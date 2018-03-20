@@ -53,7 +53,7 @@ const mcu_board_config_t mcu_board_config = {
         .o_flags = UART_FLAG_SET_LINE_CODING_DEFAULT,
         .width = 8
     },
-    .o_flags = MCU_BOARD_CONFIG_FLAG_LED_ACTIVE_HIGH,
+    .o_flags = 0,
     .led = {6, 4}, //PG4
     .event_handler = 0,
     .usb_rx_buffer = usb_rx_buffer,
@@ -64,8 +64,8 @@ const bootloader_board_config_t boot_board_config = {
     .sw_req_loc = 0x20004000,
     .sw_req_value = 0x55AA55AA,
     .program_start_addr = 0x40000 + (u32)&_flash_start, //flash start + 256KB
-    .hw_req = {0, 10}, //PA10
-    .o_flags = BOOT_BOARD_CONFIG_FLAG_HW_REQ_PULLDOWN,
+    .hw_req = {4, 0}, //PE0
+    .o_flags = BOOT_BOARD_CONFIG_FLAG_HW_REQ_PULLDOWN | BOOT_BOARD_CONFIG_FLAG_HW_REQ_ACTIVE_HIGH,
     .link_transport_driver = &link_transport,
     .id = __HARDWARE_ID,
 };

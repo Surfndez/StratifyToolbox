@@ -57,7 +57,9 @@ link_transport_phy_t link_transport_open(const char * name, int baudrate){
     usb_attr.tx_fifo_word_size[0] = 32; //TX endpoint 0
     usb_attr.tx_fifo_word_size[1] = 32; //TX endpoint 1
     usb_attr.tx_fifo_word_size[2] = 32; //TX endpoint 2
-    usb_attr.tx_fifo_word_size[3] = 64; //TX endpoint 3
+    usb_attr.tx_fifo_word_size[3] = 32; //TX endpoint 3
+    usb_attr.tx_fifo_word_size[4] = 16; //TX endpoint 4
+    usb_attr.tx_fifo_word_size[5] = 16; //TX endpoint 5
 	fd = boot_link_transport_usb_open(name,
 			&m_usb_control,
 			&sos_link_transport_usb_constants,

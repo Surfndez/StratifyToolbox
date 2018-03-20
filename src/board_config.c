@@ -42,7 +42,7 @@ limitations under the License.
 
 //openocd -f interface/stlink-v2-1.cfg -f target/stm32f4x_stlink.cfg
 
-#define SOS_BOARD_SYSTEM_CLOCK 216000000
+#define SOS_BOARD_SYSTEM_CLOCK 168000000
 #define SOS_BOARD_PERIPH_CLOCK (SOS_BOARD_SYSTEM_CLOCK/4)
 #define SOS_BOARD_SYSTEM_MEMORY_SIZE (8192*3)
 #define SOS_BOARD_TASK_TOTAL 10
@@ -71,7 +71,7 @@ const mcu_board_config_t mcu_board_config = {
         .o_flags = UART_FLAG_SET_LINE_CODING_DEFAULT,
         .width = 8
     },
-    .o_flags = MCU_BOARD_CONFIG_FLAG_LED_ACTIVE_HIGH,
+    .o_flags = 0,
     .event_handler = board_event_handler,
     .led = {6, 4}, //PG4
     .usb_rx_buffer = usb_rx_buffer,
