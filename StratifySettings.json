@@ -1,15 +1,25 @@
 {
     "bootsuffix": "_boot",
     "buildprefix": "build_",
-    "change": "First release",
+    "change": "Added Cloud ID to kernel",
+    "changes": {
+        "-L8_9dnL1LrQnRYssdF2": {
+            "description": "First release",
+            "version": "0.1"
+        },
+        "-L8_DyR_md_nG3jPS4nK": {
+            "description": "Added Cloud ID to kernel",
+            "version": "0.2"
+        }
+    },
     "description": "The Stratify Toolbox is an all-in-one hardware debugging tool.",
     "github": "https://github.com/StratifyLabs/StratifyToolbox",
     "hardwareid": "0x00000007",
     "name": "StratifyToolbox",
-    "permissions": "public",
+    "permissions": "searchable",
     "publisher": "Stratify Labs, Inc",
     "tags": "stm32,arm,cortex-m7",
     "type": "StratifyKernel",
     "uid": "QSW7bQHeDqhJEcZ0mxQ5SmEYUSL2",
-    "version": "0.1"
+    "version": "0.2"
 }
