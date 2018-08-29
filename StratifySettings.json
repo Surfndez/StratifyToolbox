@@ -1,7 +1,7 @@
 {
     "bootsuffix": "_boot",
     "buildprefix": "build_",
-    "change": "Added Cloud ID to kernel",
+    "change": "Fixed issue with USB 2.0 FS",
     "changes": {
         "-L8_9dnL1LrQnRYssdF2": {
             "description": "First release",
@@ -10,6 +10,10 @@
         "-L8_DyR_md_nG3jPS4nK": {
             "description": "Added Cloud ID to kernel",
             "version": "0.2"
+        },
+        "-L9g019iywPDhzAiw7Nm": {
+            "description": "Fixed issue with USB 2.0 FS",
+            "version": "0.3"
         }
     },
     "description": "The Stratify Toolbox is an all-in-one hardware debugging tool.",
@@ -21,5 +25,5 @@
     "tags": "stm32,arm,cortex-m7",
     "type": "StratifyKernel",
     "uid": "QSW7bQHeDqhJEcZ0mxQ5SmEYUSL2",
-    "version": "0.2"
+    "version": "0.3"
 }

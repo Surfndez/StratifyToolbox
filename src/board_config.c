@@ -83,12 +83,11 @@ void board_event_handler(int event, void * args){
         break;
 
     case MCU_BOARD_CONFIG_EVENT_START_LINK:
-        mcu_debug_user_printf("Start LED %d\n", mcu_config.irq_middle_prio);
+        mcu_debug_log_info(MCU_DEBUG_USER0, "Start LED");
         sos_led_startup();
         break;
 
     case MCU_BOARD_CONFIG_EVENT_START_FILESYSTEM:
-        mcu_debug_user_printf("Started %ld apps\n", *((u32*)args));
         break;
     }
 }

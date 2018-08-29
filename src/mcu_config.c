@@ -18,6 +18,7 @@ limitations under the License.
 
 #include <mcu/arch.h>
 #include <mcu/mcu.h>
+#include <mcu/debug.h>
 
 #include "config.h"
 
@@ -59,5 +60,6 @@ const mcu_board_config_t mcu_board_config = {
     .o_flags = 0,
     .event_handler = SOS_BOARD_EVENT_HANDLER,
     .led = {DEBUG_LED_PORT, DEBUG_LED_PIN},
-    .arch_config = &stm32_config 
+    .arch_config = &stm32_config,
+    .o_mcu_debug = MCU_DEBUG_INFO | MCU_DEBUG_SYS | MCU_DEBUG_LINK | MCU_DEBUG_USB | MCU_DEBUG_DEVICE | MCU_DEBUG_USER0 | MCU_DEBUG_USER1
 };

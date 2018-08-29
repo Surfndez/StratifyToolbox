@@ -23,7 +23,7 @@ limitations under the License.
 
 #include "board_config.h"
 
-//openocd -f interface/stlink-v2-1.cfg -f target/stm32f4x_stlink.cfg
+//openocd -f interface/stlink-v2-1.cfg -f target/stm32f7x.cfg
 //openocd -f interface/stlink-v2-1.cfg -f target/stm32f7x.cfg -c "program ./build_release_boot/StratifyToolbox.bin verify; reset run; exit;"
 
 #define SOS_BOARD_SYSTEM_CLOCK 216000000
@@ -53,7 +53,7 @@ limitations under the License.
 #define STM32_ARCH_CLOCK_VOLTAGE_SCALE 1
 #define STM32_ARCH_CLOCK_FLASH_LATENCY 7
 
-//--------------------------------------------Disco Definitions-------------------------------------------------
+//--------------------------------------------Board Definitions-------------------------------------------------
 
 #define DEBUG_UART_PORT 0
 #define DEBUG_UART_RX_PORT 1
@@ -65,6 +65,18 @@ limitations under the License.
 #define BOOT_HARDWARE_REQUEST_PORT 4
 #define BOOT_HARDWARE_REQUEST_PIN 0
 
+//--------------------------------------------For High Speed USB-------------------------------------------------
+
+
+#if 1
+#define SOS_BOARD_USB_PORT 1
+#define SOS_BOARD_USB_DM_PIN mcu_pin(1,14)
+#define SOS_BOARD_USB_DP_PIN mcu_pin(1,15)
+#define SOS_BOARD_RX_FIFO_WORDS 0x200
+#define SOS_BOARD_TX0_FIFO_WORDS 0x80
+#define SOS_BOARD_TX1_FIFO_WORDS 0x80
+#define SOS_BOARD_USB_ATTR_FLAGS (USB_FLAG_SET_DEVICE)
+#endif
 //--------------------------------------------Symbols-------------------------------------------------
 
 /* By defining Ignore switches, functions can be omitted from the kernel

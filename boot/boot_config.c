@@ -54,6 +54,7 @@ void _main(){ boot_main(); }
 void board_event_handler(int event, void * args){
     devfs_handle_t pio_handle;
     pio_attr_t pio_attr;
+    u32 value;
 
     switch(event){
     case BOOT_EVENT_INIT:
@@ -64,6 +65,8 @@ void board_event_handler(int event, void * args){
         pio_attr.o_flags = PIO_FLAG_SET_INPUT | PIO_FLAG_IS_FLOAT;
         pio_attr.o_pinmask = (1<<14) | (1<<15);
         mcu_pio_setattr(&pio_handle, &pio_attr);
+        value = mcu_pio_get(&pio_handle, 0);
+        dstr("PB2 0x"); dhex((value & (1<<2)) != 0); dstr("\n");
         break;
     }
 }
