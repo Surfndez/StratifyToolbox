@@ -1,13 +1,12 @@
 {
-   "bootsuffix": "_boot",
    "description": "The Stratify Toolbox is an all-in-one hardware debugging tool.",
    "github": "https://github.com/StratifyLabs/StratifyToolbox",
-   "hardwareid": "0x00000007",
    "name": "StratifyToolbox",
    "permissions": "searchable",
    "publisher": "Stratify Labs, Inc",
    "tags": "stm32,arm,cortex-m7",
    "type": "os",
    "uid": "QSW7bQHeDqhJEcZ0mxQ5SmEYUSL2",
-   "version": "0.3"
+   "version": "0.3",
+   "hardwareId": "0x00000007"
 }
