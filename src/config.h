@@ -16,21 +16,36 @@ limitations under the License.
 
 */
 
+
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
 #include <mcu/arch.h>
 
+#include "sl_config.h"
 #include "board_config.h"
 
-//openocd -f interface/stlink-v2-1.cfg -f target/stm32f7x.cfg
-//openocd -f interface/stlink-v2-1.cfg -f target/stm32f7x.cfg -c "program ./build_release_boot/StratifyToolbox.bin verify; reset run; exit;"
+/*
+ * openocd -f interface/stlink-v2-1.cfg -f target/stm32h7x_stlink.cfg
+ * openocd -f StratifyToolbox/stlink-fixed.cfg -f target/stm32h7x.cfg -c "program ./StratifyToolbox/build_debug_boot/StratifyToolbox.bin 0x08000000; reset run; exit;"
+ *
+ *
+ * sl fs.copy:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/home/debug.bin
+ * sl fs.verify:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/home/debug.bin
+ *
+ * sl fs.write:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/dev/ramdrive
+ * sl fs.verify:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/dev/ramdrive
+ * sl task.signal:id=1,signal=ALARM
+ *
+ * sl --writeOsRam && sl --execOsRam
+ *
+ */
 
-#define SOS_BOARD_SYSTEM_CLOCK 216000000
-#define SOS_BOARD_SYSTEM_MEMORY_SIZE (8192*4)
-#define SOS_BOARD_ID "-L8_9drPQKb1Lqi4BCJa"
-#define SOS_BOARD_VERSION "0.3"
-#define SOS_BOARD_NAME "StratifyToolbox"
+#define SOS_BOARD_SYSTEM_CLOCK 400000000
+#define SOS_BOARD_SYSTEM_MEMORY_SIZE (8192*3)
+#define SOS_BOARD_ID SL_CONFIG_DOCUMENT_ID
+#define SOS_BOARD_VERSION SL_CONFIG_VERSION_STRING
+#define SOS_BOARD_NAME SL_CONFIG_NAME
 
 #define SOS_BOARD_USB_RX_BUFFER_SIZE 512
 #define SOS_BOARD_STDIO_BUFFER_SIZE 512
@@ -41,64 +56,50 @@ limitations under the License.
 #define SOS_BOARD_EVENT_HANDLER board_event_handler
 #define SOS_BOARD_TRACE_EVENT board_trace_event
 
-#define STM32_ARCH_O_FLAGS STM32_CONFIG_FLAG_IS_HSE_ON | STM32_CONFIG_FLAG_IS_OVERDRIVE_ON
-#define STM32_ARCH_CLOCK_PLLM 6
+#define STM32_ARCH_O_FLAGS STM32_CONFIG_FLAG_IS_HSE_ON
+#define STM32_ARCH_CLOCK_PLLM 4
 #define STM32_ARCH_CLOCK_PLLN 216
 #define STM32_ARCH_CLOCK_PLLP 2
 #define STM32_ARCH_CLOCK_PLLQ 9
-#define STM32_ARCH_CLOCK_PLLR 0
+#define STM32_ARCH_CLOCK_PLLR 2
 #define STM32_ARCH_CLOCK_AHB_CLOCK_DIVIDER 1
 #define STM32_ARCH_CLOCK_APB1_CLOCK_DIVIDER 4
 #define STM32_ARCH_CLOCK_APB2_CLOCK_DIVIDER 2
+#define STM32_ARCH_CLOCK_48_CLOCK_SELECTION 0
 #define STM32_ARCH_CLOCK_VOLTAGE_SCALE 1
 #define STM32_ARCH_CLOCK_FLASH_LATENCY 7
 
-//--------------------------------------------Board Definitions-------------------------------------------------
-
-#define DEBUG_UART_PORT 0
-#define DEBUG_UART_RX_PORT 1
-#define DEBUG_UART_RX_PIN 6
-#define DEBUG_UART_TX_PORT 1
-#define DEBUG_UART_TX_PIN 7
-#define DEBUG_LED_PORT 6
-#define DEBUG_LED_PIN 4
-#define BOOT_HARDWARE_REQUEST_PORT 4
-#define BOOT_HARDWARE_REQUEST_PIN 0
-
-//--------------------------------------------For High Speed USB-------------------------------------------------
-
-
-#if 1
-#define SOS_BOARD_USB_PORT 1
-#define SOS_BOARD_USB_DM_PIN mcu_pin(1,14)
-#define SOS_BOARD_USB_DP_PIN mcu_pin(1,15)
-#define SOS_BOARD_RX_FIFO_WORDS 0x200
-#define SOS_BOARD_TX0_FIFO_WORDS 0x80
-#define SOS_BOARD_TX1_FIFO_WORDS 0x80
-#define SOS_BOARD_USB_ATTR_FLAGS (USB_FLAG_SET_DEVICE)
-#endif
 //--------------------------------------------Symbols-------------------------------------------------
 
 /* By defining Ignore switches, functions can be omitted from the kernel
  * This means any applications that use these functions will fail
  * to install on the BSP.
- * 
+ *
  * If you are building a custom board, ignoring symbols is a good
  * way to squeeze down the kernel to only what is necessary. However,
  * if you plan on allowing your users to install applications, they
  * might find it challenging when some functions are missing (the
  * applications will compile but fail to install).
- * 
- * See [sos/symbols/defines.h](https://github.com/StratifyLabs/StratifyOS/blob/master/include/sos/symbols/defines.h) 
+ *
+ * See [sos/symbols/defines.h](https://github.com/StratifyLabs/StratifyOS/blob/master/include/sos/symbols/defines.h)
  * for all available switches.
- * 
- */ 
+ *
+ */
 
 #define SYMBOLS_IGNORE_DCOMPLEX 1
 #define SYMBOLS_IGNORE_POSIX_TRACE 1 //Always ignore -- deprecated
 #define SYMBOLS_IGNORE_SG 1 //Stratify Graphics -- ignore if board will not support displays
 #define SYMBOLS_IGNORE_SOCKET 1
 #define SYMBOLS_IGNORE_LWIP 1
+
+//#define SOS_BOARD_ARM_DSP_API_Q15 1
+//#define SOS_BOARD_ARM_DSP_API_Q31 1
+#define ARM_DSP_API_IGNORE_FILTER 1
+#define ARM_DSP_API_IGNORE_MATRIX 0
+#define ARM_DSP_API_IGNORE_CONTROLLER 1
+#define ARM_DSP_API_IGNORE_DCT 1
+#define SOS_BOARD_ARM_DSP_API_F32 1
+#define SOS_BOARD_ARM_DSP_CONVERSION_API 1
 
 //other ignore switches
 #if 0

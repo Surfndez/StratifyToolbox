@@ -16,8 +16,17 @@ limitations under the License.
 
 */
 
+
+
+#if !_IS_BOOT
 #include <sos/symbols.h>
 
 #include "config.h"
 
 #include <sos/symbols/table.h>
+#else
+#include <mcu/types.h>
+
+u32 symbols_table[1] = { 0 };
+
+#endif
