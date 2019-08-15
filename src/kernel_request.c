@@ -39,9 +39,5 @@
 #include <arm_dsp_api_declaration.h>
 
 const void * kernel_request_api(u32 request){
-#if !_IS_BOOT
-	if( request == OPUS_API_REQUEST ){ return &opus_api; }
-#endif
-
 	 return 0;
 }

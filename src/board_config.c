@@ -174,7 +174,6 @@ void board_event_handler(int event, void * args){
 		case MCU_BOARD_CONFIG_EVENT_START_LINK:
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Start LED");
 			sos_led_startup();
-#if 0
 #if _IS_BOOT
 			if( load_kernel_image() < 0 ){
 				mcu_debug_log_error(MCU_DEBUG_USER0, "failed to load kernel image");
@@ -185,7 +184,6 @@ void board_event_handler(int event, void * args){
 			}
 #else
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from RAM");
-#endif
 #endif
 
 
