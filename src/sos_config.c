@@ -313,7 +313,7 @@ const sysfs_t sysfs_list[] = {
 	APPFS_MOUNT("/app", &mem0, SYSFS_ALL_ACCESS), //the folder for ram/flash applications
 #endif
 	DEVFS_MOUNT("/dev", devfs_list, SYSFS_READONLY_ACCESS), //the list of devices
-	//SFFS_MOUNT("/home", &sffs_configuration, SYSFS_ALL_ACCESS), //stratify flash filesystem
+	SFFS_MOUNT("/home", &sffs_configuration, SYSFS_ALL_ACCESS), //stratify flash filesystem
 	SYSFS_MOUNT("/", sysfs_list, SYSFS_READONLY_ACCESS), //the root filesystem (must be last)
 	SYSFS_TERMINATOR
 };
