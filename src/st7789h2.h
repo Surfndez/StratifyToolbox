@@ -76,7 +76,7 @@
 /** 
   * @brief  ST7789H2 Size  
   */
-#define  ST7789H2_LCD_PIXEL_WIDTH    ((uint16_t)240)
+#define  ST7789H2_LCD_PIXEL_WIDTH    ((uint16_t)320)
 #define  ST7789H2_LCD_PIXEL_HEIGHT   ((uint16_t)240)
 
 /**

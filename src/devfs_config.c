@@ -42,6 +42,7 @@ limitations under the License.
 #include <device/drive_cfi.h>
 
 #include "ram_drive.h"
+#include "display_device.h"
 
 #include "config.h"
 #include "link_config.h"
@@ -307,6 +308,8 @@ const devfs_device_t devfs_list[] = {
 	DEVFS_DEVICE("core0", mcu_core, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
 
 	#if !_IS_BOOT
+
+	DEVFS_DEVICE("display0", display_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 
 
 	//crypto
