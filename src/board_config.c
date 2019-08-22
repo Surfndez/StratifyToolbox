@@ -30,6 +30,7 @@ limitations under the License.
 #include "board_config.h"
 #include "config.h"
 #include "link_config.h"
+#include "stm32_bsp.h"
 
 #define TRACE_COUNT 8
 #define TRACE_FRAME_SIZE sizeof(link_trace_event_t)
@@ -41,8 +42,6 @@ const ffifo_config_t board_trace_config = {
 	.buffer = trace_buffer
 };
 ffifo_state_t board_trace_state;
-
-extern void SystemClock_Config();
 
 #if _IS_BOOT
 int load_kernel_image();
@@ -157,7 +156,11 @@ void board_event_handler(int event, void * args){
 
 		case MCU_BOARD_CONFIG_EVENT_ROOT_INITIALIZE_CLOCK:
 			SystemClock_Config();
-			//PD6 needs to be driven low for debugging to work
+
+#if !_IS_BOOT
+			MX_FMC_Init();
+#endif
+			//PE1 needs to be driven low for debugging to work
 			attr.o_flags = PIO_FLAG_SET_OUTPUT;
 			attr.o_pinmask = (1<<1);
 			pio_handle.port = 4;
@@ -166,16 +169,22 @@ void board_event_handler(int event, void * args){
 
 			mcu_pio_open(&pio_handle);
 			mcu_pio_setattr(&pio_handle, &attr);
+			mcu_pio_clrmask(&pio_handle, (void*)attr.o_pinmask);
 
-			mcu_pio_clrmask(&pio_handle, (void*)(u32)(1<<10));
+			attr.o_flags = PIO_FLAG_SET_INPUT | PIO_FLAG_IS_FLOAT;
+			attr.o_pinmask = (1<<1);
+			pio_handle.port = 0;
+			mcu_pio_open(&pio_handle);
+			mcu_pio_setattr(&pio_handle, &attr);
 
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_START_LINK:
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Start LED");
-			sos_led_startup();
+
 #if _IS_BOOT
 			if( load_kernel_image() < 0 ){
+				sos_led_startup();
 				mcu_debug_log_error(MCU_DEBUG_USER0, "failed to load kernel image");
 				signal(SIGALRM, handle_alarm);
 			} else {
@@ -183,10 +192,9 @@ void board_event_handler(int event, void * args){
 				handle_alarm(0);
 			}
 #else
+			sos_led_startup();
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from RAM");
 #endif
-
-
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_START_FILESYSTEM:
@@ -195,16 +203,15 @@ void board_event_handler(int event, void * args){
 }
 
 #if _IS_BOOT
-
 typedef struct {
 	u32 offset;
 	const void * src;
 	u32 size;
 } copy_block_t;
 
-void copy_block(void * args){
+void svcall_copy_block(void * args){
+	CORTEXM_SVCALL_ENTER();
 	copy_block_t * p = args;
-
 	memcpy((void*)(0x24000000 + p->offset), p->src, p->size);
 }
 
@@ -235,7 +242,7 @@ int load_kernel_image(){
 		result = read(fd, buffer, 256);
 		if( result > 0 ){
 			args.size = result;
-			cortexm_svcall(copy_block, &args);
+			cortexm_svcall(svcall_copy_block, &args);
 			args.offset += result;
 		}
 		//this is causing a memory fault (but MPU is disabled??)

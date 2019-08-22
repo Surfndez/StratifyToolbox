@@ -49,7 +49,7 @@ limitations under the License.
 
 #define SOS_BOARD_USB_RX_BUFFER_SIZE 512
 #define SOS_BOARD_STDIO_BUFFER_SIZE 512
-#define SOS_BOARD_TMR 1
+#define SOS_BOARD_TMR 4 //TIM5 -- 32-bit timer
 
 //Total number of tasks (threads) for the entire system
 #define SOS_BOARD_TASK_TOTAL 10

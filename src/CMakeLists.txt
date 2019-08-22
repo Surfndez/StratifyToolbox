@@ -3,13 +3,20 @@ set(SOURCES
   ${SOURCES_PREFIX}/board_config.c
   ${SOURCES_PREFIX}/board_config.h
   ${SOURCES_PREFIX}/config.h
-  ${SOURCES_PREFIX}/link_config.c
+	${SOURCES_PREFIX}/display_device.c
+	${SOURCES_PREFIX}/display_device.h
+	${SOURCES_PREFIX}/st7789h2.c
+	${SOURCES_PREFIX}/st7789h2.h
+	${SOURCES_PREFIX}/devfs_config.c
+	${SOURCES_PREFIX}/link_config.c
   ${SOURCES_PREFIX}/link_config.h
   ${SOURCES_PREFIX}/mcu_config.c
   ${SOURCES_PREFIX}/sos_config.c
 	${SOURCES_PREFIX}/board_symbols.c
 	${SOURCES_PREFIX}/ram_drive.c
 	${SOURCES_PREFIX}/ram_drive.h
+	${SOURCES_PREFIX}/stm32_bsp.c
+	${SOURCES_PREFIX}/stm32_bsp.h
 	${SOURCES_PREFIX}/sl_config.h
 	${SOURCES_PREFIX}/kernel_request.c
 	${SOURCES_PREFIX}/SystemClock_Config.c
