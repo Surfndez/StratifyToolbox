@@ -44,8 +44,20 @@ limitations under the License.
 
 #include "config.h"
 #include "link_config.h"
+#include "wifi_api.h"
 
+//--------------------------------------------Socket API-------------------------------------------------
 
+#if !_IS_BOOT
+const wifi_api_config_t wifi_api_config = {
+
+};
+
+wifi_api_state_t wifi_api_state;
+
+WIFI_DECLARE_SOCKET_API(wifi, &wifi_api_config, &wifi_api_state);
+
+#endif
 //--------------------------------------------Stratify OS Configuration-------------------------------------------------
 const sos_board_config_t sos_board_config = {
 	.clk_usecond_tmr = SOS_BOARD_TMR, //TIM2 -- 32 bit timer
@@ -61,7 +73,11 @@ const sos_board_config_t sos_board_config = {
 	.start = sos_default_thread,
 	.start_args = &link_transport,
 	.start_stack_size = SOS_DEFAULT_START_STACK_SIZE,
+	#if !_IS_BOOT
+	.socket_api = &wifi_api,
+	#else
 	.socket_api = 0,
+	#endif
 	.request = 0,
 	.git_hash = SOS_GIT_HASH,
 	.trace_dev = "/dev/trace",
