@@ -8,9 +8,17 @@
 #include <cortexm/task.h>
 
 #include <sys/socket.h>
+#include <pthread.h>
+#include <unistd.h>
+
 #include "socket/include/m2m_socket.h"
+#include "driver/include/m2m_wifi.h"
+
+static void * wifi_api_thread_function(void * args);
 
 int wifi_api_startup(const void * config){
+
+	//start the wifi_api_thread_function() thread
 
 	return 0;
 }
@@ -160,6 +168,20 @@ const char * wifi_api_inet_ntop(int af, const void * src, char * dst, socklen_t 
 	return 0;
 }
 int wifi_api_inet_pton(int af, const char * src, void * dst){
+	return 0;
+}
+
+void * wifi_api_thread_function(void * args){
+
+	//initialize the Wifi
+
+	while( 1 ){
+		m2m_wifi_handle_events(0);
+		sleep(1); // this will be interrupted when an event happens
+
+	}
+
+
 	return 0;
 }
 

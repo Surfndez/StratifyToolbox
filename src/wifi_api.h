@@ -1,5 +1,5 @@
-#ifndef LWIP_API_H_
-#define LWIP_API_H_
+#ifndef WIFI_API_H
+#define WIFI_API_H
 
 #include <sys/socket.h>
 #include <sos/fs/devfs.h>
@@ -118,4 +118,4 @@ int wifi_api_inet_pton(int af, const char * src, void * dst);
 	.config = api_config, \
 	.state = api_state }
 
-#endif /* LWIP_HDR_LWIPOPTS_H__ */
+#endif /* WIFI_API_H */

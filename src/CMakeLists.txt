@@ -24,6 +24,9 @@ set(SOURCES
 	${SOURCES_PREFIX}/wifi_api.c
 	${SOURCES_PREFIX}/wifi_api.h
 
+	${SOURCES_PREFIX}/wifi_device.c
+	${SOURCES_PREFIX}/wifi_device.h
+
 	${SOURCES_PREFIX}/atwinc1500/driver/include/ecc_types.h
 	${SOURCES_PREFIX}/atwinc1500/driver/include/m2m_ssl.h
 	${SOURCES_PREFIX}/atwinc1500/driver/include/m2m_crypto.h
