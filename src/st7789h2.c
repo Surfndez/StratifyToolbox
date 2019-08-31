@@ -537,7 +537,7 @@ void ST7789H2_DrawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t
 static ST7789H2_Rgb888 ST7789H2_ReadPixel_rgb888(uint16_t Xpos, uint16_t Ypos)
 {
   ST7789H2_Rgb888 rgb888;
-  uint16_t         rgb888_part1, rgb888_part2;
+  uint16_t rgb888_part1, rgb888_part2;
 
   /* In LCD RAM, pixels are 24 bits packed and read with 16 bits access
    * Here is the pixels components arrangement in memory :

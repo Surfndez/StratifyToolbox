@@ -188,27 +188,13 @@ void board_event_handler(int event, void * args){
 
 			mcu_debug_printf("hello\n");
 
+#if 1
 			ST7789H2_Init();
-			u8 c[2];
-			c[0] = 0xff;
-			c[1] = 0xff;
-			u32 count = 0;
-			while(1){
-				count++;
-				if( count == 5000 ){
-					mcu_debug_printf("%d\n", count);
-					count = 0;
-				}
-				ST7789H2_WriteReg(
-							0xff,
-							c,
-							2);
 
-				cortexm_delay_ms(1);
-				//mcu_debug_printf("Testing\n");
-
-
+			for(u32 i=0; i < 240; i++){
+				ST7789H2_DrawHLine(0xffff, 0, 0, 240);
 			}
+#endif
 
 			break;
 
