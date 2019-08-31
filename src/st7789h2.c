@@ -80,26 +80,7 @@ typedef struct  {
   * @}
   */  
 
-/** @defgroup ST7789H2_Private_Variables ST7789H2 Private Variables
-  * @{
-  */ 
-LCD_DrvTypeDef   ST7789H2_drv = 
-{
-  ST7789H2_Init,
-  ST7789H2_ReadID,
-  ST7789H2_DisplayOn,
-  ST7789H2_DisplayOff,
-  ST7789H2_SetCursor,
-  ST7789H2_WritePixel,
-  ST7789H2_ReadPixel,
-  ST7789H2_SetDisplayWindow,
-  ST7789H2_DrawHLine,
-  ST7789H2_DrawVLine,
-  ST7789H2_GetLcdPixelWidth,
-  ST7789H2_GetLcdPixelHeight,
-  ST7789H2_DrawBitmap,
-  ST7789H2_DrawRGBImage,  
-};
+
 
 static uint16_t WindowsXstart = 0;
 static uint16_t WindowsYstart = 0;
@@ -113,7 +94,6 @@ static uint16_t WindowsYend = ST7789H2_LCD_PIXEL_HEIGHT-1;
   * @{
   */
 static ST7789H2_Rgb888 ST7789H2_ReadPixel_rgb888(uint16_t Xpos, uint16_t Ypos);
-static void ST7789H2_DrawRGBHLine(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, uint8_t *pdata);
 
 /**
   * @}
@@ -131,7 +111,7 @@ static void ST7789H2_DrawRGBHLine(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, 
 void ST7789H2_Init(void)
 {
   uint8_t   parameter[14];
-  
+
   /* Initialize st7789h2 low level bus layer ----------------------------------*/
   LCD_IO_Init();
   /* Sleep In Command */ 
@@ -254,7 +234,6 @@ void ST7789H2_Init(void)
   /* Tearing Effect Line On: Option (00h:VSYNC Interface OFF, 01h:VSYNC Interface ON) */
   parameter[0] = 0x00;     
   ST7789H2_WriteReg(ST7789H2_TEARING_EFFECT, parameter, 1);
-
 }
 
 /**
@@ -523,110 +502,26 @@ void ST7789H2_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uin
   * @param  RGBCode: Specifies the RGB color in RGB565 format
   * @param  Xpos:     specifies the X position.
   * @param  Ypos:     specifies the Y position.
-  * @param  Length:   specifies the Line length.  
+  * @param  Length:   specifies the Line length.
   * @retval None
   */
 void ST7789H2_DrawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
 {
   uint16_t counter = 0;
-  
-  /* Set Cursor */
-  ST7789H2_SetCursor(Xpos, Ypos); 
-  
-  /* Prepare to write to LCD RAM */
-  ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
-  
-  /* Sent a complete line */
-  for(counter = 0; counter < Length; counter++)
-  {
-    LCD_IO_WriteData(RGBCode);
-  }  
-}
-
-/**
-  * @brief  Draw vertical line.
-  * @param  RGBCode: Specifies the RGB color    
-  * @param  Xpos:     specifies the X position.
-  * @param  Ypos:     specifies the Y position.
-  * @param  Length:   specifies the Line length.  
-  * @retval None
-  */
-void ST7789H2_DrawVLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
-{
-  uint16_t counter = 0;
 
   /* Set Cursor */
   ST7789H2_SetCursor(Xpos, Ypos);
-  
+
   /* Prepare to write to LCD RAM */
   ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
 
-  /* Fill a complete vertical line */
+  /* Sent a complete line */
   for(counter = 0; counter < Length; counter++)
   {
-    ST7789H2_WritePixel(Xpos, Ypos + counter, RGBCode);
+	 LCD_IO_WriteData(RGBCode);
   }
 }
 
-/**
-  * @brief  Displays a bitmap picture.
-  * @param  BmpAddress: Bmp picture address.
-  * @param  Xpos: Bmp X position in the LCD
-  * @param  Ypos: Bmp Y position in the LCD    
-  * @retval None
-  */
-void ST7789H2_DrawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
-{
-  uint32_t index = 0, size = 0;
-  uint32_t posY;
-  uint32_t nb_line = 0;
-  uint16_t Xsize = WindowsXend - WindowsXstart + 1;
-  uint16_t Ysize = WindowsYend - WindowsYstart + 1;
-
-  /* Read bitmap size */
-  size = *(volatile uint16_t *) (pbmp + 2);
-  size |= (*(volatile uint16_t *) (pbmp + 4)) << 16;
-  /* Get bitmap data address offset */
-  index = *(volatile uint16_t *) (pbmp + 10);
-  index |= (*(volatile uint16_t *) (pbmp + 12)) << 16;
-  size = (size - index)/2;
-  pbmp += index;
-
-  for (posY = (Ypos + Ysize); posY > Ypos; posY--)  /* In BMP files the line order is inverted */
-  {
-    /* Set Cursor */
-    ST7789H2_SetCursor(Xpos, posY - 1);
-
-    /* Draw one line of the picture */
-    ST7789H2_DrawRGBHLine(Xpos, posY - 1, Xsize, (pbmp + (nb_line * Xsize * 2)));
-    nb_line++;
-  }
-}
-
-/**
-  * @brief  Displays picture.
-  * @param  pdata: picture address.
-  * @param  Xpos: Image X position in the LCD
-  * @param  Ypos: Image Y position in the LCD
-  * @param  Xsize: Image X size in the LCD
-  * @param  Ysize: Image Y size in the LCD
-  * @retval None
-  */
-void ST7789H2_DrawRGBImage(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, uint16_t Ysize, uint8_t *pdata)
-{
-  uint32_t posY;
-  uint32_t nb_line = 0;
-
-  for (posY = Ypos; posY < (Ypos + Ysize); posY ++)
-  {
-    /* Set Cursor */
-    ST7789H2_SetCursor(Xpos, posY);
-
-    /* Draw one line of the picture */
-    ST7789H2_DrawRGBHLine(Xpos, posY, Xsize, (pdata + (nb_line * Xsize * 2)));
-    nb_line++;
-  }
-}
 
 
 /******************************************************************************
@@ -671,38 +566,6 @@ static ST7789H2_Rgb888 ST7789H2_ReadPixel_rgb888(uint16_t Xpos, uint16_t Ypos)
   rgb888.blue  = (rgb888_part2 & 0xFC00) >> 8;
 
   return rgb888;
-}
-
-
-/**
-  * @brief  Displays a single picture line.
-  * @param  pdata: picture address.
-  * @param  Xpos: Image X position in the LCD
-  * @param  Ypos: Image Y position in the LCD
-  * @param  Xsize: Image X size in the LCD
-  * @retval None
-  */
-static void ST7789H2_DrawRGBHLine(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, uint8_t *pdata)
-{
-  uint32_t i = 0;
-  uint32_t posX;
-  uint16_t *rgb565 = (uint16_t*)pdata;
-  
-  /* Prepare to write to LCD RAM */
-  ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
-  
-  for (posX = Xpos; posX < (Xsize + Xpos); posX++)
-  {
-    if ((posX >= WindowsXstart) && (Ypos >= WindowsYstart) &&     /* Check we are in the defined window */
-        (posX <= WindowsXend) && (Ypos <= WindowsYend))
-    {
-      if (posX != (Xsize + Xpos))     /* When writing last pixel when size is odd, the third part is not written */
-      {
-        LCD_IO_WriteData(rgb565[i]);        
-      }      
-      i++;
-    }
-  }
 }
 
 /**

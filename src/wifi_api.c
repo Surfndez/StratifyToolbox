@@ -178,7 +178,6 @@ void * wifi_api_thread_function(void * args){
 	while( 1 ){
 		m2m_wifi_handle_events(0);
 		sleep(1); // this will be interrupted when an event happens
-
 	}
 
 

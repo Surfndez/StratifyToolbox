@@ -42,6 +42,8 @@ const stm32_config_t stm32_config = {
 	.usb_rx_buffer_size = SOS_BOARD_USB_RX_BUFFER_SIZE
 };
 
+//#define CONFIG_CACHE MCU_BOARD_CONFIG_FLAG_ENABLE_CACHE
+#define CONFIG_CACHE 0
 
 const mcu_board_config_t mcu_board_config = {
 	 .core_cpu_freq = SOS_BOARD_SYSTEM_CLOCK,
@@ -58,7 +60,7 @@ const mcu_board_config_t mcu_board_config = {
 		  .o_flags = UART_FLAG_SET_LINE_CODING_DEFAULT,
 		  .width = 8
 	 },
-	 .o_flags = MCU_BOARD_CONFIG_FLAG_ENABLE_CACHE,
+	 .o_flags = CONFIG_CACHE,
 	 .event_handler = SOS_BOARD_EVENT_HANDLER,
 	 .led = {3, 10},
 	 .arch_config = &stm32_config,

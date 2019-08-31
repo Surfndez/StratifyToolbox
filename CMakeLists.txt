@@ -23,12 +23,16 @@ set(SOS_ARCH v7em_f5dh)
 set(SOS_DEVICE stm32h750xbram)
 set(SOS_DEVICE_FAMILY stm32h750xx)
 set(SOS_HARDWARD_ID 0x00000007)
-set(SOS_LIBRARIES son_kernel)
+set(SOS_LIBRARIES
+	jansson_kernel
+	mbedtls_kernel
+	sgfx_kernel
+	)
+
 set(SOS_INCLUDE_DIRECTORIES
 	${TOOLCHAIN_INC_DIR}/mcu/arch/stm32/cmsis
 	src/atwinc1500
 	)
-
 
 set(SOS_KERNEL_START_ADDRESS 0x24000000)
 set(SOS_BOOT_START_ADDRESS 0x08000000)

@@ -5,9 +5,10 @@ set(SOURCES
   ${SOURCES_PREFIX}/config.h
 	${SOURCES_PREFIX}/display_device.c
 	${SOURCES_PREFIX}/display_device.h
-	#${SOURCES_PREFIX}/st7789h2.c
-	#${SOURCES_PREFIX}/st7789h2.h
-	#${SOURCES_PREFIX}/lcd.h
+	${SOURCES_PREFIX}/st7789h2.c
+	${SOURCES_PREFIX}/st7789h2.h
+	${SOURCES_PREFIX}/lcd.c
+	${SOURCES_PREFIX}/lcd.h
 	${SOURCES_PREFIX}/devfs_config.c
 	${SOURCES_PREFIX}/link_config.c
   ${SOURCES_PREFIX}/link_config.h

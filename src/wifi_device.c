@@ -7,12 +7,14 @@
 int wifi_device_open(
 		const devfs_handle_t * handle
 		){
+	return 0;
 
 }
 
 int wifi_device_close(
 		const devfs_handle_t * handle
 		){
+	return 0;
 
 }
 
@@ -24,6 +26,7 @@ int wifi_device_ioctl(
 
 	//implement the sos/dev/wifi.h ioctl calls
 
+	return 0;
 }
 
 int wifi_device_read(

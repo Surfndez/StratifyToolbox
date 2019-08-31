@@ -31,6 +31,8 @@ limitations under the License.
 #include "config.h"
 #include "link_config.h"
 #include "stm32_bsp.h"
+#include "display_device.h"
+#include "st7789h2.h"
 
 #define TRACE_COUNT 8
 #define TRACE_FRAME_SIZE sizeof(link_trace_event_t)
@@ -158,8 +160,11 @@ void board_event_handler(int event, void * args){
 			SystemClock_Config();
 
 #if !_IS_BOOT
-			MX_FMC_Init();
+
+
 #endif
+
+
 			//PE1 needs to be driven low for debugging to work
 			attr.o_flags = PIO_FLAG_SET_OUTPUT;
 			attr.o_pinmask = (1<<1);
@@ -179,11 +184,41 @@ void board_event_handler(int event, void * args){
 
 			break;
 
+		case MCU_BOARD_CONFIG_EVENT_ROOT_DEBUG_INITIALIZED:
+
+			mcu_debug_printf("hello\n");
+
+			ST7789H2_Init();
+			u8 c[2];
+			c[0] = 0xff;
+			c[1] = 0xff;
+			u32 count = 0;
+			while(1){
+				count++;
+				if( count == 5000 ){
+					mcu_debug_printf("%d\n", count);
+					count = 0;
+				}
+				ST7789H2_WriteReg(
+							0xff,
+							c,
+							2);
+
+				cortexm_delay_ms(1);
+				//mcu_debug_printf("Testing\n");
+
+
+			}
+
+			break;
+
 		case MCU_BOARD_CONFIG_EVENT_START_LINK:
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Start LED");
 
 #if _IS_BOOT
+
 			if( load_kernel_image() < 0 ){
+			//if( 1 ){
 				sos_led_startup();
 				mcu_debug_log_error(MCU_DEBUG_USER0, "failed to load kernel image");
 				signal(SIGALRM, handle_alarm);

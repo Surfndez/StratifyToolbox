@@ -140,9 +140,6 @@ void     ST7789H2_WritePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode);
 uint16_t ST7789H2_ReadPixel(uint16_t Xpos, uint16_t Ypos);
 
 void     ST7789H2_DrawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length);
-void     ST7789H2_DrawVLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length);
-void     ST7789H2_DrawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp);
-void     ST7789H2_DrawRGBImage(uint16_t Xpos, uint16_t Ypos, uint16_t Xsize, uint16_t Ysize, uint8_t *pdata);
 
 void     ST7789H2_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height);
 
@@ -150,16 +147,6 @@ void     ST7789H2_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width,
 uint16_t ST7789H2_GetLcdPixelWidth(void);
 uint16_t ST7789H2_GetLcdPixelHeight(void);
 
-/* LCD driver structure */
-extern LCD_DrvTypeDef   ST7789H2_drv;
-
-/* LCD IO functions */
-extern void     LCD_IO_Init(void);
-extern void     LCD_IO_WriteMultipleData(uint16_t *pData, uint32_t Size);
-extern void     LCD_IO_WriteReg(uint8_t Reg);
-extern void     LCD_IO_WriteData(uint16_t RegValue);
-extern uint16_t LCD_IO_ReadData(void);
-extern void     LCD_IO_Delay(uint32_t delay);
 
 /**
   * @}

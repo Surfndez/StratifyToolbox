@@ -6,6 +6,7 @@
 #include <mcu/arch.h>
 #include <mcu/arch/stm32/stm32h7xx/stm32h7xx_hal.h>
 #include "display_device.h"
+#include "st7789h2.h"
 
 static int m_is_initialized MCU_SYS_MEM;
 
@@ -121,7 +122,7 @@ int display_device_clear(const devfs_handle_t * handle, void * ctl){
 	MCU_UNUSED_ARGUMENT(ctl);
 
 	for(u32 i=0; i < DISPLAY_HEIGHT; i++){
-//		ST7789H2_DrawHLine(m_display_colors[0], 0, i, ST7789H2_LCD_PIXEL_WIDTH);
+		ST7789H2_DrawHLine(m_display_colors[0], 0, i, ST7789H2_LCD_PIXEL_WIDTH);
 	}
 
 	return SYSFS_RETURN_SUCCESS;
@@ -131,21 +132,8 @@ int display_device_init(const devfs_handle_t * handle, void * ctl){
 	//initialize and clear the display
 
 	if( m_is_initialized == 0 ){
-		//FMC Bank 2 needs to be non-cacheable because it is used to write the display driver chip
-#if 0
-		mpu_enable_region(TASK_APPLICATION_DATA_USER_REGION_LOW_PRIORITY,
-								(void*)(0x60000000 + 0x04000000), //bank 1 sub bank 2
-								0x04000000,
-								MPU_ACCESS_PRW,
-								MPU_MEMORY_PERIPHERALS,
-								0);
-		//sychronize data since mpu has been updated
-		mcu_core_disable_cache();
-		mcu_core_enable_cache();
-#endif
-
 		mcu_debug_printf("initialize LCD\n");
-		//BSP_LCD_Init();
+		ST7789H2_Init();
 		m_is_initialized = 1;
 	}
 
@@ -200,5 +188,7 @@ int display_device_disable(const devfs_handle_t * handle, void * ctl){
 int display_device_isbusy(const devfs_handle_t * handle, void * ctl){
 	return 0;
 }
+
+
 
 
