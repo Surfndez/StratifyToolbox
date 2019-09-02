@@ -222,42 +222,19 @@ void ST7789H2_Init(void)
 	write_command(ST7789H2_DISPLAY_INVERSION);
 	LCD_IO_Deassert_CS();
 
-	mcu_debug_printf("Start loop\n");
-	//while(1){
-		/* Set Column address CASET */
-		parameter[0] = 0x00;
-		parameter[1] = 0x00;
-		parameter[2] = 0x00;
-		parameter[3] = 0xEF;
-		ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
-		cortexm_delay_ms(1);
-	//}
-
-	/* Set Row address RASET */
+	/* Set Column address CASET */
 	parameter[0] = 0x00;
 	parameter[1] = 0x00;
 	parameter[2] = 0x00;
 	parameter[3] = 0xEF;
+	ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
+
+	/* Set Row address RASET */
+	parameter[0] = 0x00;
+	parameter[1] = 0x00;
+	parameter[2] = 0x01;
+	parameter[3] = 0x3F;
 	ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
-
-#if 1
-	LCD_IO_Assert_CS();
-	write_command(ST7789H2_CASET); //Frame rate control
-	write_data(0x00);
-	write_data(0x00);
-	write_data(0x00);
-	write_data(0xef);
-	LCD_IO_Deassert_CS();
-	cortexm_delay_ms(1);
-
-	LCD_IO_Assert_CS();
-	write_command(ST7789H2_RASET); //Display function control
-	write_data(0x00);
-	write_data(0x00);
-	write_data(0x01);
-	write_data(0x3F);
-	LCD_IO_Deassert_CS();
-#endif
 
 
 	LCD_IO_Assert_CS();
@@ -270,7 +247,7 @@ void ST7789H2_Init(void)
 
 	delay(25);
 	LCD_IO_Assert_CS();
-	write_command(ST7789H2_WRITE_RAM);
+	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, 0, 0);
 	u8 pixels[8];
 
 	memset(pixels, 0xff, sizeof(pixels));
