@@ -8,6 +8,7 @@ void LCD_IO_Init();
 void LCD_IO_WriteMultipleData(u8 *pData, u32 Size);
 void LCD_IO_WriteReg(u8 Reg);
 void LCD_IO_WriteDataBlock(const u8 * data, int nbyte);
+void LCD_IO_WriteData64(u64 value);
 void LCD_IO_WriteData8(u8 RegValue);
 void LCD_IO_WriteData(u16 RegValue);
 u16 LCD_IO_ReadData();

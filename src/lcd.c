@@ -102,16 +102,12 @@ void LCD_IO_WriteReg(u8 Reg){
 	transaction.data.second = Reg; //register value
 	*m_reg_location = transaction.raw;
 	__DSB();
-	cortexm_delay_us(2);
+	cortexm_delay_us(1);
 	SET_DATA();
-	cortexm_delay_us(2);
+	cortexm_delay_us(1);
 }
 
 void LCD_IO_WriteDataBlock(const u8 * data, int nbyte){
-	if( nbyte == 0 ){
-		return;
-	}
-
 	transaction_t transaction;
 	for(u32 i=0; i < nbyte; i+=2 ){
 		transaction.data.first = data[i];
@@ -119,6 +115,11 @@ void LCD_IO_WriteDataBlock(const u8 * data, int nbyte){
 		*m_reg_location = transaction.raw;
 		__DSB();
 	}
+}
+
+void LCD_IO_WriteData64(u64 value){
+	*m_reg_location = value;
+	__DSB();
 }
 
 void LCD_IO_WriteData8(u8 RegValue){
