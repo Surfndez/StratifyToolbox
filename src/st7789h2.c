@@ -31,7 +31,7 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */ 
+  */
 
 /* Includes ------------------------------------------------------------------*/
 #include <mcu/debug.h>
@@ -39,46 +39,27 @@
 
 /** @addtogroup BSP
   * @{
-  */ 
+  */
 
 /** @addtogroup Components
   * @{
-  */ 
-  
+  */
+
 /** @defgroup ST7789H2
-  * @brief     This file provides a set of functions needed to drive the 
+  * @brief     This file provides a set of functions needed to drive the
   *            FRIDA FRD154BP2901 LCD.
   * @{
   */
 
 /** @defgroup ST7789H2_Private_TypesDefinitions ST7789H2 Private TypesDefinitions
   * @{
-  */ 
+  */
 typedef struct  {
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
 } ST7789H2_Rgb888;
 
-/**
-  * @}
-  */ 
-
-/** @defgroup ST7789H2_Private_Defines ST7789H2 Private Defines
-  * @{
-  */
-
-/**
-  * @}
-  */ 
-  
-/** @defgroup ST7789H2_Private_Macros ST7789H2 Private Macros
-  * @{
-  */
-     
-/**
-  * @}
-  */  
 
 
 
@@ -86,197 +67,263 @@ static uint16_t WindowsXstart = 0;
 static uint16_t WindowsYstart = 0;
 static uint16_t WindowsXend = ST7789H2_LCD_PIXEL_WIDTH-1;
 static uint16_t WindowsYend = ST7789H2_LCD_PIXEL_HEIGHT-1;
-/**
-  * @}
-  */ 
-  
-/** @defgroup ST7789H2_Private_FunctionPrototypes ST7789H2 Private FunctionPrototypes
-  * @{
-  */
+
 static ST7789H2_Rgb888 ST7789H2_ReadPixel_rgb888(uint16_t Xpos, uint16_t Ypos);
 
-/**
-  * @}
-  */ 
-  
-/** @defgroup ST7789H2_Private_Functions ST7789H2 Private Functions
-  * @{
-  */   
+#define write_command(x) LCD_IO_WriteReg(x)
+#define write_data(x) LCD_IO_WriteData8(x)
+#define delay(x) LCD_IO_Delay(x)
 
-/**
-  * @brief  Initialize the st7789h2 LCD Component.
-  * @param  None
-  * @retval None
-  */
 void ST7789H2_Init(void)
 {
-  uint8_t   parameter[14];
+	u8 parameter[14];
 
-  /* Initialize st7789h2 low level bus layer ----------------------------------*/
-  LCD_IO_Init();
-  /* Sleep In Command */ 
-  ST7789H2_WriteReg(ST7789H2_SLEEP_IN, (uint8_t*)NULL, 0); 
-  /* Wait for 10ms */
-  LCD_IO_Delay(10);  
-  
-  /* SW Reset Command */
-  ST7789H2_WriteReg(0x01, (uint8_t*)NULL, 0); 
-  /* Wait for 200ms */
-  LCD_IO_Delay(200);
-  
-  /* Sleep Out Command */
-  ST7789H2_WriteReg(ST7789H2_SLEEP_OUT, (uint8_t*)NULL, 0); 
-  /* Wait for 120ms */
-  LCD_IO_Delay(120); 
+	/* Initialize st7789h2 low level bus layer ----------------------------------*/
+	LCD_IO_Init();
 
-  /* Normal display for Driver Down side */
-  parameter[0] = 0x00;     
-  ST7789H2_WriteReg(ST7789H2_NORMAL_DISPLAY, parameter, 1);
- 
-  /* Color mode 16bits/pixel */
-  parameter[0] = 0x05;     
-  ST7789H2_WriteReg(ST7789H2_COLOR_MODE, parameter, 1);
-  
-  /* Display inversion On */
-  ST7789H2_WriteReg(ST7789H2_DISPLAY_INVERSION, (uint8_t*)NULL, 0);     
-  
-  /* Set Column address CASET */  
-  parameter[0] = 0x00;
-  parameter[1] = 0x00;
-  parameter[2] = 0x00;
-  parameter[3] = 0xEF;
-  ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
-  /* Set Row address RASET */  
-  parameter[0] = 0x00;
-  parameter[1] = 0x00;
-  parameter[2] = 0x00;
-  parameter[3] = 0xEF;
-  ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
+	LCD_IO_Assert_CS();
+	/* Sleep In Command */
+	ST7789H2_WriteReg(ST7789H2_SLEEP_IN, (uint8_t*)NULL, 0);
+	LCD_IO_Deassert_CS();
 
-  /*--------------- ST7789H2 Frame rate setting -------------------------------*/
-  /* PORCH control setting */      
-  parameter[0] = 0x0C;
-  parameter[1] = 0x0C;
-  parameter[2] = 0x00;
-  parameter[3] = 0x33;
-  parameter[4] = 0x33; 
-  ST7789H2_WriteReg(ST7789H2_PORCH_CTRL, parameter, 5);
-  
-  /* GATE control setting */
-  parameter[0] = 0x35; 
-  ST7789H2_WriteReg(ST7789H2_GATE_CTRL, parameter, 1);
-  
-  /*--------------- ST7789H2 Power setting ------------------------------------*/
-  /* VCOM setting */ 
-  parameter[0] = 0x1F; 
-  ST7789H2_WriteReg(ST7789H2_VCOM_SET, parameter, 1); 
-  
-  /* LCM Control setting */ 
-  parameter[0] = 0x2C; 
-  ST7789H2_WriteReg(ST7789H2_LCM_CTRL, parameter, 1);
-  
-  /* VDV and VRH Command Enable */ 
-  parameter[0] = 0x01;
-  parameter[1] = 0xC3;
-  ST7789H2_WriteReg(ST7789H2_VDV_VRH_EN, parameter, 2);
-  
-  /* VDV Set */ 
-  parameter[0] = 0x20; 
-  ST7789H2_WriteReg(ST7789H2_VDV_SET, parameter, 1); 
-  
-  /* Frame Rate Control in normal mode */ 
-  parameter[0] = 0x0F; 
-  ST7789H2_WriteReg(ST7789H2_FR_CTRL, parameter, 1); 
-  
-  /* Power Control */     
-  parameter[0] = 0xA4;
-  parameter[1] = 0xA1;
-  ST7789H2_WriteReg(ST7789H2_POWER_CTRL, parameter, 1); 
-  
-  /*--------------- ST7789H2 Gamma setting ------------------------------------*/
-  /* Positive Voltage Gamma Control */ 
-  parameter[0] = 0xD0;
-  parameter[1] = 0x08;
-  parameter[2] = 0x11;
-  parameter[3] = 0x08;
-  parameter[4] = 0x0C;
-  parameter[5] = 0x15;
-  parameter[6] = 0x39;
-  parameter[7] = 0x33;
-  parameter[8] = 0x50;
-  parameter[9] = 0x36;
-  parameter[10] = 0x13;
-  parameter[11] = 0x14;
-  parameter[12] = 0x29;
-  parameter[13] = 0x2D;
-  ST7789H2_WriteReg(ST7789H2_PV_GAMMA_CTRL, parameter, 14); 
-  
-  /* Negative Voltage Gamma Control */     
-  parameter[0] = 0xD0;
-  parameter[1] = 0x08;
-  parameter[2] = 0x10;
-  parameter[3] = 0x08;
-  parameter[4] = 0x06;
-  parameter[5] = 0x06;
-  parameter[6] = 0x39;
-  parameter[7] = 0x44;
-  parameter[8] = 0x51;
-  parameter[9] = 0x0B;
-  parameter[10] = 0x16;
-  parameter[11] = 0x14;
-  parameter[12] = 0x2F;
-  parameter[13] = 0x31;
-  ST7789H2_WriteReg(ST7789H2_NV_GAMMA_CTRL, parameter, 14); 
-  
-  /* Display ON command */
-  ST7789H2_DisplayOn();  
-  
-  /* Tearing Effect Line On: Option (00h:VSYNC Interface OFF, 01h:VSYNC Interface ON) */
-  parameter[0] = 0x00;     
-  ST7789H2_WriteReg(ST7789H2_TEARING_EFFECT, parameter, 1);
+
+	/* Wait for 10ms */
+	LCD_IO_Delay(10);
+
+	LCD_IO_Assert_CS();
+
+	/* SW Reset Command */
+	ST7789H2_WriteReg(0x01, (uint8_t*)NULL, 0);
+	LCD_IO_Deassert_CS();
+	/* Wait for 200ms */
+	LCD_IO_Delay(200);
+
+	LCD_IO_Assert_CS();
+
+	/* Sleep Out Command */
+	ST7789H2_WriteReg(ST7789H2_SLEEP_OUT, (uint8_t*)NULL, 0);
+	LCD_IO_Deassert_CS();
+	/* Wait for 120ms */
+	LCD_IO_Delay(120);
+
+
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x00;
+	parameter[1] = 0x00;
+	ST7789H2_WriteReg(ST7789H2_NORMAL_DISPLAY, parameter, 2);
+	LCD_IO_Deassert_CS();
+
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x05;
+	parameter[1] = 0x00;
+	ST7789H2_WriteReg(ST7789H2_COLOR_MODE, parameter, 2);
+	LCD_IO_Deassert_CS();
+
+	//--------------------------------ST7789V Frame rate setting----------------------------------//
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x0C;
+	parameter[1] = 0x0C;
+	parameter[2] = 0x00;
+	parameter[3] = 0x33;
+	parameter[4] = 0x33;
+	parameter[5] = 0x00;
+	ST7789H2_WriteReg(ST7789H2_PORCH_CTRL, parameter, 6);
+	LCD_IO_Deassert_CS();
+
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x70;
+	parameter[1] = 0x00;
+	ST7789H2_WriteReg(ST7789H2_GATE_CTRL, parameter, 2);
+	LCD_IO_Deassert_CS();
+
+	//---------------------------------ST7789V Power setting--------------------------------------//
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x21;
+	parameter[1] = 0x00;
+	ST7789H2_WriteReg(ST7789H2_VCOM_SET, parameter, 2);
+	LCD_IO_Deassert_CS();
+
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x2C;
+	parameter[1] = 0x00;
+	ST7789H2_WriteReg(ST7789H2_LCM_CTRL, parameter, 2);
+	LCD_IO_Deassert_CS();
+
+#if 1
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x01;
+	parameter[1] = 0x00;
+	ST7789H2_WriteReg(ST7789H2_VDV_VRH_EN, parameter, 2);
+	//write_data(0xff);
+	LCD_IO_Deassert_CS();
+
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x0B;
+	parameter[1] = 0x00;
+	ST7789H2_WriteReg(0xc3, parameter, 2);
+	LCD_IO_Deassert_CS();
+
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x27;
+	parameter[1] = 0x00;
+	ST7789H2_WriteReg(ST7789H2_VDV_SET, parameter, 2);
+	LCD_IO_Deassert_CS();
+#endif
+
+	LCD_IO_Assert_CS();
+	parameter[0] = 0x0f;
+	parameter[1] = 0x00;
+	ST7789H2_WriteReg(ST7789H2_FR_CTRL, parameter, 2);
+	LCD_IO_Deassert_CS();
+
+	LCD_IO_Assert_CS();
+	parameter[0] = 0xa4;
+	parameter[1] = 0xa1;
+	ST7789H2_WriteReg(ST7789H2_POWER_CTRL, parameter, 2);
+	LCD_IO_Deassert_CS();
+	//--------------------------------ST7789V gamma setting---------------------------------------//
+	LCD_IO_Assert_CS();
+	parameter[0] = 0xD0;
+	parameter[1] = 0x06;
+	parameter[2] = 0x0B;
+	parameter[3] = 0x09;
+	parameter[4] = 0x08;
+	parameter[5] = 0x30;
+	parameter[6] = 0x30;
+	parameter[7] = 0x5B;
+	parameter[8] = 0x4B;
+	parameter[9] = 0x18;
+	parameter[10] = 0x14;
+	parameter[11] = 0x14;
+	parameter[12] = 0x2C;
+	parameter[13] = 0x32;
+	ST7789H2_WriteReg(ST7789H2_PV_GAMMA_CTRL, parameter, 14);
+	LCD_IO_Deassert_CS();
+
+	LCD_IO_Assert_CS();
+	parameter[0] = 0xD0;
+	parameter[1] = 0x05;
+	parameter[2] = 0x0A;
+	parameter[3] = 0x0A;
+	parameter[4] = 0x07;
+	parameter[5] = 0x28;
+	parameter[6] = 0x32;
+	parameter[7] = 0x2C;
+	parameter[8] = 0x49;
+	parameter[9] = 0x18;
+	parameter[10] = 0x13;
+	parameter[11] = 0x13;
+	parameter[12] = 0x2C;
+	parameter[13] = 0x33;
+	ST7789H2_WriteReg(ST7789H2_NV_GAMMA_CTRL, parameter, 14);
+	LCD_IO_Deassert_CS();
+
+	LCD_IO_Assert_CS();
+	write_command(ST7789H2_DISPLAY_INVERSION);
+	LCD_IO_Deassert_CS();
+
+	mcu_debug_printf("Start loop\n");
+	//while(1){
+		/* Set Column address CASET */
+		parameter[0] = 0x00;
+		parameter[1] = 0x00;
+		parameter[2] = 0x00;
+		parameter[3] = 0xEF;
+		ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
+		cortexm_delay_ms(1);
+	//}
+
+	/* Set Row address RASET */
+	parameter[0] = 0x00;
+	parameter[1] = 0x00;
+	parameter[2] = 0x00;
+	parameter[3] = 0xEF;
+	ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
+
+#if 1
+	LCD_IO_Assert_CS();
+	write_command(ST7789H2_CASET); //Frame rate control
+	write_data(0x00);
+	write_data(0x00);
+	write_data(0x00);
+	write_data(0xef);
+	LCD_IO_Deassert_CS();
+	cortexm_delay_ms(1);
+
+	LCD_IO_Assert_CS();
+	write_command(ST7789H2_RASET); //Display function control
+	write_data(0x00);
+	write_data(0x00);
+	write_data(0x01);
+	write_data(0x3F);
+	LCD_IO_Deassert_CS();
+#endif
+
+
+	LCD_IO_Assert_CS();
+	ST7789H2_WriteReg(ST7789H2_DISPLAY_ON, 0, 0);
+	LCD_IO_Deassert_CS();
+
+	while(1){
+		break;
+	}
+
+	delay(25);
+	LCD_IO_Assert_CS();
+	write_command(ST7789H2_WRITE_RAM);
+	u8 pixels[8];
+
+	memset(pixels, 0xff, sizeof(pixels));
+	for(u32 i=0;
+		 i < (ST7789H2_LCD_PIXEL_HEIGHT*ST7789H2_LCD_PIXEL_HEIGHT)/4;
+		 i++){
+		LCD_IO_WriteDataBlock(pixels, 8);
+	}
+	LCD_IO_Deassert_CS();
+
 }
 
 /**
   * @brief  Set the Display Orientation.
   * @param  orientation: ST7789H2_ORIENTATION_PORTRAIT, ST7789H2_ORIENTATION_LANDSCAPE
-  *                      or ST7789H2_ORIENTATION_LANDSCAPE_ROT180  
+  *                      or ST7789H2_ORIENTATION_LANDSCAPE_ROT180
   * @retval None
   */
 void ST7789H2_SetOrientation(uint32_t orientation)
 {
-  uint8_t   parameter[6];
+	uint8_t   parameter[6];
 
-  if(orientation == ST7789H2_ORIENTATION_LANDSCAPE)
-  {
-    parameter[0] = 0x00;     
-  }
-  else if(orientation == ST7789H2_ORIENTATION_LANDSCAPE_ROT180)
-  {
-    /* Vertical Scrolling Definition */
-    /* TFA describes the Top Fixed Area */
-    parameter[0] = 0x00;
-    parameter[1] = 0x00;
-    /* VSA describes the height of the Vertical Scrolling Area */
-    parameter[2] = 0x01;
-    parameter[3] = 0xF0;
-    /* BFA describes the Bottom Fixed Area */
-    parameter[4] = 0x00;
-    parameter[5] = 0x00; 
-    ST7789H2_WriteReg(ST7789H2_VSCRDEF, parameter, 6);
+	if(orientation == ST7789H2_ORIENTATION_LANDSCAPE)
+	{
+		parameter[0] = 0x00;
+	}
+	else if(orientation == ST7789H2_ORIENTATION_LANDSCAPE_ROT180)
+	{
+		/* Vertical Scrolling Definition */
+		/* TFA describes the Top Fixed Area */
+		parameter[0] = 0x00;
+		parameter[1] = 0x00;
+		/* VSA describes the height of the Vertical Scrolling Area */
+		parameter[2] = 0x01;
+		parameter[3] = 0xF0;
+		/* BFA describes the Bottom Fixed Area */
+		parameter[4] = 0x00;
+		parameter[5] = 0x00;
+		ST7789H2_WriteReg(ST7789H2_VSCRDEF, parameter, 6);
 
-    /* Vertical Scroll Start Address of RAM */
-    /* GRAM row nbr (320) - Display row nbr (240) = 80 = 0x50 */
-    parameter[0] = 0x00;
-    parameter[1] = 0x50;
-    ST7789H2_WriteReg(ST7789H2_VSCSAD, parameter, 2);
-    
-    parameter[0] = 0xC0; 
-  }
-  else
-  {
-    parameter[0] = 0x60;     
-  }
-  ST7789H2_WriteReg(ST7789H2_NORMAL_DISPLAY, parameter, 1);
+		/* Vertical Scroll Start Address of RAM */
+		/* GRAM row nbr (320) - Display row nbr (240) = 80 = 0x50 */
+		parameter[0] = 0x00;
+		parameter[1] = 0x50;
+		ST7789H2_WriteReg(ST7789H2_VSCSAD, parameter, 2);
+
+		parameter[0] = 0xC0;
+	}
+	else
+	{
+		parameter[0] = 0x60;
+	}
+	ST7789H2_WriteReg(ST7789H2_NORMAL_DISPLAY, parameter, 1);
 }
 
 /**
@@ -286,11 +333,11 @@ void ST7789H2_SetOrientation(uint32_t orientation)
   */
 void ST7789H2_DisplayOn(void)
 {
-  /* Display ON command */
-  ST7789H2_WriteReg(ST7789H2_DISPLAY_ON, (uint8_t*)NULL, 0);
+	/* Display ON command */
+	ST7789H2_WriteReg(ST7789H2_DISPLAY_ON, (uint8_t*)NULL, 0);
 
-  /* Sleep Out command */
-  ST7789H2_WriteReg(ST7789H2_SLEEP_OUT, (uint8_t*)NULL, 0);
+	/* Sleep Out command */
+	ST7789H2_WriteReg(ST7789H2_SLEEP_OUT, (uint8_t*)NULL, 0);
 }
 
 /**
@@ -300,14 +347,14 @@ void ST7789H2_DisplayOn(void)
   */
 void ST7789H2_DisplayOff(void)
 {
-  uint8_t   parameter[1];
-  parameter[0] = 0xFE;
-  /* Display OFF command */
-  ST7789H2_WriteReg(ST7789H2_DISPLAY_OFF, parameter, 1);  
-  /* Sleep In Command */
-  ST7789H2_WriteReg(ST7789H2_SLEEP_IN, (uint8_t*)NULL, 0); 
-  /* Wait for 10ms */
-  LCD_IO_Delay(10);  
+	uint8_t   parameter[1];
+	parameter[0] = 0xFE;
+	/* Display OFF command */
+	ST7789H2_WriteReg(ST7789H2_DISPLAY_OFF, parameter, 1);
+	/* Sleep In Command */
+	ST7789H2_WriteReg(ST7789H2_SLEEP_IN, (uint8_t*)NULL, 0);
+	/* Wait for 10ms */
+	LCD_IO_Delay(10);
 }
 
 /**
@@ -317,7 +364,7 @@ void ST7789H2_DisplayOff(void)
   */
 uint16_t ST7789H2_GetLcdPixelWidth(void)
 {
- return (uint16_t)ST7789H2_LCD_PIXEL_WIDTH;
+	return (uint16_t)ST7789H2_LCD_PIXEL_WIDTH;
 }
 
 /**
@@ -327,19 +374,19 @@ uint16_t ST7789H2_GetLcdPixelWidth(void)
   */
 uint16_t ST7789H2_GetLcdPixelHeight(void)
 {
- return (uint16_t)ST7789H2_LCD_PIXEL_HEIGHT;
+	return (uint16_t)ST7789H2_LCD_PIXEL_HEIGHT;
 }
 
 /**
   * @brief  Get the st7789h2 ID.
   * @param  None
-  * @retval The st7789h2 ID 
+  * @retval The st7789h2 ID
   */
 uint16_t ST7789H2_ReadID(void)
 {
-  LCD_IO_Init();
-  
-  return ST7789H2_ReadReg(ST7789H2_LCD_ID);
+	LCD_IO_Init();
+
+	return ST7789H2_ReadReg(ST7789H2_LCD_ID);
 }
 
 /**
@@ -350,23 +397,23 @@ uint16_t ST7789H2_ReadID(void)
   */
 void ST7789H2_SetCursor(uint16_t Xpos, uint16_t Ypos)
 {
-  uint8_t   parameter[4];
-  /* CASET: Comumn Addrses Set */
-  parameter[0] = 0x00;     
-  parameter[1] = 0x00 + Xpos;
-  parameter[2] = 0x00;
-  parameter[3] = 0xEF + Xpos;
-  ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
-  /* RASET: Row Addrses Set */  
-  parameter[0] = 0x00;
-  parameter[1] = 0x00 + Ypos;
-  parameter[2] = 0x00;
-  parameter[3] = 0xEF + Ypos;
-  ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
+	uint8_t   parameter[4];
+	/* CASET: Comumn Addrses Set */
+	parameter[0] = Xpos >> 8;
+	parameter[1] = Xpos;
+	parameter[2] = 0x00;
+	parameter[3] = 0xEF;
+	ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
+	/* RASET: Row Addrses Set */
+	parameter[0] = Ypos >> 8;
+	parameter[1] = Ypos;
+	parameter[2] = 0x00;
+	parameter[3] = 0x3F;
+	ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
 }
 
 /**
-  * @brief  Write pixel.   
+  * @brief  Write pixel.
   * @param  Xpos: specifies the X position.
   * @param  Ypos: specifies the Y position.
   * @param  RGBCode: the RGB pixel color in RGB565 format
@@ -374,14 +421,14 @@ void ST7789H2_SetCursor(uint16_t Xpos, uint16_t Ypos)
   */
 void ST7789H2_WritePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
 {
-  /* Set Cursor */
-  ST7789H2_SetCursor(Xpos, Ypos);
+	/* Set Cursor */
+	ST7789H2_SetCursor(Xpos, Ypos);
 
-  /* Prepare to write to LCD RAM */
-  ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
+	/* Prepare to write to LCD RAM */
+	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
 
-  /* Write RAM data */
-  LCD_IO_WriteData(RGBCode);
+	/* Write RAM data */
+	LCD_IO_WriteData(RGBCode);
 }
 
 /**
@@ -392,24 +439,24 @@ void ST7789H2_WritePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
   */
 uint16_t ST7789H2_ReadPixel(uint16_t Xpos, uint16_t Ypos)
 {
-  ST7789H2_Rgb888 rgb888;
-  uint8_t          r, g, b;
-  uint16_t         rgb565;
+	ST7789H2_Rgb888 rgb888;
+	uint8_t          r, g, b;
+	uint16_t         rgb565;
 
-  /* Set Cursor */
-  ST7789H2_SetCursor(Xpos, Ypos);
-  
-  /* Read RGB888 data from LCD RAM */
-  rgb888 = ST7789H2_ReadPixel_rgb888(Xpos, Ypos);
-  
-  /* Convert RGB888 to RGB565 */
-  r = ((rgb888.red & 0xF8) >> 3);    /* Extract the red component 5 most significant bits */
-  g = ((rgb888.green & 0xFC) >> 2);  /* Extract the green component 6 most significant bits */
-  b = ((rgb888.blue & 0xF8) >> 3);   /* Extract the blue component 5 most significant bits */
+	/* Set Cursor */
+	ST7789H2_SetCursor(Xpos, Ypos);
 
-  rgb565 = ((uint16_t)(r) << 11) + ((uint16_t)(g) << 5) + ((uint16_t)(b) << 0);
-  
-  return (rgb565);
+	/* Read RGB888 data from LCD RAM */
+	rgb888 = ST7789H2_ReadPixel_rgb888(Xpos, Ypos);
+
+	/* Convert RGB888 to RGB565 */
+	r = ((rgb888.red & 0xF8) >> 3);    /* Extract the red component 5 most significant bits */
+	g = ((rgb888.green & 0xFC) >> 2);  /* Extract the green component 6 most significant bits */
+	b = ((rgb888.blue & 0xF8) >> 3);   /* Extract the blue component 5 most significant bits */
+
+	rgb565 = ((uint16_t)(r) << 11) + ((uint16_t)(g) << 5) + ((uint16_t)(b) << 0);
+
+	return (rgb565);
 }
 
 /**
@@ -421,16 +468,10 @@ uint16_t ST7789H2_ReadPixel(uint16_t Xpos, uint16_t Ypos)
   */
 void ST7789H2_WriteReg(uint8_t Command, uint8_t *Parameters, uint8_t NbParameters)
 {
-  uint8_t   i;
 
-  /* Send command */
-  LCD_IO_WriteReg(Command);
-  
-  /* Send command's parameters if any */
-  for (i=0; i<NbParameters; i++)
-  {
-	 LCD_IO_WriteData(Parameters[i]);
-  }
+	/* Send command */
+	LCD_IO_WriteReg(Command);
+	LCD_IO_WriteDataBlock(Parameters, NbParameters);
 }
 
 /**
@@ -440,14 +481,14 @@ void ST7789H2_WriteReg(uint8_t Command, uint8_t *Parameters, uint8_t NbParameter
   */
 uint8_t ST7789H2_ReadReg(uint8_t Command)
 {
-  /* Send command */
-  LCD_IO_WriteReg(Command);
+	/* Send command */
+	LCD_IO_WriteReg(Command);
 
-  /* Read dummy data */
-  LCD_IO_ReadData();
-  
-  /* Read register value */
-  return (LCD_IO_ReadData());
+	/* Read dummy data */
+	LCD_IO_ReadData();
+
+	/* Read register value */
+	return (LCD_IO_ReadData());
 }
 
 /**
@@ -460,41 +501,41 @@ uint8_t ST7789H2_ReadReg(uint8_t Command)
   */
 void ST7789H2_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height)
 {
-  if (Xpos < ST7789H2_LCD_PIXEL_WIDTH)
-  {
-    WindowsXstart = Xpos;
-  }
-  else
-  {
-    WindowsXstart = 0;
-  }
+	if (Xpos < ST7789H2_LCD_PIXEL_WIDTH)
+	{
+		WindowsXstart = Xpos;
+	}
+	else
+	{
+		WindowsXstart = 0;
+	}
 
-  if (Ypos < ST7789H2_LCD_PIXEL_HEIGHT)
-  {
-    WindowsYstart = Ypos;
-  }
-  else
-  {
-    WindowsYstart = 0;
-  }
+	if (Ypos < ST7789H2_LCD_PIXEL_HEIGHT)
+	{
+		WindowsYstart = Ypos;
+	}
+	else
+	{
+		WindowsYstart = 0;
+	}
 
-  if (Width  + Xpos <= ST7789H2_LCD_PIXEL_WIDTH)
-  {
-    WindowsXend = Width  + Xpos - 1;
-  }
-  else
-  {
-    WindowsXend = ST7789H2_LCD_PIXEL_WIDTH - 1;
-  }
+	if (Width  + Xpos <= ST7789H2_LCD_PIXEL_WIDTH)
+	{
+		WindowsXend = Width  + Xpos - 1;
+	}
+	else
+	{
+		WindowsXend = ST7789H2_LCD_PIXEL_WIDTH - 1;
+	}
 
-  if (Height + Ypos <= ST7789H2_LCD_PIXEL_HEIGHT)
-  {
-    WindowsYend = Height + Ypos - 1;
-  }
-  else
-  {
-    WindowsYend = ST7789H2_LCD_PIXEL_HEIGHT-1;
-  }
+	if (Height + Ypos <= ST7789H2_LCD_PIXEL_HEIGHT)
+	{
+		WindowsYend = Height + Ypos - 1;
+	}
+	else
+	{
+		WindowsYend = ST7789H2_LCD_PIXEL_HEIGHT-1;
+	}
 }
 
 /**
@@ -507,25 +548,25 @@ void ST7789H2_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uin
   */
 void ST7789H2_DrawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
 {
-  uint16_t counter = 0;
+	uint16_t counter = 0;
 
-  /* Set Cursor */
-  ST7789H2_SetCursor(Xpos, Ypos);
+	/* Set Cursor */
+	ST7789H2_SetCursor(Xpos, Ypos);
 
-  /* Prepare to write to LCD RAM */
-  ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
+	/* Prepare to write to LCD RAM */
+	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
 
-  /* Sent a complete line */
-  for(counter = 0; counter < Length; counter++)
-  {
-	 LCD_IO_WriteData(RGBCode);
-  }
+	/* Sent a complete line */
+	for(counter = 0; counter < Length; counter++)
+	{
+		LCD_IO_WriteData(RGBCode);
+	}
 }
 
 
 
 /******************************************************************************
-                            Static Functions
+									 Static Functions
 *******************************************************************************/
 
 /**
@@ -536,52 +577,52 @@ void ST7789H2_DrawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t
   */
 static ST7789H2_Rgb888 ST7789H2_ReadPixel_rgb888(uint16_t Xpos, uint16_t Ypos)
 {
-  ST7789H2_Rgb888 rgb888;
-  uint16_t rgb888_part1, rgb888_part2;
+	ST7789H2_Rgb888 rgb888;
+	uint16_t rgb888_part1, rgb888_part2;
 
-  /* In LCD RAM, pixels are 24 bits packed and read with 16 bits access
-   * Here is the pixels components arrangement in memory :
-   *       bits:  15 14 13 12 11 10 09 08 | 07 06 05 04 03 02 01 00
-   * address 0 :     red pixel 0    X  X  |   green pixel 0   X  X
-   * address 1 :    blue pixel 0    X  X  |     red pixel 1   X  X
-   * address 2 :   green pixel 1    X  X  |    blue pixel 1   X  X
-   */
+	/* In LCD RAM, pixels are 24 bits packed and read with 16 bits access
+	* Here is the pixels components arrangement in memory :
+	*       bits:  15 14 13 12 11 10 09 08 | 07 06 05 04 03 02 01 00
+	* address 0 :     red pixel 0    X  X  |   green pixel 0   X  X
+	* address 1 :    blue pixel 0    X  X  |     red pixel 1   X  X
+	* address 2 :   green pixel 1    X  X  |    blue pixel 1   X  X
+	*/
 
-  /* Set Cursor */
-  ST7789H2_SetCursor(Xpos, Ypos);
-  /* Prepare to read LCD RAM */
-  ST7789H2_WriteReg(ST7789H2_READ_RAM, (uint8_t*)NULL, 0);   /* RAM read data command */
-  /* Dummy read */
-  LCD_IO_ReadData();
-  /* Read first part of the RGB888 data */
-  rgb888_part1 = LCD_IO_ReadData();
-  /* Read first part of the RGB888 data */
-  rgb888_part2 = LCD_IO_ReadData();
+	/* Set Cursor */
+	ST7789H2_SetCursor(Xpos, Ypos);
+	/* Prepare to read LCD RAM */
+	ST7789H2_WriteReg(ST7789H2_READ_RAM, (uint8_t*)NULL, 0);   /* RAM read data command */
+	/* Dummy read */
+	LCD_IO_ReadData();
+	/* Read first part of the RGB888 data */
+	rgb888_part1 = LCD_IO_ReadData();
+	/* Read first part of the RGB888 data */
+	rgb888_part2 = LCD_IO_ReadData();
 
-  /* red component */
-  rgb888.red   = (rgb888_part1 & 0xFC00) >> 8;
-  /* green component */
-  rgb888.green = (rgb888_part1 & 0x00FC) >> 0;
-  /* blue component */
-  rgb888.blue  = (rgb888_part2 & 0xFC00) >> 8;
+	/* red component */
+	rgb888.red   = (rgb888_part1 & 0xFC00) >> 8;
+	/* green component */
+	rgb888.green = (rgb888_part1 & 0x00FC) >> 0;
+	/* blue component */
+	rgb888.blue  = (rgb888_part2 & 0xFC00) >> 8;
 
-  return rgb888;
+	return rgb888;
 }
 
 /**
   * @}
-  */ 
-
-/**
-  * @}
-  */ 
-  
-/**
-  * @}
-  */ 
+  */
 
 /**
   * @}
   */
-  
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

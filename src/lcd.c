@@ -16,11 +16,43 @@
 #define IO_ADDRESS (0x60000000)
 #define IO_ADDRESS_DEFERENCE *((__IO u8*)0x60000000)
 
-#define SET_COMMAND() (GPIOC->BSRRH = GPIO_PIN_3) //RESET
-#define SET_DATA() (GPIOC->BSRRL = GPIO_PIN_3) //SET
+volatile u64 * const m_reg_location = (u64*)0x60000000;
+
+#define SET_COMMAND() (GPIOE->BSRRH = GPIO_PIN_0) //RESET
+#define SET_DATA() (GPIOE->BSRRL = GPIO_PIN_0) //SET
 
 #define ASSERT_RESET() (GPIOE->BSRRH = GPIO_PIN_1) //RESET
 #define DEASSERT_RESET() (GPIOE->BSRRL = GPIO_PIN_1) //SET
+
+#define ASSERT_CS() (GPIOD->BSRRH = GPIO_PIN_7) //RESET
+#define DEASSERT_CS() (GPIOD->BSRRL = GPIO_PIN_7) //SET
+
+void LCD_IO_Assert_CS(){
+#if MANUAL_FMC_CHIP_SELECT > 0
+	ASSERT_CS();
+	cortexm_delay_us(5);
+#endif
+}
+
+void LCD_IO_Deassert_CS(){
+#if MANUAL_FMC_CHIP_SELECT > 0
+	DEASSERT_CS();
+	cortexm_delay_us(5);
+#endif
+}
+
+typedef struct MCU_PACK {
+	u8 first;
+	u8 dummy[3];
+	u8 second;
+	u8 dummy0[3];
+} transaction_data_t;
+
+typedef union {
+	u64 raw;
+	transaction_data_t data;
+} transaction_t;
+
 
 void LCD_IO_Init(){
 	MX_FMC_Init();
@@ -31,7 +63,7 @@ void LCD_IO_Init(){
 				(void*)(IO_ADDRESS), //bank 1 sub bank 2
 				0x04000000,
 				MPU_ACCESS_PRW,
-				MPU_MEMORY_PERIPHERALS,
+				MPU_MEMORY_LCD,
 				0
 				);
 	if( result < 0 ){
@@ -41,32 +73,77 @@ void LCD_IO_Init(){
 	mcu_core_disable_cache();
 	mcu_core_enable_cache();
 
+#if 0
+	while(1){
+		LCD_IO_Deassert_CS();
+		SET_DATA();
+		ASSERT_RESET();
+		cortexm_delay_ms(10);
+		DEASSERT_RESET();
+		SET_COMMAND();
+		LCD_IO_Assert_CS();
+		cortexm_delay_ms(10);
+	}
+#else
+	LCD_IO_Deassert_CS();
 	SET_DATA();
 	ASSERT_RESET();
 	cortexm_delay_ms(10);
 	DEASSERT_RESET();
+	cortexm_delay_ms(120);
+#endif
 }
 
 void LCD_IO_WriteReg(u8 Reg){
 	SET_COMMAND();
-	cortexm_delay_us(1);
-	IO_ADDRESS_DEFERENCE = Reg;
+	cortexm_delay_us(2);
+	transaction_t transaction;
+	transaction.data.first = 0; //NOP
+	transaction.data.second = Reg; //register value
+	*m_reg_location = transaction.raw; //three NOP's are written first
 	__DSB();
 }
 
+void LCD_IO_WriteDataBlock(const u8 * data, int nbyte){
+	if( nbyte == 0 ){
+		return;
+	}
+	SET_DATA();
+	cortexm_delay_us(2);
+	transaction_t transaction;
+	for(u32 i=0; i < nbyte; i+=2 ){
+		transaction.data.first = data[i];
+		transaction.data.second = data[i+1];
+		m_reg_location[0] = transaction.raw;
+		__DSB();
+	}
+}
+
+void LCD_IO_WriteData8(u8 RegValue){
+	SET_DATA();
+	cortexm_delay_us(2);
+	m_reg_location[0] = RegValue;
+	__DSB();
+}
+
+
 void LCD_IO_WriteData(u16 RegValue){
 	SET_DATA();
-	cortexm_delay_us(1);
-	IO_ADDRESS_DEFERENCE = RegValue >> 8;
-	IO_ADDRESS_DEFERENCE = RegValue;
+	cortexm_delay_us(2);
+	m_reg_location[0] = RegValue >> 8;
+	__DSB();
+	m_reg_location[0] = RegValue;
+	__DSB();
 }
 
 u16 LCD_IO_ReadData(){
 	SET_DATA();
-	cortexm_delay_us(1);
+	cortexm_delay_us(2);
 	u16 result;
-	result = IO_ADDRESS_DEFERENCE << 8;
-	result |= IO_ADDRESS_DEFERENCE;
+	result = m_reg_location[0] << 8;
+	__DSB();
+	result |= m_reg_location[0];
+	__DSB();
 	return result;
 }
 

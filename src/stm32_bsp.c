@@ -6,8 +6,12 @@
 #include <mcu/arch/stm32/stm32h7xx/stm32h7xx_hal_gpio.h>
 #include <mcu/arch/stm32/stm32h7xx/stm32h7xx_hal_rcc.h>
 
+#include "stm32_bsp.h"
+
+
 static SRAM_HandleTypeDef hsram1 MCU_SYS_MEM;
 static int FMC_Initialized = 0;
+
 
 void SystemClock_Config(){
 
@@ -113,7 +117,7 @@ void MX_FMC_Init(){
 	hsram1.Init.NSBank = FMC_NORSRAM_BANK1;
 	hsram1.Init.DataAddressMux = FMC_DATA_ADDRESS_MUX_DISABLE;
 	hsram1.Init.MemoryType = FMC_MEMORY_TYPE_SRAM;
-	hsram1.Init.MemoryDataWidth = FMC_NORSRAM_MEM_BUS_WIDTH_8;
+	hsram1.Init.MemoryDataWidth = FMC_NORSRAM_MEM_BUS_WIDTH_32;
 	hsram1.Init.BurstAccessMode = FMC_BURST_ACCESS_MODE_DISABLE;
 	hsram1.Init.WaitSignalPolarity = FMC_WAIT_SIGNAL_POLARITY_LOW;
 	hsram1.Init.WaitSignalActive = FMC_WAIT_TIMING_BEFORE_WS;
@@ -123,7 +127,7 @@ void MX_FMC_Init(){
 	hsram1.Init.AsynchronousWait = FMC_ASYNCHRONOUS_WAIT_DISABLE;
 	hsram1.Init.WriteBurst = FMC_WRITE_BURST_DISABLE;
 	hsram1.Init.ContinuousClock = FMC_CONTINUOUS_CLOCK_SYNC_ONLY;
-	hsram1.Init.WriteFifo = FMC_WRITE_FIFO_ENABLE;
+	hsram1.Init.WriteFifo = FMC_WRITE_FIFO_DISABLE;
 	hsram1.Init.PageSize = FMC_PAGE_SIZE_NONE;
 	/* Timing */
 	Timing.AddressSetupTime = 15;
@@ -189,7 +193,10 @@ static void HAL_FMC_MspInit(void){
 			GPIO_PIN_1|
 			GPIO_PIN_4|
 			GPIO_PIN_5|
-			GPIO_PIN_7;
+#if MANUAL_FMC_CHIP_SELECT == 0
+			GPIO_PIN_7|
+#endif
+			0;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -197,11 +204,11 @@ static void HAL_FMC_MspInit(void){
 	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
 	//use this as data/command switch
-	GPIO_InitStruct.Pin = GPIO_PIN_3;
+	GPIO_InitStruct.Pin = GPIO_PIN_0;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 	/* USER CODE BEGIN FMC_MspInit 1 */
 	GPIO_InitStruct.Pin = GPIO_PIN_1;
@@ -209,7 +216,9 @@ static void HAL_FMC_MspInit(void){
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_1, SET);
 
+	//backlight
 	GPIO_InitStruct.Pin = GPIO_PIN_13;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -217,6 +226,14 @@ static void HAL_FMC_MspInit(void){
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, SET);
 
+#if MANUAL_FMC_CHIP_SELECT > 0
+	GPIO_InitStruct.Pin = GPIO_PIN_7;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, RESET);
+#endif
 
 	/* USER CODE END FMC_MspInit 1 */
 }

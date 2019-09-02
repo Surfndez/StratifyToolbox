@@ -190,11 +190,17 @@ void board_event_handler(int event, void * args){
 
 #if 1
 			ST7789H2_Init();
+			mcu_debug_printf("init complete\n");
 
-			for(u32 i=0; i < 240; i++){
-				ST7789H2_DrawHLine(0xffff, 0, 0, 240);
+			//mcu_debug_printf("ID:0x%X\n", ST7789H2_ReadID());
+
+			for(u32 i=0; i < 64; i++){
+				//ST7789H2_DrawHLine(0xffff, i, i, 64);
 			}
 #endif
+			while(1){
+				;
+			}
 
 			break;
 
