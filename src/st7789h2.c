@@ -35,6 +35,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <mcu/debug.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 #include "st7789h2.h"
 
 /** @addtogroup BSP
@@ -59,8 +62,6 @@ typedef struct  {
 	uint8_t green;
 	uint8_t blue;
 } ST7789H2_Rgb888;
-
-
 
 
 static uint16_t WindowsXstart = 0;
@@ -107,8 +108,9 @@ void ST7789H2_Init(void)
 	LCD_IO_Delay(120);
 
 
+	//use landscape mode
 	LCD_IO_Assert_CS();
-	parameter[0] = 0x00;
+	parameter[0] = 0x60; //landscape mode (320W x 240H)
 	parameter[1] = 0x00;
 	ST7789H2_WriteReg(ST7789H2_NORMAL_DISPLAY, parameter, 2);
 	LCD_IO_Deassert_CS();
@@ -225,15 +227,15 @@ void ST7789H2_Init(void)
 	/* Set Column address CASET */
 	parameter[0] = 0x00;
 	parameter[1] = 0x00;
-	parameter[2] = 0x00;
-	parameter[3] = 0xEF;
+	parameter[2] = 0x01;
+	parameter[3] = 0x3F;
 	ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
 
 	/* Set Row address RASET */
 	parameter[0] = 0x00;
 	parameter[1] = 0x00;
-	parameter[2] = 0x01;
-	parameter[3] = 0x3F;
+	parameter[2] = 0x00;
+	parameter[3] = 0xEF;
 	ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
 
 
@@ -252,7 +254,7 @@ void ST7789H2_Init(void)
 	for(u32 i=0;
 		 i < (ST7789H2_LCD_PIXEL_WIDTH*ST7789H2_LCD_PIXEL_HEIGHT)/4;
 		 i++){
-		LCD_IO_WriteDataBlock(&pixels, 8);
+		LCD_IO_WriteDataBlock((const u8*)&pixels, 8);
 	}
 	clock_gettime(CLOCK_REALTIME, &end);
 	LCD_IO_Deassert_CS();

@@ -45,6 +45,22 @@ const ffifo_config_t board_trace_config = {
 };
 ffifo_state_t board_trace_state;
 
+typedef struct MCU_PACK {
+	u16 signature;
+	u32 size;
+	u16 resd1;
+	u16 resd2;
+	u32 offset;
+} bmp_header_t;
+
+typedef struct MCU_PACK {
+	u32 hdr_size;
+	s32 width;
+	s32 height;
+	u16 planes;
+	u16 bits_per_pixel;
+} bmp_dib_t;
+
 #if _IS_BOOT
 int load_kernel_image();
 
@@ -119,6 +135,34 @@ static void handle_alarm(int signo){
 
 #endif
 
+void write_row_svcall(void * args){
+	CORTEXM_SVCALL_ENTER();
+	LCD_IO_WriteDataBlock(args, 600);
+}
+
+void set_cursor_svcall(void * args){
+	CORTEXM_SVCALL_ENTER();
+	int j = (int)args;
+	u8 parameter[4];
+
+	/* Set Column address CASET */
+	parameter[0] = 0;
+	parameter[1] = 10;
+	parameter[2] = 1;
+	parameter[3] = 53;
+	ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
+
+	/* Set Row address RASET */
+	parameter[0] = 0;
+	parameter[1] = 146-j;
+	parameter[2] = 0;
+	parameter[3] = 146;
+	ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
+
+	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, 0, 0);
+
+}
+
 void board_trace_event(void * event){
 	link_trace_event_header_t * header = event;
 	devfs_async_t async;
@@ -132,6 +176,7 @@ void board_trace_event(void * event){
 	async.flags = O_RDWR;
 	trace_dev->driver.write(&(trace_dev->handle), &async);
 }
+
 
 void board_event_handler(int event, void * args){
 
@@ -187,20 +232,9 @@ void board_event_handler(int event, void * args){
 		case MCU_BOARD_CONFIG_EVENT_ROOT_DEBUG_INITIALIZED:
 
 			mcu_debug_printf("hello\n");
-
-#if 1
 			ST7789H2_Init();
-			mcu_debug_printf("init complete\n");
 
-			//mcu_debug_printf("ID:0x%X\n", ST7789H2_ReadID());
 
-			for(u32 i=0; i < 64; i++){
-				//ST7789H2_DrawHLine(0xffff, i, i, 64);
-			}
-#endif
-			while(1){
-				;
-			}
 
 			break;
 
@@ -209,8 +243,55 @@ void board_event_handler(int event, void * args){
 
 #if _IS_BOOT
 
-			if( load_kernel_image() < 0 ){
-			//if( 1 ){
+
+			int fd = open("/home/icon.bmp", O_RDONLY);
+			if( fd >= 0 ){
+				mcu_debug_printf("opened %d\n", fd);
+
+				bmp_header_t hdr;
+				bmp_dib_t dib;
+
+				if( read(fd, &hdr, sizeof(hdr) == sizeof(hdr)) ){
+					mcu_debug_printf("read header\n");
+					if( read(fd, &dib, sizeof(dib) == sizeof(dib)) ){
+
+						lseek(fd, 138, SEEK_SET);
+						mcu_debug_printf("height is %d\n", dib.height);
+						mcu_debug_printf("signature is %d\n", hdr.signature);
+						mcu_debug_printf("size is %d\n", hdr.size);
+						mcu_debug_printf("offset is %d\n", hdr.offset);
+
+						u16 row_buffer[300];
+
+						for(u32 j = 0; j < 54; j++){
+							mcu_debug_printf("write %d of %d\n", j, dib.height);
+							read(fd, row_buffer, sizeof(row_buffer));
+							cortexm_svcall(set_cursor_svcall, (void*)j);
+
+							for(u32 i=0; i < 300; i++){
+								row_buffer[i] = __REV16(row_buffer[i]);
+							}
+							cortexm_svcall(write_row_svcall, row_buffer);
+						}
+
+
+					} else {
+						mcu_debug_printf("failed to read dib\n");
+					}
+
+
+				} else {
+					mcu_debug_printf("failed to read hdr\n");
+
+				}
+
+				close(fd);
+			} else {
+				mcu_debug_printf("failed to open file\n");
+			}
+
+			//if( load_kernel_image() < 0 ){
+			if( 1 ){
 				sos_led_startup();
 				mcu_debug_log_error(MCU_DEBUG_USER0, "failed to load kernel image");
 				signal(SIGALRM, handle_alarm);
