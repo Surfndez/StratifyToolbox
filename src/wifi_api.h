@@ -14,6 +14,7 @@ typedef struct {
 	u16 mtu /*! Default value should be 1500 */;
 	const char * host_name;
 	struct netif * network_interface_list;
+	u32 thread_stack_size;
 	u16 network_interface_count;
 	u16 max_packet_size;
 	u8 * packet_buffer;

@@ -11,16 +11,18 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#include "wifi_api.h"
 #include "socket/include/m2m_socket.h"
 #include "driver/include/m2m_wifi.h"
 
 static void * wifi_api_thread_function(void * args);
+static int start_wifi_thread(const void * config);
 
 int wifi_api_startup(const void * config){
 
 	//start the wifi_api_thread_function() thread
 
-	return 0;
+	return start_wifi_thread(config);
 }
 
 int wifi_api_accept(int s, struct sockaddr *addr, socklen_t * addrlen){
@@ -119,23 +121,42 @@ int wifi_api_socket(int domain, int type, int protocol){
 }
 
 int wifi_api_write(int s, const void *dataptr, size_t size){
-	return 0;
+	return wifi_api_send(
+				s,
+				dataptr,
+				size,
+				0);
 }
 
 int wifi_api_writev(int s, const struct iovec *iov, int iovcnt){
 	return 0;
 }
 
-int wifi_api_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
-						  struct timeval *timeout){
+int wifi_api_select(
+		int maxfdp1,
+		fd_set *readset,
+		fd_set *writeset,
+		fd_set *exceptset,
+		struct timeval *timeout
+		){
 	return 0;
 }
 
-int wifi_api_ioctl(int s, long cmd, void *argp){
+int wifi_api_ioctl(
+		int s,
+		long cmd,
+		void *argp
+		){
+
 	return 0;
 }
 
-int wifi_api_fcntl(int s, int cmd, int val){
+int wifi_api_fcntl(
+		int s,
+		int cmd,
+		int val
+		){
+
 	return 0;
 }
 
@@ -147,7 +168,15 @@ struct hostent * wifi_api_gethostbyname(const char *name){
 	return 0;
 }
 
-int wifi_api_gethostbyname_r(const char *name, struct hostent *ret, char *buf, size_t buflen, struct hostent **result, int *h_errnop){
+int wifi_api_gethostbyname_r(
+		const char *name,
+		struct hostent *ret,
+		char *buf,
+		size_t buflen,
+		struct hostent **result,
+		int *h_errnop
+		){
+
 	return 0;
 }
 
@@ -155,19 +184,44 @@ void wifi_api_freeaddrinfo(struct addrinfo *ai){
 
 }
 
-int wifi_api_getaddrinfo(const char *nodename, const char *servname, const struct addrinfo *hints, struct addrinfo **res){
+int wifi_api_getaddrinfo(
+		const char *nodename,
+		const char *servname,
+		const struct addrinfo *hints,
+		struct addrinfo **res
+		){
+
 	return 0;
 }
-in_addr_t wifi_api_inet_addr(const char * cp){
+
+in_addr_t wifi_api_inet_addr(
+		const char * cp
+		){
+
 	return 0;
 }
-char * wifi_api_inet_ntoa(struct in_addr in){
+char * wifi_api_inet_ntoa(
+		struct in_addr in
+		){
+
 	return 0;
 }
-const char * wifi_api_inet_ntop(int af, const void * src, char * dst, socklen_t size){
+const char * wifi_api_inet_ntop(
+		int af,
+		const void * src,
+		char * dst,
+		socklen_t size
+		){
+
 	return 0;
 }
-int wifi_api_inet_pton(int af, const char * src, void * dst){
+
+int wifi_api_inet_pton(
+		int af,
+		const char * src,
+		void * dst
+		){
+
 	return 0;
 }
 
@@ -182,5 +236,44 @@ void * wifi_api_thread_function(void * args){
 
 
 	return 0;
+}
+
+int start_wifi_thread(const void * config){
+
+	int result;
+	const wifi_api_config_t * wifi_config = config;
+	pthread_attr_t attr;
+	pthread_t tmp;
+
+	pthread_attr_init(&attr);
+
+	u32 stack_size = wifi_config->thread_stack_size;
+	if( stack_size == 0 ){
+		stack_size = 2048;
+	}
+
+	if( pthread_attr_setstacksize(&attr, stack_size) < 0 ){
+		mcu_debug_log_error(MCU_DEBUG_SOCKET, "Failed to set stack size");
+	}
+
+#if 0
+	if( pthread_attr_setschedpolicy(&attr, SCHED_RR) < 0 ){
+		mcu_debug_log_error(MCU_DEBUG_SOCKET, "Failed to set policy");
+	}
+
+	struct sched_param param;
+	param.sched_priority = prio;
+
+	if( pthread_attr_setschedparam(&attr, &param) < 0 ){
+		mcu_debug_log_error(MCU_DEBUG_SOCKET, "Failed to set priority");
+	}
+#endif
+
+	result = pthread_create(&tmp,
+									&attr,
+									wifi_api_thread_function,
+									(void*)config);
+
+	return result;
 }
 
