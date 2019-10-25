@@ -5,8 +5,6 @@
 #include <cortexm/task.h>
 #include <mcu/core.h>
 #include <mcu/debug.h>
-#include <mcu/arch/stm32/stm32h7xx/stm32h7xx_hal_sram.h>
-#include <mcu/arch/stm32/stm32h7xx/stm32h7xx_hal_gpio.h>
 
 #include "lcd.h"
 #include "stm32_bsp.h"
@@ -18,14 +16,14 @@
 
 volatile u64 * const m_reg_location = (u64*)0x60000000;
 
-#define SET_COMMAND() (GPIOE->BSRRH = GPIO_PIN_0) //RESET
-#define SET_DATA() (GPIOE->BSRRL = GPIO_PIN_0) //SET
+#define SET_COMMAND() (GPIOE->BSRR = (GPIO_PIN_0 << 16)) //RESET
+#define SET_DATA() (GPIOE->BSRR = GPIO_PIN_0) //SET
 
-#define ASSERT_RESET() (GPIOE->BSRRH = GPIO_PIN_1) //RESET
-#define DEASSERT_RESET() (GPIOE->BSRRL = GPIO_PIN_1) //SET
+#define ASSERT_RESET() (GPIOE->BSRR = (GPIO_PIN_1 << 16)) //RESET
+#define DEASSERT_RESET() (GPIOE->BSRR = GPIO_PIN_1) //SET
 
-#define ASSERT_CS() (GPIOD->BSRRH = GPIO_PIN_7) //RESET
-#define DEASSERT_CS() (GPIOD->BSRRL = GPIO_PIN_7) //SET
+#define ASSERT_CS() (GPIOD->BSRR = (GPIO_PIN_7<<16)) //RESET
+#define DEASSERT_CS() (GPIOD->BSRR = GPIO_PIN_7) //SET
 
 void LCD_IO_Assert_CS(){
 #if MANUAL_FMC_CHIP_SELECT > 0

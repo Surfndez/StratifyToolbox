@@ -71,9 +71,14 @@ link_transport_driver_t link_transport = {
 	.wait = sos_link_transport_usb_wait,
 	.flush = sos_link_transport_usb_flush,
 	.timeout = 500,
+	#if !_IS_BOOT
 	.transport_read = link1_transport_slaveread,
 	.transport_write = link1_transport_slavewrite,
-	.o_flags = 0,
+	#else
+	.transport_read = link2_transport_slaveread,
+	.transport_write = link2_transport_slavewrite,
+	#endif
+	.o_flags = 0
 
 };
 

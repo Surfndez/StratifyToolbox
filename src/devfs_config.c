@@ -40,8 +40,8 @@ limitations under the License.
 #include <mcu/hash.h>
 #include <sos/sos.h>
 #include <device/drive_cfi.h>
+#include <device/drive_ram.h>
 
-#include "ram_drive.h"
 #include "display_device.h"
 
 #include "config.h"
@@ -281,6 +281,30 @@ const drive_cfi_config_t drive_cfi_config = {
 
 drive_cfi_state_t drive_cfi_state MCU_SYS_MEM;
 
+#if _IS_BOOT
+
+const drive_ram_config_t drive_ram_config = {
+	.memory = (void*)0x24000000,
+	.size = 512*1024UL
+};
+
+#define USB_FIFO_BUFFER_SIZE (LINK2_MAX_PACKET_SIZE)
+static char usb_fifo_buffer[USB_FIFO_BUFFER_SIZE] MCU_SYS_MEM;
+static char usb_read_buffer[SOS_LINK_TRANSPORT_USB_BULK_ENDPOINT_SIZE] MCU_SYS_MEM;
+const usbfifo_config_t link2_transport_usb_fifo_cfg = {
+	.endpoint = SOS_LINK_TRANSPORT_USB_BULK_ENDPOINT,
+	.endpoint_size = SOS_LINK_TRANSPORT_USB_BULK_ENDPOINT_SIZE,
+	.read_buffer = usb_read_buffer,
+	.fifo = {
+		.buffer = usb_fifo_buffer,
+		.size = USB_FIFO_BUFFER_SIZE
+	}
+};
+#define LINK_CONFIG &link2_transport_usb_fifo_cfg
+#else
+#define LINK_CONFIG &sos_link_transport_usb_fifo_cfg
+#endif
+
 
 /* This is the list of devices that will show up in the /dev folder.
  */
@@ -294,14 +318,15 @@ const devfs_device_t devfs_list[] = {
 	#endif
 	DEVFS_DEVICE("stdio-out", fifo, 0, &stdio_out_config, &stdio_out_state, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("stdio-in", fifo, 0, &stdio_in_config, &stdio_in_state, 0666, SYSFS_ROOT, S_IFCHR),
-	DEVFS_DEVICE("link-phy-usb", usbfifo, SOS_BOARD_USB_PORT, &sos_link_transport_usb_fifo_cfg, &sos_link_transport_usb_fifo_state, 0666, SYSFS_ROOT, S_IFCHR),
+	DEVFS_DEVICE("link-phy-usb", usbfifo, SOS_BOARD_USB_PORT, LINK_CONFIG, &sos_link_transport_usb_fifo_state, 0666, SOS_USER_ROOT, S_IFCHR),
 	DEVFS_DEVICE("sys", sys, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
 
 	DEVFS_DEVICE("drive0", drive_cfi_qspi, 0, &drive_cfi_config, &drive_cfi_state, 0666, SYSFS_ROOT, S_IFBLK),
 
 	#if _IS_BOOT
-	DEVFS_DEVICE("ramdrive", ram_drive, 0, 0, 0, 0666, SYSFS_ROOT, S_IFBLK),
+	DEVFS_DEVICE("ramdrive", drive_ram, 0, &drive_ram_config, 0, 0666, SOS_USER_ROOT, S_IFBLK),
 	#endif
+
 
 	//MCU peripherals
 	DEVFS_DEVICE("core", mcu_core, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
