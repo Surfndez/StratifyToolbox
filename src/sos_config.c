@@ -66,13 +66,14 @@ const sos_board_config_t sos_board_config = {
 	.stdout_dev = "/dev/stdio-out",
 	.stderr_dev = "/dev/stdio-out",
 	.o_sys_flags = SYS_FLAG_IS_STDIO_FIFO | SYS_FLAG_IS_TRACE | SYS_FLAG_IS_ACTIVE_ON_IDLE,
-	.sys_name = SOS_BOARD_NAME,
-	.sys_version = SOS_BOARD_VERSION,
-	.sys_id = SOS_BOARD_ID,
+	.sys_name = SL_CONFIG_NAME,
+	.sys_version = SL_CONFIG_VERSION_STRING,
+	.sys_id = SL_CONFIG_DOCUMENT_ID,
+	.team_id = SL_CONFIG_TEAM_ID,
 	.sys_memory_size = SOS_BOARD_SYSTEM_MEMORY_SIZE,
 	.start = sos_default_thread,
 	.start_args = &link_transport,
-	.start_stack_size = SOS_DEFAULT_START_STACK_SIZE,
+	.start_stack_size = 8192,
 	#if !_IS_BOOT
 	.socket_api = &wifi_api,
 	#else
@@ -126,7 +127,17 @@ SOS_DECLARE_TASK_TABLE(SOS_BOARD_TASK_TOTAL);
  */
 
 u32 ram_usage_table[APPFS_RAM_USAGE_WORDS(APPFS_RAM_PAGES)] MCU_SYS_MEM;
-const devfs_device_t flash0 = DEVFS_DEVICE("flash0", mcu_flash, 0, 0, 0, 0666, SOS_USER_ROOT, S_IFBLK);
+const devfs_device_t flash0 =
+		DEVFS_DEVICE(
+			"flash0",
+			mcu_flash,
+			0,
+			0,
+			0,
+			0666,
+			SYSFS_ROOT,
+			S_IFBLK
+			);
 
 const appfs_mem_config_t appfs_mem_config = {
 	.usage_size = sizeof(ram_usage_table),
@@ -141,7 +152,17 @@ const appfs_mem_config_t appfs_mem_config = {
 	}
 };
 
-const devfs_device_t mem0 = DEVFS_DEVICE("mem0", appfs_mem, 0, &appfs_mem_config, 0, 0666, SOS_USER_ROOT, S_IFBLK);
+const devfs_device_t mem0 =
+		DEVFS_DEVICE(
+			"mem0",
+			appfs_mem,
+			0,
+			&appfs_mem_config,
+			0,
+			0666,
+			SYSFS_ROOT,
+			S_IFBLK
+			);
 #endif
 
 sffs_state_t sffs_state;
@@ -154,12 +175,10 @@ const sffs_config_t sffs_configuration = {
 };
 
 const sysfs_t sysfs_list[] = {
-#if 1
 	APPFS_MOUNT("/app", &mem0, 0777, SYSFS_ROOT), //the folder for ram/flash applications
-#endif
 	DEVFS_MOUNT("/dev", devfs_list, 0555, SYSFS_ROOT), //the list of devices
 	SFFS_MOUNT("/home", &sffs_configuration, 0777, SYSFS_ROOT), //stratify flash filesystem
-	SYSFS_MOUNT("/", sysfs_list, 0555, SYSFS_ROOT), //the root filesystem (must be last)
+	SYSFS_MOUNT("/", sysfs_list, 0666, SYSFS_ROOT), //the root filesystem (must be last)
 	SYSFS_TERMINATOR
 };
 

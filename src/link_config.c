@@ -134,7 +134,10 @@ link_transport_phy_t link_transport_open(const char * name, const void * options
 	usb_attr.tx_fifo_word_size[4] = SOS_BOARD_TX4_FIFO_WORDS; //TX endpoint 4
 	usb_attr.tx_fifo_word_size[5] = SOS_BOARD_TX5_FIFO_WORDS; //TX endpoint 5
 
-	mcu_debug_user_printf("Open USB\n");
+	mcu_debug_log_info(
+				MCU_DEBUG_LINK,
+				"Open USB"
+				);
 
 	init_usb_pio();
 
@@ -145,7 +148,11 @@ link_transport_phy_t link_transport_open(const char * name, const void * options
 												mcu_pin(0xff,0xff),
 												1); //USB pin is active high
 
-	mcu_debug_user_printf("Returned %d\n", fd);
+	mcu_debug_log_info(
+				MCU_DEBUG_LINK,
+				"USB Returned %d",
+				fd
+				);
 
 	return fd;
 }

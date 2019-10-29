@@ -27,7 +27,7 @@ limitations under the License.
 
 /*
  * openocd -f interface/stlink-v2-1.cfg -f target/stm32h7x_stlink.cfg
- * openocd -f StratifyToolbox/stlink-fixed.cfg -f target/stm32h7x.cfg -c "program ./StratifyToolbox/build_debug_boot/StratifyToolbox.bin 0x08000000; reset run; exit;"
+ * openocd -f StratifyToolbox/stlink-fixed.cfg -f target/stm32h7x.cfg -c "program ./StratifyToolbox/build_boot_debug/StratifyToolbox.bin 0x08000000; reset run; exit;"
  *
  *
  * sl fs.copy:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/home/debug.bin
@@ -42,10 +42,7 @@ limitations under the License.
  */
 
 #define SOS_BOARD_SYSTEM_CLOCK 400000000
-#define SOS_BOARD_SYSTEM_MEMORY_SIZE (8192*3)
-#define SOS_BOARD_ID SL_CONFIG_DOCUMENT_ID
-#define SOS_BOARD_VERSION SL_CONFIG_VERSION_STRING
-#define SOS_BOARD_NAME SL_CONFIG_NAME
+#define SOS_BOARD_SYSTEM_MEMORY_SIZE (64*1024)
 
 #define SOS_BOARD_USB_RX_BUFFER_SIZE 512
 #define SOS_BOARD_STDIO_BUFFER_SIZE 512

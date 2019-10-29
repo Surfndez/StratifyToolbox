@@ -1,5 +1,7 @@
 
 set(SOURCES
+	${SOURCES_PREFIX}/kernel_loader.c
+	${SOURCES_PREFIX}/kernel_loader.h
   ${SOURCES_PREFIX}/board_config.c
   ${SOURCES_PREFIX}/board_config.h
   ${SOURCES_PREFIX}/config.h

@@ -249,19 +249,12 @@ void ST7789H2_Init(void)
 	u64 pixels;
 	memset(&pixels, 0xff, sizeof(pixels));
 
-	struct timespec start, end;
-	clock_gettime(CLOCK_REALTIME, &start);
 	for(u32 i=0;
 		 i < (ST7789H2_LCD_PIXEL_WIDTH*ST7789H2_LCD_PIXEL_HEIGHT)/4;
 		 i++){
 		LCD_IO_WriteDataBlock((const u8*)&pixels, 8);
 	}
-	clock_gettime(CLOCK_REALTIME, &end);
 	LCD_IO_Deassert_CS();
-
-	mcu_debug_printf("duration: %ld\n",
-						  (end.tv_nsec - start.tv_nsec)/1000);
-
 }
 
 /**
