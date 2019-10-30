@@ -12,3 +12,9 @@ sl fs.write:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=dev
 sl fs.verify:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/dev/drive1
 sl os.reset
 ```
+
+```
+sl os.invokebootloader
+sl fs.write:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/dev/ramdrive,pagesize=2048
+sl task.signal:id=1,signal=CONT
+```
