@@ -197,9 +197,9 @@ const sysfs_t sysfs_list[] = {
 	APPFS_MOUNT("/app", &mem0, 0777, SYSFS_ROOT), //the folder for ram/flash applications
 	DEVFS_MOUNT("/dev", devfs_list, 0555, SYSFS_ROOT), //the list of devices
 	SFFS_MOUNT("/home", &sffs_configuration, 0777, SYSFS_ROOT), //stratify flash filesystem
-#if !_IS_BOOT
-	//FATFS_MOUNT("/card", &fatfs_configuration, 0777, SYSFS_ROOT),
-#endif
+	#if !_IS_BOOT
+	FATFS_MOUNT("/card", &fatfs_configuration, 0777, SYSFS_ROOT),
+	#endif
 	SYSFS_MOUNT("/", sysfs_list, 0666, SYSFS_ROOT), //the root filesystem (must be last)
 	SYSFS_TERMINATOR
 };

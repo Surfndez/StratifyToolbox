@@ -345,7 +345,6 @@ const drive_cfi_config_t drive1_cfi_config = {
 };
 drive_cfi_state_t drive1_cfi_state MCU_SYS_MEM;
 
-#if _IS_BOOT
 
 const drive_ram_config_t drive_ram_config = {
 	.memory = (void*)0x24000000,
@@ -365,8 +364,8 @@ const usbfifo_config_t link2_transport_usb_fifo_cfg = {
 	}
 };
 #define LINK_CONFIG &link2_transport_usb_fifo_cfg
-#else
-#define LINK_CONFIG &sos_link_transport_usb_fifo_cfg
+
+#if !_IS_BOOT
 
 drive_sdio_state_t sdio_state;
 const drive_sdio_config_t sdio_configuration = {
