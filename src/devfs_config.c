@@ -41,6 +41,7 @@ limitations under the License.
 #include <sos/sos.h>
 #include <device/drive_cfi.h>
 #include <device/drive_ram.h>
+#include <device/drive_sdio.h>
 
 #include "display_device.h"
 
@@ -366,6 +367,28 @@ const usbfifo_config_t link2_transport_usb_fifo_cfg = {
 #define LINK_CONFIG &link2_transport_usb_fifo_cfg
 #else
 #define LINK_CONFIG &sos_link_transport_usb_fifo_cfg
+
+drive_sdio_state_t sdio_state;
+const drive_sdio_config_t sdio_configuration = {
+	.sdio = {
+		.attr = {
+			.o_flags = SDIO_FLAG_SET_INTERFACE |
+			SDIO_FLAG_IS_BUS_WIDTH_4 |
+			SDIO_FLAG_IS_CLOCK_RISING |
+			SDIO_FLAG_IS_HARDWARE_FLOW_CONTROL_ENABLED |
+			0,
+			.freq = 25000000UL,
+			.pin_assignment = {
+				.clock = {2, 1}, //PC1
+				.command = {0, 0}, //PA0
+				.data[0] = {1, 14}, //PB14
+				.data[1] = {1, 15}, //PB15
+				.data[2] = {1, 3}, //PB3
+				.data[3] = {1, 4} //PB4
+			}
+		}
+	}
+};
 #endif
 
 
@@ -379,6 +402,9 @@ const devfs_device_t devfs_list[] = {
 	DEVFS_DEVICE("zero", zero, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("random", random, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
 	#endif
+	//MCU peripherals
+	DEVFS_DEVICE("core", mcu_core, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
+	DEVFS_DEVICE("core0", mcu_core, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("stdio-out", fifo, 0, &stdio_out_config, &stdio_out_state, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("stdio-in", fifo, 0, &stdio_in_config, &stdio_in_state, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("link-phy-usb", usbfifo, SOS_BOARD_USB_PORT, LINK_CONFIG, &sos_link_transport_usb_fifo_state, 0666, SOS_USER_ROOT, S_IFCHR),
@@ -389,14 +415,11 @@ const devfs_device_t devfs_list[] = {
 
 	#if _IS_BOOT
 	DEVFS_DEVICE("ramdrive", drive_ram, 0, &drive_ram_config, 0, 0666, SOS_USER_ROOT, S_IFBLK),
+	#else
+	DEVFS_DEVICE("drive2", drive_sdio_dma, 1, &sdio_configuration, &sdio_state, 0666, SOS_USER_ROOT, S_IFBLK),
 	#endif
 
-	//MCU peripherals
-	DEVFS_DEVICE("core", mcu_core, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
-	DEVFS_DEVICE("core0", mcu_core, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
-
 	#if !_IS_BOOT
-
 	DEVFS_DEVICE("display0", display_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 
 	//crypto

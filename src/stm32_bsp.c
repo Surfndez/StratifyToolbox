@@ -11,11 +11,15 @@
 
 static SRAM_HandleTypeDef hsram1 MCU_SYS_MEM;
 static int FMC_Initialized = 0;
+static void system_initialize();
 
 
 void SystemClock_Config(){
 
+	system_initialize();
+
 	__HAL_RCC_SYSCFG_CLK_ENABLE();
+
 
 	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
 	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
@@ -193,9 +197,9 @@ static void HAL_FMC_MspInit(void){
 			GPIO_PIN_1|
 			GPIO_PIN_4|
 			GPIO_PIN_5|
-#if MANUAL_FMC_CHIP_SELECT == 0
+		#if MANUAL_FMC_CHIP_SELECT == 0
 			GPIO_PIN_7|
-#endif
+		#endif
 			0;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -236,6 +240,89 @@ static void HAL_FMC_MspInit(void){
 #endif
 
 	/* USER CODE END FMC_MspInit 1 */
+}
+
+#define DATA_IN_D2_SRAM 1
+#if !defined __FPU_USED
+#define __FPU_USED 1
+#endif
+
+void system_initialize(){
+#if defined (DATA_IN_D2_SRAM)
+	__IO uint32_t tmpreg;
+#endif /* DATA_IN_D2_SRAM */
+
+	/* FPU settings ------------------------------------------------------------*/
+#if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+	SCB->CPACR |= ((3UL << (10*2))|(3UL << (11*2)));  /* set CP10 and CP11 Full Access */
+#endif
+	/* Reset the RCC clock configuration to the default reset state ------------*/
+	/* Set HSION bit */
+	RCC->CR |= RCC_CR_HSION;
+
+	/* Reset CFGR register */
+	RCC->CFGR = 0x00000000;
+
+	/* Reset HSEON, CSSON , CSION,RC48ON, CSIKERON PLL1ON, PLL2ON and PLL3ON bits */
+	RCC->CR &= 0xEAF6ED7FU;
+
+	/* Reset D1CFGR register */
+	RCC->D1CFGR = 0x00000000;
+
+	/* Reset D2CFGR register */
+	RCC->D2CFGR = 0x00000000;
+
+	/* Reset D3CFGR register */
+	RCC->D3CFGR = 0x00000000;
+
+	/* Reset PLLCKSELR register */
+	RCC->PLLCKSELR = 0x00000000;
+
+	/* Reset PLLCFGR register */
+	RCC->PLLCFGR = 0x00000000;
+	/* Reset PLL1DIVR register */
+	RCC->PLL1DIVR = 0x00000000;
+	/* Reset PLL1FRACR register */
+	RCC->PLL1FRACR = 0x00000000;
+
+	/* Reset PLL2DIVR register */
+	RCC->PLL2DIVR = 0x00000000;
+
+	/* Reset PLL2FRACR register */
+
+	RCC->PLL2FRACR = 0x00000000;
+	/* Reset PLL3DIVR register */
+	RCC->PLL3DIVR = 0x00000000;
+
+	/* Reset PLL3FRACR register */
+	RCC->PLL3FRACR = 0x00000000;
+
+	/* Reset HSEBYP bit */
+	RCC->CR &= 0xFFFBFFFFU;
+
+	/* Disable all interrupts */
+	RCC->CIER = 0x00000000;
+
+#if defined (DATA_IN_D2_SRAM)
+	/* in case of initialized data in D2 SRAM (AHB SRAM) , enable the D2 SRAM clock ((AHB SRAM clock) */
+#if defined(RCC_AHB2ENR_D2SRAM1EN)
+	RCC->AHB2ENR |= (RCC_AHB2ENR_D2SRAM1EN | RCC_AHB2ENR_D2SRAM2EN | RCC_AHB2ENR_D2SRAM3EN);
+#else
+	RCC->AHB2ENR |= (RCC_AHB2ENR_AHBSRAM1EN | RCC_AHB2ENR_AHBSRAM2EN);
+#endif /* RCC_AHB2ENR_D2SRAM1EN */
+
+	tmpreg = RCC->AHB2ENR;
+	(void) tmpreg;
+#endif /* DATA_IN_D2_SRAM */
+
+	/* dual core CM7 or single core line */
+	if((DBGMCU->IDCODE & 0xFFFF0000U) < 0x20000000U)
+	{
+		/* if stm32h7 revY*/
+		/* Change  the switch matrix read issuing capability to 1 for the AXI SRAM target (Target 7) */
+		*((__IO uint32_t*)0x51008108) = 0x000000001U;
+	}
+
 }
 
 void HAL_SRAM_MspInit(SRAM_HandleTypeDef* hsram){
