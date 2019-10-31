@@ -18,3 +18,7 @@ sl os.invokebootloader
 sl fs.write:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/dev/ramdrive,pagesize=2048
 sl task.signal:id=1,signal=CONT
 ```
+
+```
+sl os.invokebootloader fs.write:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/dev/ramdrive,pagesize=2048 task.signal:id=1,signal=CONT
+```
