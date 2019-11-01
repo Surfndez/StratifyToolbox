@@ -21,6 +21,7 @@ static int start_wifi_thread(const void * config);
 int wifi_api_startup(const void * config){
 
 	//start the wifi_api_thread_function() thread
+	mcu_debug_printf("------------start wifi thread---------------\n");
 
 	return start_wifi_thread(config);
 }
@@ -225,9 +226,43 @@ int wifi_api_inet_pton(
 	return 0;
 }
 
+void wifi_api_AppWifiCb(uint8 u8MsgType, void * pvMsg){
+
+}
+
+void wifi_api_tpfAppMonCb(
+		tstrM2MWifiRxPacketInfo *pstrWifiRxPacket,
+		uint8 * pu8Payload,
+		uint16 u16PayloadSize
+		){
+
+	//for monitoring raw packets
+
+}
+
 void * wifi_api_thread_function(void * args){
 
+	const wifi_api_config_t * wifi_config = args;
+
 	//initialize the Wifi
+	mcu_debug_printf("entered wifi thread\n");
+
+
+	tstrWifiInitParam wifi_init_param;
+
+	wifi_init_param.pfAppWifiCb = wifi_api_AppWifiCb;
+	wifi_init_param.pfAppMonCb = wifi_api_tpfAppMonCb;
+	wifi_init_param.strEthInitParam.pfAppWifiCb = 0;
+	wifi_init_param.strEthInitParam.pfAppEthCb = 0;
+	wifi_init_param.strEthInitParam.au8ethRcvBuf = 0;
+	wifi_init_param.strEthInitParam.u16ethRcvBufSize = 0;
+	wifi_init_param.strEthInitParam.u8EthernetEnable = 0;
+	wifi_init_param.strEthInitParam.__PAD8__ = 0;
+
+	int result = m2m_wifi_init(&wifi_init_param);
+
+	mcu_debug_printf("enter wifi loop with result %d\n", result);
+
 
 	while( 1 ){
 		m2m_wifi_handle_events(0);

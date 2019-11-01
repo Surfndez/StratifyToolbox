@@ -50,42 +50,11 @@
 #include <fcntl.h>
 #include <aio.h>
 #include "bus_wrapper/include/nm_bus_wrapper.h"
-
-sysfs_file_t m_spi_file;
+#include "bsp/include/nm_bsp_toolbox.h"
 
 tstrNmBusCapabilities egstrNmBusCapabilities = {
 	.u16MaxTrxSz = 512
 };
-
-
-static sint8 spi_rw(
-		uint8* pu8Mosi,
-		uint8* pu8Miso,
-		uint16 u16Sz
-		){
-	struct aiocb aio_read_buffer;
-
-	memset(&aio_read_buffer,
-				0,
-				sizeof(aio_read_buffer));
-
-	aio_read_buffer.aio_offset = 0;
-	//aio_read_buffer.aio_sigevent = 0; //?
-	aio_read_buffer.aio_buf = pu8Miso;
-	aio_read_buffer.aio_nbytes = u16Sz;
-	aio_read_buffer.aio_lio_opcode = LIO_READ;
-
-	//queue the read
-	sysfs_file_aio(&m_spi_file, &aio_read_buffer);
-
-	//execute the full duplex transfer
-	if( sysfs_file_write(&m_spi_file, pu8Mosi, u16Sz) != u16Sz ){
-		return M2M_ERR_BUS_FAIL;
-	}
-
-	//both operations end at the same time
-	return M2M_SUCCESS;
-}
 
 /*
 *	@fn		nm_bus_init
@@ -96,24 +65,14 @@ static sint8 spi_rw(
 *	@version	1.0
 */
 sint8 nm_bus_init(void * pvInitValue){
-	sint8 result = M2M_SUCCESS;
 
-	int file_result;
 
-	file_result	= sysfs_file_open(&m_spi_file, "/dev/spi0", O_RDWR);
-	if( file_result < 0 ){
-		//
+
+
+	sint8 result = nm_bsp_init();
+	if(result != M2M_SUCCESS){
+		return result;
 	}
-
-	file_result = sysfs_file_ioctl(
-				&m_spi_file,
-				I_SPI_SETATTR,
-				0
-				);
-	if( file_result < 0 ){
-		//
-	}
-
 
 	/* Reset WINC1500. */
 	nm_bsp_reset();
@@ -143,7 +102,7 @@ sint8 nm_bus_ioctl(uint8 u8Cmd, void * pvParameter)
 		case NM_BUS_IOCTL_RW: {
 			tstrNmSpiRw *pstrParam = (tstrNmSpiRw *)pvParameter;
 			s8Ret =
-					spi_rw(
+					nm_bsp_toolbox_spi_read_write(
 						pstrParam->pu8InBuf,
 						pstrParam->pu8OutBuf,
 						pstrParam->u16Sz

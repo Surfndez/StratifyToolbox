@@ -67,6 +67,7 @@ const mcu_board_config_t mcu_board_config = {
 		MCU_DEBUG_DEVICE |
 		MCU_DEBUG_APPFS |
 		MCU_DEBUG_FILESYSTEM |
+		MCU_DEBUG_SOCKET |
 		//MCU_DEBUG_LINK |
 		0
 		};

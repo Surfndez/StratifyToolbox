@@ -43,9 +43,12 @@
  */
 
 #include <unistd.h>
+#include <sos/sos.h>
 
 #include "bsp/include/nm_bsp.h"
 #include "common/include/nm_common.h"
+#include "../../../wifi_phy_device.h"
+#include "../../../wifi_api.h"
 
 /*
  *	@fn		nm_bsp_init
@@ -58,6 +61,26 @@
 sint8 nm_bsp_init(void)
 {
 	//initialize pins
+	const wifi_api_config_t * config =
+			sos_board_config.socket_api->config;
+
+	MCU_DEBUG_LINE_TRACE();
+
+	int result;
+	if( (result =
+		  sysfs_shared_open(
+			  &config->device_config
+			  )
+		  ) < 0 ){
+		mcu_debug_log_error(
+					MCU_DEBUG_SOCKET,
+					"Failed to initialize WIFI phy device (%d, %d)",
+					result,
+					errno
+					);
+		return M2M_ERR_FAIL;
+	}
+
 
 	nm_bsp_reset();
 
@@ -87,7 +110,39 @@ sint8 nm_bsp_deinit(void)
  *	@version	1.0
  */
 void nm_bsp_reset(void){
-  //toggle the HW reset pin
+	//toggle the HW reset pin
+	const wifi_api_config_t * config = sos_board_config.socket_api->config;
+
+	int result = sysfs_shared_ioctl(
+				&config->device_config,
+				I_WIFIPHY_ASSERT_RESET,
+				0
+				);
+	if( result < 0 ){
+		mcu_debug_log_error(
+					MCU_DEBUG_SOCKET,
+					"Failed to assert wifi phy reset (%d, %d)",
+					result,
+					errno
+					);
+	}
+
+	usleep(10*1000);
+
+	result = sysfs_shared_ioctl(
+				&config->device_config,
+				I_WIFIPHY_DEASSERT_RESET,
+				0
+				);
+
+	if( result < 0 ){
+		mcu_debug_log_error(
+					MCU_DEBUG_SOCKET,
+					"Failed to deassert wifi phy reset (%d, %d)",
+					result,
+					errno
+					);
+	}
 }
 
 /*
@@ -126,8 +181,45 @@ void nm_bsp_register_isr(tpfNmBspIsr pfIsr){
  *	@date	28 OCT 2013
  *	@version	1.0
  */
-void nm_bsp_interrupt_ctrl(uint8 u8Enable)
-{
+void nm_bsp_interrupt_ctrl(uint8 u8Enable){
 
+}
+
+int nm_bsp_toolbox_spi_read_write(
+		uint8* pu8Mosi,
+		uint8* pu8Miso,
+		uint16 u16Sz
+		){
+	const wifi_api_config_t * config = sos_board_config.socket_api->config;
+	struct aiocb aio_read_buffer;
+
+	memset(&aio_read_buffer,
+			 0,
+			 sizeof(aio_read_buffer));
+
+	aio_read_buffer.aio_offset = 0;
+	aio_read_buffer.aio_sigevent.sigev_notify = SIGEV_NONE;
+	aio_read_buffer.aio_buf = pu8Miso;
+	aio_read_buffer.aio_nbytes = u16Sz;
+	aio_read_buffer.aio_lio_opcode = LIO_READ;
+
+	//queue the read
+	sysfs_shared_aio(
+				&config->device_config,
+				&aio_read_buffer
+				);
+
+	//execute the full duplex transfer
+	if( sysfs_shared_write(
+			 &config->device_config,
+			 0,
+			 pu8Mosi,
+			 u16Sz
+			 ) != u16Sz ){
+		return M2M_ERR_BUS_FAIL;
+	}
+
+	//both operations end at the same time
+	return M2M_SUCCESS;
 }
 

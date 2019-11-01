@@ -49,11 +49,31 @@ limitations under the License.
 //--------------------------------------------Socket API-------------------------------------------------
 
 #if !_IS_BOOT
-const wifi_api_config_t wifi_api_config = {
+#define WIFI_PACKET_BUFFER_SIZE 64
+u8 wifi_packet_buffer[WIFI_PACKET_BUFFER_SIZE];
+wifi_api_state_t wifi_api_state;
 
+const wifi_api_config_t wifi_api_config = {
+	.device_config = {
+		.devfs = &(sysfs_list[1]),
+		.name = "wifi_phy",
+		.state = &wifi_api_state.device_state
+	},
+	.hw_addr[0] = 0,
+	.hw_addr[1] = 0,
+	.hw_addr[2] = 0,
+	.hw_addr[3] = 0,
+	.hw_addr[4] = 0,
+	.hw_addr[5] = 0,
+	.mtu = 1500,
+	.host_name = "StratifyToolbox",
+	.network_interface_list = 0,
+	.thread_stack_size = 4096,
+	.network_interface_count = 0,
+	.max_packet_size = WIFI_PACKET_BUFFER_SIZE,
+	.packet_buffer = wifi_packet_buffer
 };
 
-wifi_api_state_t wifi_api_state;
 
 WIFI_DECLARE_SOCKET_API(wifi, &wifi_api_config, &wifi_api_state);
 

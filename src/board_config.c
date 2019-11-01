@@ -118,6 +118,13 @@ void board_event_handler(int event, void * args){
 #if _IS_BOOT
 			kernel_loader_startup();
 #else
+
+			if( sos_board_config.socket_api ){
+				sos_board_config.socket_api->startup(
+							sos_board_config.socket_api->config
+							);
+			}
+
 			sos_led_startup();
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from RAM");
 #endif

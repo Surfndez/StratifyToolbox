@@ -44,6 +44,7 @@ limitations under the License.
 #include <device/drive_sdio.h>
 
 #include "display_device.h"
+#include "wifi_phy_device.h"
 
 #include "config.h"
 #include "link_config.h"
@@ -113,46 +114,65 @@ const i2c_config_t i2c2_config = {
 };
 
 //PC10, PC11, PC12 are SPI3_SCK, SPI3_MISO, SPI3_MOSI (spi2)
-const stm32_spi_dma_config_t spi2_dma_config = {
-	.spi_config = {
-		.attr = {
-			.o_flags = SPI_FLAG_SET_MASTER |
-			SPI_FLAG_IS_FORMAT_SPI |
-			SPI_FLAG_IS_MODE0,
-			.pin_assignment = {
-				.cs = {0xff, 0xff},
-				.sck = {2, 10},
-				.miso = {2, 11},
-				.mosi = {2, 12},
+
+
+const wifi_phy_config_t wifi_phy_config = {
+	.spi_dma_config = {
+		.spi_config = {
+			.attr = {
+				.o_flags = SPI_FLAG_SET_MASTER |
+				SPI_FLAG_IS_FORMAT_SPI |
+				SPI_FLAG_IS_MODE0,
+				.pin_assignment = {
+					.cs = {0xff, 0xff},
+					.sck = {2, 10}, //PC10
+					.miso = {2, 11}, //PC11
+					.mosi = {2, 12}, //PC12
+				},
+				.width = 8
+			}
+		},
+		.dma_config = {
+			.tx = {
+				.dma_number = STM32_DMA1,
+				.stream_number = 3,
+				.channel_number = 62, //DMA_REQUEST_SPI3_TX
+				.priority = STM32_DMA_PRIORITY_LOW,
+				.o_flags = STM32_DMA_FLAG_IS_NORMAL |
+				STM32_DMA_FLAG_IS_FIFO |
+				STM32_DMA_FLAG_IS_MEMORY_TO_PERIPH |
+				STM32_DMA_FLAG_IS_MEMORY_BYTE |
+				STM32_DMA_FLAG_IS_PERIPH_BYTE
 			},
-			.width = 8
+			.rx = {
+				.dma_number = STM32_DMA1,
+				.stream_number = 2,
+				.channel_number = 61, //DMA_REQUEST_SPI3_RX
+				.priority = STM32_DMA_PRIORITY_LOW,
+				.o_flags = STM32_DMA_FLAG_IS_NORMAL |
+				STM32_DMA_FLAG_IS_FIFO |
+				STM32_DMA_FLAG_IS_PERIPH_TO_MEMORY |
+				STM32_DMA_FLAG_IS_MEMORY_BYTE |
+				STM32_DMA_FLAG_IS_PERIPH_BYTE
+			}
 		}
 	},
-	.dma_config = {
-		.tx = {
-			.dma_number = STM32_DMA1,
-			.stream_number = 3,
-			.channel_number = 62, //DMA_REQUEST_SPI3_TX
-			.priority = STM32_DMA_PRIORITY_LOW,
-			.o_flags = STM32_DMA_FLAG_IS_NORMAL |
-			STM32_DMA_FLAG_IS_FIFO |
-			STM32_DMA_FLAG_IS_MEMORY_TO_PERIPH |
-			STM32_DMA_FLAG_IS_MEMORY_BYTE |
-			STM32_DMA_FLAG_IS_PERIPH_BYTE
-		},
-		.rx = {
-			.dma_number = STM32_DMA1,
-			.stream_number = 2,
-			.channel_number = 61, //DMA_REQUEST_SPI3_RX
-			.priority = STM32_DMA_PRIORITY_LOW,
-			.o_flags = STM32_DMA_FLAG_IS_NORMAL |
-			STM32_DMA_FLAG_IS_FIFO |
-			STM32_DMA_FLAG_IS_PERIPH_TO_MEMORY |
-			STM32_DMA_FLAG_IS_MEMORY_BYTE |
-			STM32_DMA_FLAG_IS_PERIPH_BYTE
-		}
+	.reset = {4, 15}, //PE15
+	.cs = {1, 0}, //PB0
+	.cs_handle = {
+		.port = 1,
+		.state = 0,
+		.config = 0,
+	},
+	.reset_handle = {
+		.port = 4,
+		.state = 0,
+		.config = 0,
 	}
 };
+
+wifi_state_t wifi_phy_state MCU_SYS_MEM;
+
 
 //PE11, PE12, PE13, PE14 are SPI4_NSS, SPI4_SCK, SPI4_MISO, SPI4_MOSI (spi3)
 const stm32_spi_dma_config_t spi3_dma_config = {
@@ -433,8 +453,8 @@ const devfs_device_t devfs_list[] = {
 
 	DEVFS_DEVICE("i2s0", mcu_i2c, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PE3, PE4, PE5, PE6 SAI1/SAI4 A/B full duplex
 
-	DEVFS_DEVICE("spi2", mcu_spi, 2, &spi2_dma_config, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOH
-	DEVFS_DEVICE("spi3", mcu_spi, 3, &spi3_dma_config, 0, 0666, SYSFS_USER, S_IFCHR), //GPIOH
+	DEVFS_DEVICE("wifi_phy", wifi_phy_device, 2, &wifi_phy_config, &wifi_phy_state, 0666, SYSFS_ROOT, S_IFCHR),
+	DEVFS_DEVICE("spi3", mcu_spi, 3, &spi3_dma_config, 0, 0666, SYSFS_USER, S_IFCHR),
 
 	DEVFS_DEVICE("uart0", mcu_uart, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PA10 USART1 RX ONLY
 	DEVFS_DEVICE("uart1", mcu_uart, 1, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PA2, PA3 UART2
