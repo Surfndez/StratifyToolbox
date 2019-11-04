@@ -7,10 +7,12 @@
 
 typedef struct {
 	stm32_spi_dma_config_t spi_dma_config;
-	mcu_pin_t reset;
-	mcu_pin_t cs;
-	devfs_handle_t cs_handle;
+	u8 reset_pin_number;
+	u8 chip_select_pin_number;
+	u8 chip_enable_pin_number;
+	devfs_handle_t chip_select_handle;
 	devfs_handle_t reset_handle;
+	devfs_handle_t chip_enable_handle;
 } wifi_phy_config_t;
 
 typedef struct {
@@ -26,6 +28,8 @@ typedef struct {
 #define I_WIFIPHY_SETACTION _IOCTLW(WIFI_PHY_IDENT_CHAR, I_MCU_SETACTION, mcu_action_t)
 #define I_WIFIPHY_ASSERT_RESET _IOCTL(WIFI_PHY_IDENT_CHAR, I_MCU_TOTAL+1)
 #define I_WIFIPHY_DEASSERT_RESET _IOCTL(WIFI_PHY_IDENT_CHAR, I_MCU_TOTAL+2)
+#define I_WIFIPHY_SET_FULL_DUPLEX _IOCTL(WIFI_PHY_IDENT_CHAR, I_MCU_TOTAL+3)
+#define I_WIFIPHY_SET_HALF_DUPLEX _IOCTL(WIFI_PHY_IDENT_CHAR, I_MCU_TOTAL+4)
 
 
 int wifi_phy_device_open(const devfs_handle_t * handle);

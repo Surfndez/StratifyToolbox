@@ -49,7 +49,7 @@
 #define LIMITED_RAM_DEVICE
 #include "bsp/include/nm_bsp_avr.h"
 #else
-#include "bsp/include/nm_bsp_samd21.h"
+#include "bsp/include/nm_bsp_toolbox.h"
 #endif
 
 #if defined(ARDUINO) && !defined(ARDUINO_SAMD_MKR1000)

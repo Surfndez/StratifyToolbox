@@ -267,7 +267,7 @@ sint8 nm_drv_init_download_mode()
 	nm_spi_init();
 #endif
 
-	M2M_INFO("Chip ID %lx\n", nmi_get_chipid());
+	M2M_INFO("Chip ID-%lx\n", nmi_get_chipid());
 
 	/*disable all interrupt in ROM (to disable uart) in 2b0 chip*/
 	nm_write_reg(0x20300,0);
@@ -320,18 +320,18 @@ sint8 nm_drv_init(void * arg)
 	/**
 	Go...
 	**/
-	ret = chip_reset();
+	//ret = chip_reset();
 	if (M2M_SUCCESS != ret) {
 		goto ERR2;
 	}
 #endif
 	M2M_INFO("Chip ID %lx\n", nmi_get_chipid());
-#ifdef ARDUINO
+//#ifdef ARDUINO
 	if ((REV(GET_CHIPID()) & 0xff0) != REV_3A0 && (REV(GET_CHIPID()) & 0xff0) != REV_B0) {
 		ret = M2M_ERR_INVALID;
 		goto ERR2;
 	}
-#endif
+//#endif
 #ifdef CONF_WINC_USE_SPI
 	/* Must do this after global reset to set SPI data packet size. */
 	nm_spi_init();

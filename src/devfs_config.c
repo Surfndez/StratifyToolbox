@@ -122,7 +122,9 @@ const wifi_phy_config_t wifi_phy_config = {
 			.attr = {
 				.o_flags = SPI_FLAG_SET_MASTER |
 				SPI_FLAG_IS_FORMAT_SPI |
+				//SPI_FLAG_IS_LSB_FIRST |
 				SPI_FLAG_IS_MODE0,
+				.freq = 2000000,
 				.pin_assignment = {
 					.cs = {0xff, 0xff},
 					.sck = {2, 10}, //PC10
@@ -157,15 +159,21 @@ const wifi_phy_config_t wifi_phy_config = {
 			}
 		}
 	},
-	.reset = {4, 15}, //PE15
-	.cs = {1, 0}, //PB0
-	.cs_handle = {
+	.reset_pin_number = 15, //PE15
+	.chip_select_pin_number = 0, //PB0
+	.chip_enable_pin_number = 2, //PC2
+	.chip_select_handle = {
 		.port = 1,
 		.state = 0,
 		.config = 0,
 	},
 	.reset_handle = {
 		.port = 4,
+		.state = 0,
+		.config = 0,
+	},
+	.chip_enable_handle = {
+		.port = 2,
 		.state = 0,
 		.config = 0,
 	}
@@ -394,9 +402,10 @@ const drive_sdio_config_t sdio_configuration = {
 			.o_flags = SDIO_FLAG_SET_INTERFACE |
 			SDIO_FLAG_IS_BUS_WIDTH_4 |
 			SDIO_FLAG_IS_CLOCK_RISING |
+			SDIO_FLAG_IS_CLOCK_POWER_SAVE_ENABLED |
 			SDIO_FLAG_IS_HARDWARE_FLOW_CONTROL_ENABLED |
 			0,
-			.freq = 25000000UL,
+			.freq = 12000000UL,
 			.pin_assignment = {
 				.clock = {2, 1}, //PC1
 				.command = {0, 0}, //PA0

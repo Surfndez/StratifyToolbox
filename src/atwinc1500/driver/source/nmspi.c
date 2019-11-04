@@ -1059,12 +1059,14 @@ _RETRY_:
 		goto _FAIL_;
 	}
 
+	MCU_DEBUG_LINE_TRACE();
 	result = spi_cmd_rsp(cmd);
 	if (result != N_OK) {
 		M2M_ERR("[nmi spi]: Failed cmd response, read reg (%08x)...\n", (unsigned int)addr);
 		goto _FAIL_;
 	}
 
+	mcu_debug_printf("respose for 0x%X\n", cmd);
 	/* to avoid endianess issues */
 	result = spi_data_read(&tmp[0], 4, clockless);
 	if (result != N_OK) {
@@ -1095,6 +1097,7 @@ _FAIL_:
 		M2M_ERR("Reset and retry %d %lx\n",retry,addr);
 		nm_bsp_sleep(1);
 		retry--;
+		while(1){ sleep(5); }
 		if(retry) goto _RETRY_;
 	}
 		

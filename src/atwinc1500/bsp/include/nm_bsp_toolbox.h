@@ -47,6 +47,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <lwip/inet.h>
+#include <unistd.h>
 #include "nm_bsp.h"
 
 int nm_bsp_toolbox_spi_read_write(
@@ -54,5 +55,13 @@ int nm_bsp_toolbox_spi_read_write(
 		uint8* pu8Miso,
 		uint16 u16Sz
 		);
+
+#define NM_DEBUG			0
+#define NM_BSP_PRINTF
+
+#define CONF_WINC_USE_SPI	1
+#define NO_HW_CHIP_EN 1
+
+#define NM_EDGE_INTERRUPT	1
 
 #endif /* _NM_BSP_TOOLBOX_H_ */

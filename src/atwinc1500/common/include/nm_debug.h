@@ -64,11 +64,11 @@
 #endif
 
 
-#define M2M_ERR(...)
-#define M2M_INFO(...)
-#define M2M_REQ(...)
-#define M2M_DBG(...)
-#define M2M_PRINT(...)
+#define M2M_ERR(...) mcu_debug_log_error(MCU_DEBUG_SOCKET, __VA_ARGS__)
+#define M2M_INFO(...) mcu_debug_log_info(MCU_DEBUG_SOCKET, __VA_ARGS__)
+#define M2M_REQ(...) mcu_debug_log_info(MCU_DEBUG_SOCKET, __VA_ARGS__)
+#define M2M_DBG(...) mcu_debug_log_info(MCU_DEBUG_SOCKET, __VA_ARGS__)
+#define M2M_PRINT(...) mcu_debug_printf(__VA_ARGS__)
 
 #if (CONF_WINC_DEBUG == 1)
 #undef M2M_PRINT

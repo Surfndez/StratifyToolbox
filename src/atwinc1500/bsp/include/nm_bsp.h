@@ -48,6 +48,8 @@
 #ifndef _NM_BSP_H_
 #define _NM_BSP_H_
 
+#include <mcu/debug.h>
+
 #define NMI_API
 /*!< 
 *        Attribute used to define memory section to map Functions in host memory.

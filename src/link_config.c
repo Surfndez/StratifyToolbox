@@ -89,25 +89,6 @@ const usbd_control_constants_t link_transport_usb_constants = {
 	.class_event_handler = sos_link_usbd_cdc_event_handler
 };
 
-static void init_usb_pio(){
-	int fd;
-	fd = open("/dev/pio3", O_RDWR);
-	pio_attr_t attr;
-	attr.o_flags = PIO_FLAG_SET_OUTPUT;
-	attr.o_pinmask = (1<<5) | (1<<3);
-	if( ioctl(fd, I_PIO_SETATTR, &attr) < 0 ){ MCU_DEBUG_LINE_TRACE(); }
-	if( ioctl(fd, I_PIO_CLRMASK, (1<<5)) < 0 ){ MCU_DEBUG_LINE_TRACE(); }
-	if( ioctl(fd, I_PIO_SETMASK, (1<<3)) < 0 ){ MCU_DEBUG_LINE_TRACE(); }
-	close(fd);
-
-	fd = open("/dev/pio0", O_RDWR);
-	attr.o_flags = PIO_FLAG_SET_INPUT | PIO_FLAG_IS_FLOAT;
-	attr.o_pinmask = (1<<9);
-	if( ioctl(fd, I_PIO_SETATTR, &attr) < 0 ){ MCU_DEBUG_LINE_TRACE(); }
-	close(fd);
-}
-
-
 link_transport_phy_t link_transport_open(const char * name, const void * options){
 	usb_attr_t usb_attr;
 	link_transport_phy_t fd;
@@ -133,8 +114,6 @@ link_transport_phy_t link_transport_open(const char * name, const void * options
 				MCU_DEBUG_LINK,
 				"Open USB"
 				);
-
-	init_usb_pio();
 
 	fd = sos_link_transport_usb_open(name,
 												&m_usb_control,

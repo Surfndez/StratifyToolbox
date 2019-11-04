@@ -65,10 +65,6 @@ tstrNmBusCapabilities egstrNmBusCapabilities = {
 *	@version	1.0
 */
 sint8 nm_bus_init(void * pvInitValue){
-
-
-
-
 	sint8 result = nm_bsp_init();
 	if(result != M2M_SUCCESS){
 		return result;
