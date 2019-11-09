@@ -173,7 +173,7 @@ sint8 cpu_start(void) {
 
 uint32 nmi_get_chipid(void)
 {
-	static uint32 chipid = 0;
+	 uint32 chipid = 0;
 
 	if (chipid == 0) {
 		uint32 rfrevid;

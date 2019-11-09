@@ -118,6 +118,7 @@ sint8 nm_get_firmware_full_info(tstrM2mRev* pstrRev)
 	{
 		m2m_memset((uint8*)pstrRev,0,sizeof(tstrM2mRev));
 		ret = nm_read_reg_with_ret(rNMI_GP_REG_2, &reg);
+		mcu_debug_printf("GP REG 2 read %d 0x%lX\n", ret, reg);
 		if(ret == M2M_SUCCESS)
 		{
 			if(reg != 0)
@@ -311,6 +312,8 @@ sint8 nm_drv_init(void * arg)
 #endif
 	
 	
+	M2M_INFO("Chip ID %lx\n", nmi_get_chipid());
+	return M2M_SUCCESS;
 #ifdef NO_HW_CHIP_EN
 	ret = chip_wake();
 	if (M2M_SUCCESS != ret) {
@@ -325,7 +328,9 @@ sint8 nm_drv_init(void * arg)
 		goto ERR2;
 	}
 #endif
-	M2M_INFO("Chip ID %lx\n", nmi_get_chipid());
+	for(u32 i=0; i < 10; i++){
+	M2M_INFO("Chip ID %lx - %d\n", nmi_get_chipid(), i);
+	}
 //#ifdef ARDUINO
 	if ((REV(GET_CHIPID()) & 0xff0) != REV_3A0 && (REV(GET_CHIPID()) & 0xff0) != REV_B0) {
 		ret = M2M_ERR_INVALID;

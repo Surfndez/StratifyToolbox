@@ -31,6 +31,7 @@ limitations under the License.
 #include <device/usbfifo.h>
 #include <device/fifo.h>
 #include <device/sys.h>
+#include <device/stream_ffifo.h>
 #include <sos/link.h>
 #include <sos/fs/sysfs.h>
 #include <sos/fs/appfs.h>
@@ -395,6 +396,202 @@ const usbfifo_config_t link2_transport_usb_fifo_cfg = {
 
 #if !_IS_BOOT
 
+const stm32_adc_dma_config_t adc0_dma_config = {
+	.adc_config = {
+		.attr = {
+			.o_flags = ADC_FLAG_SET_CONVERTER |
+			ADC_FLAG_SET_CHANNELS |
+			ADC_FLAG_IS_SCAN_MODE |
+			ADC_FLAG_IS_TRIGGER_TMR,
+			.pin_assignment = {
+				.channel[0] = {2, 4}, //PC4 ADC1_IN4
+				.channel[1] = {0xff, 0xff},
+				.channel[2] = {0xff, 0xff},
+				.channel[3] = {0xff, 0xff}
+			},
+			.freq = 0,
+			.trigger = {2, 0}, //Trigger on timer3 TRGO (/dev/tim2)
+			.width = 12,
+			.channel_count = 1, //used with scan mode
+			//these are used for individual channel config
+			.channel = 0, //not used for default config
+			.rank = 0, //not used
+			.sampling_time = 0 //not used
+		}
+	},
+	.dma_config = {
+		.dma_number = STM32_DMA1,
+		.stream_number = 2,
+		.channel_number = 9, //DMA_REQUEST_ADC1 10=DMA_REQUEST_ADC2
+		.o_flags = STM32_DMA_FLAG_IS_CIRCULAR |
+		STM32_DMA_FLAG_IS_FIFO |
+		STM32_DMA_FLAG_IS_PERIPH_TO_MEMORY |
+		STM32_DMA_FLAG_IS_MEMORY_HALFWORD |
+		STM32_DMA_FLAG_IS_PERIPH_HALFWORD |
+		STM32_DMA_FLAG_IS_MEMORY_SINGLE,
+		.priority = STM32_DMA_PRIORITY_HIGH
+	}
+};
+
+#define ADC_SAMPLES_PER_PACKET 256
+#define ADC_PACKET_SIZE (ADC_SAMPLES_PER_PACKET*sizeof(u16))
+const devfs_device_t adc0_dma =
+		DEVFS_DEVICE(
+			"adc0",
+			mcu_adc_dma,
+			0,
+			&adc0_dma_config,
+			0,
+			0777,
+			SYSFS_ROOT,
+			S_IFCHR
+			);
+
+STREAM_FFIFO_DECLARE_CONFIG_STATE_RX_ONLY(
+		adc0_stream_ffifo,
+		ADC_PACKET_SIZE,
+		2,
+		&adc0_dma,
+		ADC_LOC_IS_GROUP
+		);
+
+const stm32_adc_dma_config_t adc1_dma_config = {
+	.adc_config = {
+		.attr = {
+			.o_flags = ADC_FLAG_SET_CONVERTER |
+			ADC_FLAG_SET_CHANNELS |
+			ADC_FLAG_IS_SCAN_MODE |
+			ADC_FLAG_IS_TRIGGER_TMR,
+			.pin_assignment = {
+				.channel[0] = {2, 4}, //PC4 ADC1_IN4
+				.channel[1] = {0xff, 0xff},
+				.channel[2] = {0xff, 0xff},
+				.channel[3] = {0xff, 0xff}
+			},
+			.freq = 0,
+			.trigger = {2, 0}, //Trigger on timer3 TRGO (/dev/tim2)
+			.width = 12,
+			.channel_count = 1, //used with scan mode
+			//these are used for individual channel config
+			.channel = 0, //not used for default config
+			.rank = 0, //not used
+			.sampling_time = 0 //not used
+		}
+	},
+	.dma_config = {
+		.dma_number = STM32_DMA1,
+		.stream_number = 2,
+		.channel_number = 9, //DMA_REQUEST_ADC1 10=DMA_REQUEST_ADC2
+		.o_flags = STM32_DMA_FLAG_IS_CIRCULAR |
+		STM32_DMA_FLAG_IS_FIFO |
+		STM32_DMA_FLAG_IS_PERIPH_TO_MEMORY |
+		STM32_DMA_FLAG_IS_MEMORY_HALFWORD |
+		STM32_DMA_FLAG_IS_PERIPH_HALFWORD |
+		STM32_DMA_FLAG_IS_MEMORY_SINGLE,
+		.priority = STM32_DMA_PRIORITY_HIGH
+	}
+};
+
+const devfs_device_t adc1_dma =
+		DEVFS_DEVICE(
+			"adc1",
+			mcu_adc_dma,
+			0,
+			&adc0_dma_config,
+			0,
+			0777,
+			SYSFS_ROOT,
+			S_IFCHR
+			);
+
+STREAM_FFIFO_DECLARE_CONFIG_STATE_RX_ONLY(
+		adc1_stream_ffifo,
+		ADC_PACKET_SIZE,
+		2,
+		&adc1_dma,
+		ADC_LOC_IS_GROUP
+		);
+
+const stm32_dac_dma_config_t dac0_dma_config = {
+	.dac_config = {
+		.attr = {
+			.o_flags = DAC_FLAG_SET_CONVERTER |
+			DAC_FLAG_IS_TRIGGER_TMR |
+			DAC_FLAG_IS_RIGHT_JUSTIFIED |
+			DAC_FLAG_SET_CHANNELS,
+			.pin_assignment = {
+				.channel[0] = {0, 4}, //PA4
+				.channel[1] = {0xff, 0xff},
+				.channel[2] = {0xff, 0xff},
+				.channel[3] = {0xff, 0xff}
+			},
+			.freq = 0,
+			.width = 12,
+			.trigger = {14, 0}, //TIM15 TRGO
+			//these are used for individual channel config
+			.channel = 0, //not used for default config
+		},
+		.reference_mv = 3300
+	},
+	.dma_config = {
+		.dma_number = STM32_DMA1,
+		.stream_number = 3,
+		.channel_number = 67, //DMA_REQUEST_DAC1_CH1
+		.o_flags = STM32_DMA_FLAG_IS_CIRCULAR |
+		STM32_DMA_FLAG_IS_FIFO |
+		STM32_DMA_FLAG_IS_MEMORY_TO_PERIPH |
+		STM32_DMA_FLAG_IS_MEMORY_WORD |
+		STM32_DMA_FLAG_IS_PERIPH_WORD |
+		STM32_DMA_FLAG_IS_MEMORY_SINGLE,
+		.priority = STM32_DMA_PRIORITY_HIGH
+	}
+};
+
+#define DAC_SAMPLES_PER_PACKET 256
+#define DAC_PACKET_SIZE (DAC_SAMPLES_PER_PACKET*sizeof(u16))
+const devfs_device_t dac0_dma =
+		DEVFS_DEVICE(
+			"dac0",
+			mcu_dac_dma,
+			0,
+			&dac0_dma_config,
+			0,
+			0777,
+			SYSFS_ROOT,
+			S_IFCHR
+			);
+
+STREAM_FFIFO_DECLARE_CONFIG_STATE_TX_ONLY(
+		dac0_stream_ffifo,
+		DAC_PACKET_SIZE,
+		2,
+		&dac0_dma,
+		0 //dac channel 1
+		);
+
+tmr_config_t tmr14_config = {
+	.attr = {
+		.o_flags = TMR_FLAG_SET_TIMER |
+		TMR_FLAG_IS_SOURCE_CPU |
+		TMR_FLAG_IS_AUTO_RELOAD |
+		TMR_FLAG_SET_TRIGGER |
+		TMR_FLAG_IS_TRIGGER_RELOAD |
+		0,
+		.pin_assignment = {
+			.channel[0] = {0xff, 0xff},
+			.channel[1] = {0xff, 0xff},
+			.channel[2] = {0xff, 0xff},
+			.channel[3] = {0xff, 0xff}
+		},
+		.freq = 10000000,
+		.period = 10,
+		.channel = {
+			.loc = 0,
+			.value = 0
+		}
+	}
+};
+
 drive_sdio_state_t sdio_state;
 const drive_sdio_config_t sdio_configuration = {
 	.sdio = {
@@ -450,6 +647,11 @@ const devfs_device_t devfs_list[] = {
 	#if !_IS_BOOT
 	DEVFS_DEVICE("display0", display_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 
+	DEVFS_DEVICE("adc0", stream_ffifo, 0, &adc0_stream_ffifo_config, &adc0_stream_ffifo_state, 0777, SYSFS_ROOT, S_IFCHR),
+	DEVFS_DEVICE("adc1", stream_ffifo, 1, &adc1_stream_ffifo_config, &adc1_stream_ffifo_state, 0777, SYSFS_ROOT, S_IFCHR),
+
+	DEVFS_DEVICE("dac0", stream_ffifo, 0, &dac0_stream_ffifo_config, &dac0_stream_ffifo_state, 0777, SYSFS_ROOT, S_IFCHR),
+
 	//crypto
 	DEVFS_DEVICE("hash0", mcu_hash, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 	//DEVFS_DEVICE("crypt", mcu_hash, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
@@ -470,6 +672,8 @@ const devfs_device_t devfs_list[] = {
 	DEVFS_DEVICE("uart3", mcu_uart, 3, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PB8, PB9 UART4
 
 	DEVFS_DEVICE("uart5", mcu_uart, 5, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PC6, PC7 USART6
+
+	DEVFS_DEVICE("tmr14", mcu_tmr, 14, &tmr14_config, 0, 0666, SYSFS_ROOT, S_IFCHR), //TIM15
 
 	#endif
 
