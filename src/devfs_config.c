@@ -547,8 +547,8 @@ const stm32_dac_dma_config_t dac0_dma_config = {
 	}
 };
 
-#define DAC_SAMPLES_PER_PACKET 256
-#define DAC_PACKET_SIZE (DAC_SAMPLES_PER_PACKET*sizeof(u16))
+#define DAC_SAMPLES_PER_PACKET 1024
+#define DAC_PACKET_SIZE (DAC_SAMPLES_PER_PACKET*sizeof(u32))
 const devfs_device_t dac0_dma =
 		DEVFS_DEVICE(
 			"dac0",
