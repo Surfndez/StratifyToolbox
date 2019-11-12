@@ -569,6 +569,61 @@ STREAM_FFIFO_DECLARE_CONFIG_STATE_TX_ONLY(
 		0 //dac channel 1
 		);
 
+const stm32_dac_dma_config_t dac1_dma_config = {
+	.dac_config = {
+		.attr = {
+			.o_flags = DAC_FLAG_SET_CONVERTER |
+			DAC_FLAG_IS_TRIGGER_TMR |
+			DAC_FLAG_IS_RIGHT_JUSTIFIED |
+			DAC_FLAG_SET_CHANNELS,
+			.pin_assignment = {
+				.channel[0] = {0, 5}, //PA4
+				.channel[1] = {0xff, 0xff},
+				.channel[2] = {0xff, 0xff},
+				.channel[3] = {0xff, 0xff}
+			},
+			.freq = 0,
+			.width = 12,
+			.trigger = {14, 0}, //TIM15 TRGO
+			//these are used for individual channel config
+			.channel = 0, //not used for default config
+		},
+		.reference_mv = 3300
+	},
+	.dma_config = {
+		.dma_number = STM32_DMA1,
+		.stream_number = 4,
+		.channel_number = 68, //DMA_REQUEST_DAC1_CH2
+		.o_flags = STM32_DMA_FLAG_IS_CIRCULAR |
+		STM32_DMA_FLAG_IS_FIFO |
+		STM32_DMA_FLAG_IS_MEMORY_TO_PERIPH |
+		STM32_DMA_FLAG_IS_MEMORY_WORD |
+		STM32_DMA_FLAG_IS_PERIPH_WORD |
+		STM32_DMA_FLAG_IS_MEMORY_SINGLE,
+		.priority = STM32_DMA_PRIORITY_HIGH
+	}
+};
+
+const devfs_device_t dac1_dma =
+		DEVFS_DEVICE(
+			"dac1",
+			mcu_dac_dma,
+			0,
+			&dac0_dma_config,
+			0,
+			0777,
+			SYSFS_ROOT,
+			S_IFCHR
+			);
+
+STREAM_FFIFO_DECLARE_CONFIG_STATE_TX_ONLY(
+		dac1_stream_ffifo,
+		DAC_PACKET_SIZE,
+		2,
+		&dac0_dma,
+		1 //dac channel 2
+		);
+
 tmr_config_t tmr14_config = {
 	.attr = {
 		.o_flags = TMR_FLAG_SET_TIMER |
@@ -647,10 +702,11 @@ const devfs_device_t devfs_list[] = {
 	#if !_IS_BOOT
 	DEVFS_DEVICE("display0", display_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 
-	DEVFS_DEVICE("adc0", stream_ffifo, 0, &adc0_stream_ffifo_config, &adc0_stream_ffifo_state, 0777, SYSFS_ROOT, S_IFCHR),
-	DEVFS_DEVICE("adc1", stream_ffifo, 1, &adc1_stream_ffifo_config, &adc1_stream_ffifo_state, 0777, SYSFS_ROOT, S_IFCHR),
+	DEVFS_DEVICE("adc0", stream_ffifo, 0, &adc0_stream_ffifo_config, &adc0_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
+	DEVFS_DEVICE("adc1", stream_ffifo, 1, &adc1_stream_ffifo_config, &adc1_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
 
-	DEVFS_DEVICE("dac0", stream_ffifo, 0, &dac0_stream_ffifo_config, &dac0_stream_ffifo_state, 0777, SYSFS_ROOT, S_IFCHR),
+	DEVFS_DEVICE("dac0", stream_ffifo, 0, &dac0_stream_ffifo_config, &dac0_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
+	DEVFS_DEVICE("dac1", stream_ffifo, 0, &dac1_stream_ffifo_config, &dac1_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
 
 	//crypto
 	DEVFS_DEVICE("hash0", mcu_hash, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
