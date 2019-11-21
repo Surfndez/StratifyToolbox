@@ -120,6 +120,8 @@
 #define ST7789H2_PV_GAMMA_CTRL      0xE0
 #define ST7789H2_NV_GAMMA_CTRL      0xE1
 
+
+#define ST7789H2_RGB(r,b,g) (((r&31)<<11)|(((g*2+1)&63)<<5)|(b&31))
 /**
   * @}
   */
@@ -136,12 +138,11 @@ uint8_t  ST7789H2_ReadReg(uint8_t Command);
 void     ST7789H2_DisplayOn(void);
 void     ST7789H2_DisplayOff(void);
 void     ST7789H2_SetCursor(uint16_t Xpos, uint16_t Ypos);
+void     ST7789H2_SetWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height);
 void     ST7789H2_WritePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode);
 uint16_t ST7789H2_ReadPixel(uint16_t Xpos, uint16_t Ypos);
 
 void     ST7789H2_DrawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length);
-
-void     ST7789H2_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height);
 
 
 uint16_t ST7789H2_GetLcdPixelWidth(void);

@@ -64,11 +64,6 @@ typedef struct  {
 } ST7789H2_Rgb888;
 
 
-static uint16_t WindowsXstart = 0;
-static uint16_t WindowsYstart = 0;
-static uint16_t WindowsXend = ST7789H2_LCD_PIXEL_WIDTH-1;
-static uint16_t WindowsYend = ST7789H2_LCD_PIXEL_HEIGHT-1;
-
 static ST7789H2_Rgb888 ST7789H2_ReadPixel_rgb888(uint16_t Xpos, uint16_t Ypos);
 
 #define write_command(x) LCD_IO_WriteReg(x)
@@ -375,16 +370,41 @@ void ST7789H2_SetCursor(uint16_t Xpos, uint16_t Ypos)
 	/* CASET: Comumn Addrses Set */
 	parameter[0] = Xpos >> 8;
 	parameter[1] = Xpos;
-	parameter[2] = 0x00;
-	parameter[3] = 0xEF;
+	parameter[2] = ST7789H2_LCD_PIXEL_WIDTH >> 8;
+	parameter[3] = ST7789H2_LCD_PIXEL_WIDTH & 0xff;
+
 	ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
 	/* RASET: Row Addrses Set */
 	parameter[0] = Ypos >> 8;
 	parameter[1] = Ypos;
-	parameter[2] = 0x00;
-	parameter[3] = 0x3F;
+	parameter[2] = ST7789H2_LCD_PIXEL_HEIGHT >> 8;
+	parameter[3] = ST7789H2_LCD_PIXEL_HEIGHT & 0xff;
 	ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
 }
+
+void ST7789H2_SetWindow(
+		uint16_t Xpos,
+		uint16_t Ypos,
+		uint16_t Width,
+		uint16_t Height
+		){
+	uint8_t   parameter[4];
+	/* CASET: Comumn Addrses Set */
+	uint16_t x_end = Xpos + Width-1;
+	uint16_t y_end = Ypos + Height-1;
+	parameter[0] = Xpos >> 8;
+	parameter[1] = Xpos;
+	parameter[2] = x_end >> 8;
+	parameter[3] = x_end & 0xff;
+	ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
+	/* RASET: Row Addrses Set */
+	parameter[0] = Ypos >> 8;
+	parameter[1] = Ypos;
+	parameter[2] = y_end >> 8;
+	parameter[3] = y_end & 0xff;
+	ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
+}
+
 
 /**
   * @brief  Write pixel.
@@ -466,53 +486,6 @@ uint8_t ST7789H2_ReadReg(uint8_t Command)
 }
 
 /**
-  * @brief  Sets a display window
-  * @param  Xpos:   specifies the X bottom left position.
-  * @param  Ypos:   specifies the Y bottom left position.
-  * @param  Height: display window height.
-  * @param  Width:  display window width.
-  * @retval None
-  */
-void ST7789H2_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height)
-{
-	if (Xpos < ST7789H2_LCD_PIXEL_WIDTH)
-	{
-		WindowsXstart = Xpos;
-	}
-	else
-	{
-		WindowsXstart = 0;
-	}
-
-	if (Ypos < ST7789H2_LCD_PIXEL_HEIGHT)
-	{
-		WindowsYstart = Ypos;
-	}
-	else
-	{
-		WindowsYstart = 0;
-	}
-
-	if (Width  + Xpos <= ST7789H2_LCD_PIXEL_WIDTH)
-	{
-		WindowsXend = Width  + Xpos - 1;
-	}
-	else
-	{
-		WindowsXend = ST7789H2_LCD_PIXEL_WIDTH - 1;
-	}
-
-	if (Height + Ypos <= ST7789H2_LCD_PIXEL_HEIGHT)
-	{
-		WindowsYend = Height + Ypos - 1;
-	}
-	else
-	{
-		WindowsYend = ST7789H2_LCD_PIXEL_HEIGHT-1;
-	}
-}
-
-/**
   * @brief  Draw vertical line.
   * @param  RGBCode: Specifies the RGB color in RGB565 format
   * @param  Xpos:     specifies the X position.
@@ -531,9 +504,8 @@ void ST7789H2_DrawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t
 	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
 
 	/* Sent a complete line */
-	for(counter = 0; counter < Length; counter++)
-	{
-		LCD_IO_WriteData(RGBCode);
+	for(counter = 0; counter < Length; counter++){
+		LCD_IO_WriteDataBlockRgb((u8*)&RGBCode, 2);
 	}
 }
 

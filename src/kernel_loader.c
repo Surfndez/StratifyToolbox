@@ -64,6 +64,7 @@ static void svcall_is_bootloader_requested(void * args);
 static int load_kernel_image(u32 offset, u32 is_load);
 static void write_row_svcall(void * args);
 static void set_cursor_svcall(void * args);
+static void clear_display_svcall(void * args);
 
 const bootloader_board_config_t boot_board_config = {
 	.sw_req_loc = 0x20002000, //needs to reside in RAM that is preserved through reset and available to both bootloader and OS
@@ -97,10 +98,6 @@ int kernel_loader_startup(){
 				for(u32 j = 0; j < 54; j++){
 					read(fd, row_buffer, sizeof(row_buffer));
 					cortexm_svcall(set_cursor_svcall, (void*)j);
-
-					for(u32 i=0; i < 300; i++){
-						row_buffer[i] = __REV16(row_buffer[i]);
-					}
 					cortexm_svcall(write_row_svcall, row_buffer);
 				}
 
@@ -123,6 +120,18 @@ int kernel_loader_startup(){
 					"refresh time %ld",
 					(stop.tv_nsec - start.tv_nsec)/1000
 					);
+
+#if 0
+		clock_gettime(CLOCK_REALTIME, &start);
+		cortexm_svcall(clear_display_svcall, 0);
+		clock_gettime(CLOCK_REALTIME, &stop);
+
+		mcu_debug_log_info(
+					MCU_DEBUG_USER0,
+					"clear time %ld",
+					(stop.tv_nsec - start.tv_nsec)/1000
+					);
+#endif
 
 	} else {
 		mcu_debug_log_warning(
@@ -298,30 +307,21 @@ void execute_ram_image(int signo){
 
 void write_row_svcall(void * args){
 	CORTEXM_SVCALL_ENTER();
-	LCD_IO_WriteDataBlock(args, 600);
+	LCD_IO_WriteDataBlockRgb(args, 600);
 }
 
 void set_cursor_svcall(void * args){
 	CORTEXM_SVCALL_ENTER();
 	int j = (int)args;
-	u8 parameter[4];
-
-	/* Set Column address CASET */
-	parameter[0] = 0;
-	parameter[1] = 10;
-	parameter[2] = 1;
-	parameter[3] = 53;
-	ST7789H2_WriteReg(ST7789H2_CASET, parameter, 4);
-
-	/* Set Row address RASET */
-	parameter[0] = 0;
-	parameter[1] = 146-j;
-	parameter[2] = 0;
-	parameter[3] = 146;
-	ST7789H2_WriteReg(ST7789H2_RASET, parameter, 4);
-
+	ST7789H2_SetWindow(10, 146-j, 300, 146-j+1);
 	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, 0, 0);
+}
 
+void clear_display_svcall(void * args){
+	CORTEXM_SVCALL_ENTER();
+	for(u32 i=0; i < DISPLAY_HEIGHT; i++){
+		ST7789H2_DrawHLine(0, 0, i, ST7789H2_LCD_PIXEL_WIDTH);
+	}
 }
 
 #if _IS_BOOT

@@ -15,6 +15,7 @@ static int m_is_initialized MCU_SYS_MEM;
 static display_palette_t m_display_palette MCU_SYS_MEM;
 static u16 m_display_colors[DISPLAY_PALETTE_COLOR_COUNT];
 static u32 m_o_flags MCU_SYS_MEM;
+static u16 m_row_buffer[DISPLAY_WIDTH];
 static sg_region_t m_window;
 
 static int display_device_getinfo(const devfs_handle_t * handle, void * ctl);
@@ -38,6 +39,10 @@ int display_device_ioctl(const devfs_handle_t * handle, int request, void * ctl)
 	switch(request){
 		case I_DISPLAY_GETVERSION: return DISPLAY_VERSION;
 		case I_DISPLAY_GETINFO: return display_device_getinfo(handle, ctl);
+
+		case I_DISPLAY_CLEAR:
+			display_device_clear(handle, ctl);
+			return SYSFS_RETURN_SUCCESS;
 
 		case I_DISPLAY_SETATTR:
 
@@ -70,6 +75,21 @@ int display_device_ioctl(const devfs_handle_t * handle, int request, void * ctl)
 				m_window.point.y = attr->window_y;
 				m_window.area.width = attr->window_width;
 				m_window.area.height = attr->window_height;
+
+				if( m_window.point.x + m_window.area.width > DISPLAY_WIDTH ){
+					if( m_window.point.x >= DISPLAY_WIDTH ){
+						m_window.point.x = 0;
+					}
+					m_window.area.width = DISPLAY_WIDTH - m_window.point.x;
+				}
+
+				if( m_window.point.y + m_window.area.height > DISPLAY_HEIGHT ){
+					if( m_window.point.y >= DISPLAY_HEIGHT ){
+						m_window.point.y = 0;
+					}
+					m_window.area.height = DISPLAY_HEIGHT - m_window.point.y;
+				}
+
 			}
 			return 0;
 
@@ -87,7 +107,59 @@ int display_device_read(const devfs_handle_t * handle, devfs_async_t * async){
 }
 
 int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
+	ST7789H2_SetCursor(0, 0);
 
+	if( async->nbyte != DISPLAY_WIDTH*DISPLAY_HEIGHT*2 ){
+		//return SYSFS_SET_RETURN(EINVAL);
+	}
+
+	if( m_o_flags & DISPLAY_FLAG_IS_MODE_PALETTE ){
+		sg_cursor_t x_cursor;
+		sg_cursor_t y_cursor;
+		sg_bmap_t * bmap = async->buf;
+
+		//is the bmap memory in the application memory space
+		//devfs will check async->buf, but async->buf points to another bmap
+		if( task_validate_memory(bmap->data, sg_calc_bmap_size(bmap, bmap->area)) < 0 ){
+			return SYSFS_SET_RETURN(EPERM);
+		}
+
+		//start the cursor at the window
+		sg_cursor_set(&y_cursor, bmap, m_window.point);
+
+		ST7789H2_SetWindow(
+					m_window.point.x,
+					m_window.point.y,
+					m_window.area.width,
+					m_window.area.height
+					);
+
+		/* Prepare to write to LCD RAM */
+		ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
+
+		for(sg_size_t h=0; h < m_window.area.height; h++){
+			sg_cursor_copy(&x_cursor, &y_cursor);
+			for(sg_size_t w=0; w < m_window.area.width; w++){
+				sg_color_t color = sg_cursor_get_pixel_increment(&x_cursor, 1, 0);
+				//get the LCD color from the palette
+				m_row_buffer[w] = m_display_colors[color & 0x0f];
+			}
+			//use a row buffer
+			LCD_IO_WriteDataBlockRgb(
+						(u8*)m_row_buffer,
+						m_window.area.width*2
+						);
+
+			sg_cursor_inc_y(&y_cursor);
+		}
+	} else {
+		//in raw mode just write data directly to the LCD
+		//-- useful for writing images
+		LCD_IO_WriteDataBlockRgb(
+					async->buf,
+					async->nbyte
+					);
+	}
 	return async->nbyte;
 }
 
@@ -120,7 +192,6 @@ int display_device_getinfo(const devfs_handle_t * handle, void * ctl){
 int display_device_clear(const devfs_handle_t * handle, void * ctl){
 	MCU_UNUSED_ARGUMENT(handle);
 	MCU_UNUSED_ARGUMENT(ctl);
-
 	for(u32 i=0; i < DISPLAY_HEIGHT; i++){
 		ST7789H2_DrawHLine(m_display_colors[0], 0, i, ST7789H2_LCD_PIXEL_WIDTH);
 	}
@@ -132,8 +203,6 @@ int display_device_init(const devfs_handle_t * handle, void * ctl){
 	//initialize and clear the display
 
 	if( m_is_initialized == 0 ){
-		mcu_debug_printf("initialize LCD\n");
-		ST7789H2_Init();
 		m_is_initialized = 1;
 	}
 
@@ -148,25 +217,25 @@ int display_device_init(const devfs_handle_t * handle, void * ctl){
 	m_display_palette.colors = m_display_colors;
 
 	//set the default palette
-	m_display_colors[0] = 0x0004;
-	m_display_colors[1] = 0x0008;
-	m_display_colors[2] = 0x0010;
-	//m_display_colors[3] = LCD_COLOR_BLUE; //0x001F
+	m_display_colors[0] = ST7789H2_RGB(0,0,0);
+	m_display_colors[1] = ST7789H2_RGB(10,10,10);
+	m_display_colors[2] = ST7789H2_RGB(20,20,20);
+	m_display_colors[3] = ST7789H2_RGB(31,31,31); //White
 
-	m_display_colors[4] = 0x0040;
-	m_display_colors[5] = 0x00E0;
-	m_display_colors[6] = 0x03E0;
-	//m_display_colors[7] = LCD_COLOR_GREEN;
+	m_display_colors[4] = ST7789H2_RGB(8,0,0);
+	m_display_colors[5] = ST7789H2_RGB(16,0,0);
+	m_display_colors[6] = ST7789H2_RGB(24,0,0);
+	m_display_colors[7] = ST7789H2_RGB(31,0,0);  //Red
 
-	m_display_colors[8] = 0x0400;
-	m_display_colors[9] = 0x0800;
-	m_display_colors[10] = 0x7800;
-	//m_display_colors[11] = LCD_COLOR_RED;
+	m_display_colors[8] = ST7789H2_RGB(0,0,8);
+	m_display_colors[9] = ST7789H2_RGB(0,0,16);
+	m_display_colors[10] = ST7789H2_RGB(0,0,24);
+	m_display_colors[11] = ST7789H2_RGB(0,0,31); //Blue
 
-	m_display_colors[12] = 0x0000;
-	m_display_colors[13] = 0x6666;
-	m_display_colors[14] = 0xCCCC;
-	//m_display_colors[15] = LCD_COLOR_WHITE;
+	m_display_colors[12] = ST7789H2_RGB(0,8,0);
+	m_display_colors[13] = ST7789H2_RGB(0,16,0);
+	m_display_colors[14] = ST7789H2_RGB(0,24,0);
+	m_display_colors[15] = ST7789H2_RGB(0,31,0); //Green
 
 
 	for(u32 i=0; i < DISPLAY_HEIGHT; i++){
