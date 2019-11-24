@@ -107,11 +107,6 @@ int display_device_read(const devfs_handle_t * handle, devfs_async_t * async){
 }
 
 int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
-	ST7789H2_SetCursor(0, 0);
-
-	if( async->nbyte != DISPLAY_WIDTH*DISPLAY_HEIGHT*2 ){
-		//return SYSFS_SET_RETURN(EINVAL);
-	}
 
 	ST7789H2_SetWindow(
 				m_window.point.x,
@@ -130,14 +125,17 @@ int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
 		//is the bmap memory in the application memory space
 		//devfs will check async->buf, but async->buf points to another bmap
 		if( task_validate_memory(bmap->data, sg_calc_bmap_size(bmap, bmap->area)) < 0 ){
+			MCU_DEBUG_LINE_TRACE();
 			return SYSFS_SET_RETURN(EPERM);
 		}
 
 		if( bmap->area.width != m_window.area.width ){
+			MCU_DEBUG_LINE_TRACE();
 			return SYSFS_SET_RETURN(EINVAL);
 		}
 
 		if( bmap->area.height != m_window.area.height ){
+			MCU_DEBUG_LINE_TRACE();
 			return SYSFS_SET_RETURN(EINVAL);
 		}
 
