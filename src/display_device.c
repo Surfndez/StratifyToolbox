@@ -113,6 +113,15 @@ int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
 		//return SYSFS_SET_RETURN(EINVAL);
 	}
 
+	ST7789H2_SetWindow(
+				m_window.point.x,
+				m_window.point.y,
+				m_window.area.width,
+				m_window.area.height
+				);
+
+	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
+
 	if( m_o_flags & DISPLAY_FLAG_IS_MODE_PALETTE ){
 		sg_cursor_t x_cursor;
 		sg_cursor_t y_cursor;
@@ -124,18 +133,18 @@ int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
 			return SYSFS_SET_RETURN(EPERM);
 		}
 
-		//start the cursor at the window
-		sg_cursor_set(&y_cursor, bmap, m_window.point);
+		if( bmap->area.width != m_window.area.width ){
+			return SYSFS_SET_RETURN(EINVAL);
+		}
 
-		ST7789H2_SetWindow(
-					m_window.point.x,
-					m_window.point.y,
-					m_window.area.width,
-					m_window.area.height
-					);
+		if( bmap->area.height != m_window.area.height ){
+			return SYSFS_SET_RETURN(EINVAL);
+		}
+
+		//start the cursor at the start of the bitmap
+		sg_cursor_set(&y_cursor, bmap, sg_point(0,0));
 
 		/* Prepare to write to LCD RAM */
-		ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
 
 		for(sg_size_t h=0; h < m_window.area.height; h++){
 			sg_cursor_copy(&x_cursor, &y_cursor);
