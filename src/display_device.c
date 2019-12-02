@@ -129,18 +129,19 @@ int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
 			return SYSFS_SET_RETURN(EPERM);
 		}
 
-		if( bmap->area.width != m_window.area.width ){
+		if( bmap->area.width < m_window.area.width ){
 			MCU_DEBUG_LINE_TRACE();
 			return SYSFS_SET_RETURN(EINVAL);
 		}
 
-		if( bmap->area.height != m_window.area.height ){
+		if( bmap->area.height < m_window.area.height ){
 			MCU_DEBUG_LINE_TRACE();
 			return SYSFS_SET_RETURN(EINVAL);
 		}
 
-		//start the cursor at the start of the bitmap
-		sg_cursor_set(&y_cursor, bmap, sg_point(0,0));
+		//start the cursor at the window area of the bitmap
+		//bitmap is
+		sg_cursor_set(&y_cursor, bmap, m_window.point);
 
 		/* Prepare to write to LCD RAM */
 
