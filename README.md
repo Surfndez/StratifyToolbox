@@ -1,12 +1,27 @@
 # Toolbox
 
 
+## Board Bringup
+
 Installing the bootloader for the first time:
 
 ```
 brew install openocd --HEAD # to support STM32H7 need beyond 0.10.0
 ```
 
+Format `/home`
+
+```
+sl fs.format:path=device@/home
+```
+
+The format command might say that it fails. It needs 1 to 2 minutes to complete before trying again.
+
+Copy icon.bmp:
+
+```
+sl fs.copy:source=host@StratifyToolbox/assets/icon.bmp,dest=device@/home/icon.bmp
+```
 
 ```
 openocd -f StratifyToolbox/stlink-fixed.cfg -f target/stm32h7x.cfg -c "program ./StratifyToolbox/build_boot_debug/StratifyToolbox.bin 0x08000000; reset run; exit;"
