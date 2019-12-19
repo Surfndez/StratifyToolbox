@@ -46,6 +46,7 @@ limitations under the License.
 
 #include "display_device.h"
 #include "wifi_phy_device.h"
+#include "pio_ext_device.h"
 
 #include "config.h"
 #include "link_config.h"

@@ -40,8 +40,6 @@ limitations under the License.
 #include <sos/sos.h>
 #include <device/drive_cfi.h>
 
-#include "ram_drive.h"
-
 #include "config.h"
 #include "link_config.h"
 #include "wifi_api.h"

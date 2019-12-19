@@ -8,16 +8,15 @@ if( ${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows" )
 endif()
 
 include(${SOS_TOOLCHAIN_CMAKE_PATH}/sos-variables.cmake)
+include(${SOS_TOOLCHAIN_CMAKE_PATH}/sos-sdk.cmake)
 set(CMAKE_TOOLCHAIN_FILE ${SOS_TOOLCHAIN_CMAKE_PATH}/sos-bsp-toolchain.cmake)
 
 get_filename_component(SOS_NAME ${CMAKE_SOURCE_DIR} NAME)
 project(${SOS_NAME} CXX C)
 
 #Add sources to the project
-set(SOURCES_PREFIX ${CMAKE_SOURCE_DIR}/src)
-add_subdirectory(src)
+sos_sdk_add_subdirectory(SOS_KERNEL_SOURCELIST src)
 list(APPEND SOS_KERNEL_SOURCELIST ${SOURCES} sl_settings.json)
-
 
 set(SOS_ARCH v7em_f5dh)
 set(SOS_DEVICE stm32h750xbram)
