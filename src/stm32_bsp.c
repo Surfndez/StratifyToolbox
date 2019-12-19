@@ -226,6 +226,8 @@ static void HAL_FMC_MspInit(void){
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 	/* USER CODE BEGIN FMC_MspInit 1 */
+
+	//Command pin
 	GPIO_InitStruct.Pin = GPIO_PIN_1;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -234,12 +236,20 @@ static void HAL_FMC_MspInit(void){
 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_1, SET);
 
 	//backlight
-	GPIO_InitStruct.Pin = GPIO_PIN_13;
+	GPIO_InitStruct.Pin = GPIO_PIN_7;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, SET);
+
+	//display reset
+	GPIO_InitStruct.Pin = GPIO_PIN_12;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, SET);
 
 #if MANUAL_FMC_CHIP_SELECT > 0
 	GPIO_InitStruct.Pin = GPIO_PIN_7;

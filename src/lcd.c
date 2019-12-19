@@ -16,12 +16,15 @@
 
 volatile u64 * const m_reg_location = (u64*)0x60000000;
 
-#define SET_COMMAND() (GPIOE->BSRR = (GPIO_PIN_0 << 16)) //RESET
-#define SET_DATA() (GPIOE->BSRR = GPIO_PIN_0) //SET
+//PE1
+#define SET_COMMAND() (GPIOE->BSRR = (GPIO_PIN_1 << 16)) //RESET
+#define SET_DATA() (GPIOE->BSRR = GPIO_PIN_1) //SET
 
-#define ASSERT_RESET() (GPIOE->BSRR = (GPIO_PIN_1 << 16)) //RESET
-#define DEASSERT_RESET() (GPIOE->BSRR = GPIO_PIN_1) //SET
+//PB12
+#define ASSERT_RESET() (GPIOB->BSRR = (GPIO_PIN_12 << 16)) //RESET
+#define DEASSERT_RESET() (GPIOB->BSRR = GPIO_PIN_12) //SET
 
+//PD7
 #define ASSERT_CS() (GPIOD->BSRR = (GPIO_PIN_7<<16)) //RESET
 #define DEASSERT_CS() (GPIOD->BSRR = GPIO_PIN_7) //SET
 

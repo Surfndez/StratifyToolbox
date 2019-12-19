@@ -27,7 +27,7 @@ limitations under the License.
 
 /*
  * openocd -f interface/stlink-v2-1.cfg -f target/stm32h7x_stlink.cfg
- * openocd -f StratifyToolbox/stlink-fixed.cfg -f target/stm32h7x.cfg -c "program ./StratifyToolbox/build_boot_debug/StratifyToolbox.bin 0x08000000; reset run; exit;"
+ * openocd -f StratifyToolbox/stlink-fixed.cfg -f StratifyToolbox/stm32h7x.cfg -c "program ./StratifyToolbox/build_boot_debug/StratifyToolbox.bin 0x08000000; reset run; exit;"
  *
  *
  * sl fs.copy:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/home/debug.bin

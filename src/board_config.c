@@ -89,6 +89,7 @@ void board_event_handler(int event, void * args){
 		case MCU_BOARD_CONFIG_EVENT_ROOT_INITIALIZE_CLOCK:
 			SystemClock_Config();
 
+#if 0
 			//PE1 needs to be driven low for debugging to work
 			attr.o_flags = PIO_FLAG_SET_OUTPUT;
 			attr.o_pinmask = (1<<1);
@@ -99,7 +100,9 @@ void board_event_handler(int event, void * args){
 			mcu_pio_open(&pio_handle);
 			mcu_pio_setattr(&pio_handle, &attr);
 			mcu_pio_clrmask(&pio_handle, (void*)attr.o_pinmask);
+#endif
 
+			//PA1 is the I2C
 			attr.o_flags = PIO_FLAG_SET_INPUT | PIO_FLAG_IS_FLOAT;
 			attr.o_pinmask = (1<<1);
 			pio_handle.port = 0;
