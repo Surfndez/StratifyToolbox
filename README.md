@@ -57,3 +57,10 @@ Crash Analysis:
 ```
 sl debug.analyze:os=../StratifyBSP/StratifyToolbox,osBuild=debug,app=toolboxtool
 ```
+
+Scanning the internal I2C Bus:
+
+```
+sl cloud.install:id=2Cd5njdQwfvvxB1yJTK1
+sl app.run:path=i2ctool,terminal,args='--action=scan --port=2'
+```
