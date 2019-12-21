@@ -1,35 +1,50 @@
 
 set(SOURCES
-	kernel_loader.c
-	kernel_loader.h
+	kernel/kernel_loader.c
+	kernel/kernel_loader.h
+	kernel/kernel_request.c
+	kernel/kernel_io.c
+	kernel/kernel_io.h
+	kernel/kernel_service.c
+	kernel/kernel_service.h
+	kernel/kernel_shared.c
+	kernel/kernel_shared.h
+	kernel/wifi_api.c
+	kernel/wifi_api.h
+	kernel/pcal6416a.c
+	kernel/pcal6416a.h
+
+	devfs/st7789h2.c
+	devfs/st7789h2.h
+	devfs/display_device.c
+	devfs/display_device.h
+	devfs/lcd.c
+	devfs/lcd.h
+
+	devfs/pio_device.c
+	devfs/pio_device.h
+	devfs/wifi_device.c
+	devfs/wifi_device.h
+	devfs/wifi_phy_device.c
+	devfs/wifi_phy_device.h
+
+	mcu/stm32_bsp.c
+	mcu/stm32_bsp.h
+	mcu/SystemClock_Config.c
+
 	board_config.c
 	board_config.h
 	config.h
-	display_device.c
-	display_device.h
-	st7789h2.c
-	st7789h2.h
-	lcd.c
-	lcd.h
 	devfs_config.c
-	pio_ext_device.c
-	pio_ext_device.h
 	link_config.c
 	link_config.h
 	mcu_config.c
 	sos_config.c
 	board_symbols.c
-	stm32_bsp.c
-	stm32_bsp.h
 	sl_config.h
-	kernel_request.c
-	SystemClock_Config.c
-	wifi_api.c
-	wifi_api.h
-	wifi_device.c
-	wifi_device.h
-	wifi_phy_device.c
-	wifi_phy_device.h
+
+
+
 	atwinc1500/driver/include/ecc_types.h
 	atwinc1500/driver/include/m2m_ssl.h
 	atwinc1500/driver/include/m2m_crypto.h

@@ -32,10 +32,9 @@ limitations under the License.
 #include "kernel_loader.h"
 #include "config.h"
 #include "link_config.h"
-#include "stm32_bsp.h"
-#include "display_device.h"
-#include "st7789h2.h"
-
+#include "mcu/stm32_bsp.h"
+#include "devfs/display_device.h"
+#include "devfs/st7789h2.h"
 
 typedef struct MCU_PACK {
 	u16 signature;

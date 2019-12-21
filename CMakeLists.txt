@@ -32,6 +32,7 @@ set(SOS_LIBRARIES
 set(SOS_INCLUDE_DIRECTORIES
 	${TOOLCHAIN_INC_DIR}/mcu/arch/stm32/cmsis
 	src/atwinc1500
+	src
 	)
 
 set(SOS_KERNEL_START_ADDRESS 0x24000000)

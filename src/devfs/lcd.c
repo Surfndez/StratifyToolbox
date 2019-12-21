@@ -7,9 +7,9 @@
 #include <mcu/debug.h>
 
 #include "lcd.h"
-#include "stm32_bsp.h"
+#include "../mcu/stm32_bsp.h"
 
-#include "stm32_bsp.h"
+#include "../mcu/stm32_bsp.h"
 
 #define IO_ADDRESS (0x60000000)
 #define IO_ADDRESS_DEFERENCE *((__IO u8*)0x60000000)

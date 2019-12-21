@@ -42,7 +42,7 @@ limitations under the License.
 
 #include "config.h"
 #include "link_config.h"
-#include "wifi_api.h"
+#include "kernel/wifi_api.h"
 
 //--------------------------------------------Socket API-------------------------------------------------
 

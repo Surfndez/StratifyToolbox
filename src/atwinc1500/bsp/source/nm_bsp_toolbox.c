@@ -47,8 +47,8 @@
 
 #include "bsp/include/nm_bsp.h"
 #include "common/include/nm_common.h"
-#include "../../../wifi_phy_device.h"
-#include "../../../wifi_api.h"
+#include "devfs/wifi_phy_device.h"
+#include "kernel/wifi_api.h"
 
 /*
  *	@fn		nm_bsp_init

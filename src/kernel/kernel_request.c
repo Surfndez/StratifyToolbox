@@ -4,6 +4,17 @@
 #include <sapi/sg.h>
 #include <sos/crypt_api.h>
 
+#include "kernel_io.h"
+
+int kernel_request(int request, void * args){
+#if !_IS_BOOT
+	if( request == MCU_REQUEST_CODE('k',' ','i','o') ){
+		return kernel_io_request(args);
+	}
+#endif
+	return 0;
+}
+
 const void * kernel_request_api(u32 request){
 	switch(request){
 #if !_IS_BOOT

@@ -6,7 +6,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	 http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,18 +32,18 @@ limitations under the License.
 #include "board_config.h"
 #include "config.h"
 #include "link_config.h"
-#include "stm32_bsp.h"
-#include "st7789h2.h"
-#include "kernel_loader.h"
+#include "mcu/stm32_bsp.h"
+#include "kernel/kernel_loader.h"
+#include "kernel/kernel_service.h"
 
 #define TRACE_COUNT 8
 #define TRACE_FRAME_SIZE sizeof(link_trace_event_t)
 #define TRACE_BUFFER_SIZE (sizeof(link_trace_event_t)*TRACE_COUNT)
 static char trace_buffer[TRACE_FRAME_SIZE*TRACE_COUNT];
 const ffifo_config_t board_trace_config = {
-	.frame_count = TRACE_COUNT,
-	.frame_size = sizeof(link_trace_event_t),
-	.buffer = trace_buffer
+	TRACE_COUNT,
+	sizeof(link_trace_event_t),
+	trace_buffer
 };
 ffifo_state_t board_trace_state;
 
@@ -121,16 +121,8 @@ void board_event_handler(int event, void * args){
 #if _IS_BOOT
 			kernel_loader_startup();
 #else
-
-#if 0
-			if( sos_board_config.socket_api ){
-				sos_board_config.socket_api->startup(
-							sos_board_config.socket_api->config
-							);
-			}
-#endif
-
 			sos_led_startup();
+			kernel_service_init();
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from RAM");
 #endif
 			break;

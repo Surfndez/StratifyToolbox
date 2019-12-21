@@ -44,9 +44,9 @@ limitations under the License.
 #include <device/drive_ram.h>
 #include <device/drive_sdio.h>
 
-#include "display_device.h"
-#include "wifi_phy_device.h"
-#include "pio_ext_device.h"
+#include "devfs/display_device.h"
+#include "devfs/wifi_phy_device.h"
+#include "devfs/pio_device.h"
 
 #include "config.h"
 #include "link_config.h"
@@ -716,7 +716,7 @@ const devfs_device_t devfs_list[] = {
 
 	DEVFS_DEVICE("i2c0", mcu_i2c, 0, &i2c0_config, 0, 0666, SYSFS_USER, S_IFCHR), //PB8 and PB9 - I2C1
 	DEVFS_DEVICE("i2c1", mcu_i2c, 1, &i2c1_config, 0, 0666, SYSFS_USER, S_IFCHR),
-	DEVFS_DEVICE("i2c2", mcu_i2c, 2, &i2c2_config, 0, 0666, SYSFS_ROOT, S_IFCHR), //internal -- root access
+	DEVFS_DEVICE("i2c2", mcu_i2c, 2, &i2c2_config, 0, 0606, SYSFS_ROOT, S_IFCHR), //internal -- root access
 	DEVFS_DEVICE("i2c3", mcu_i2c, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PB8 and PB9 and also I2C4
 
 	DEVFS_DEVICE("i2s0", mcu_i2c, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PE3, PE4, PE5, PE6 SAI1/SAI4 A/B full duplex
