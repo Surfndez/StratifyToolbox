@@ -9,19 +9,19 @@
 kernel_shared_t m_kernel_shared;
 kernel_shared_root_t m_kernel_shared_root MCU_SYS_MEM;
 
-void kernel_shared_root_set_pin_state(
-      u8 pin_number,
+void kernel_shared_root_set_direction_state(
+      enum kernel_shared_direction_channels pin_number,
       u8 peripheral_function,
       u8 io_flags
       ){
-   m_kernel_shared_root.pin_state[pin_number].peripheral_function = peripheral_function;
-   m_kernel_shared_root.pin_state[pin_number].io_flags = io_flags;
+   m_kernel_shared_root.direction_state[pin_number].peripheral_function = peripheral_function;
+   m_kernel_shared_root.direction_state[pin_number].io_flags = io_flags;
 }
 
-const kernel_shared_pin_state_t * kernel_shared_get_pin_state(
-      u8 pin_number
+const kernel_shared_direction_state_t * kernel_shared_get_direction_state(
+      enum kernel_shared_direction_channels pin_number
       ){
-   return m_kernel_shared_root.pin_state + pin_number;
+   return m_kernel_shared_root.direction_state + pin_number;
 }
 
 sysfs_file_t * kernel_shared_i2c_file(){
@@ -30,6 +30,58 @@ sysfs_file_t * kernel_shared_i2c_file(){
 
 pthread_mutex_t * kernel_shared_i2c_mutex(){
    return &m_kernel_shared.i2c_mutex;
+}
+
+void kernel_shared_root_reference_i2s(){
+   m_kernel_shared_root.i2s_device_reference_count++;
+}
+
+void kernel_shared_root_dereference_i2s(){
+   if( m_kernel_shared_root.i2s_device_reference_count ){
+      m_kernel_shared_root.i2s_device_reference_count--;
+      if( m_kernel_shared_root.i2s_device_reference_count == 0 ){
+         //release the lock
+      }
+   }
+}
+
+void kernel_shared_root_reference_spi(){
+   m_kernel_shared_root.spi_device_reference_count++;
+}
+
+void kernel_shared_root_dereference_spi(){
+   if( m_kernel_shared_root.spi_device_reference_count ){
+      m_kernel_shared_root.spi_device_reference_count--;
+      if( m_kernel_shared_root.spi_device_reference_count == 0 ){
+         //release the lock
+      }
+   }
+}
+
+void kernel_shared_root_reference_uart(u8 port){
+   m_kernel_shared_root.uart_device_reference_count[port]++;
+}
+
+void kernel_shared_root_dereference_uart(u8 port){
+   if( m_kernel_shared_root.uart_device_reference_count[port] ){
+      m_kernel_shared_root.uart_device_reference_count[port]--;
+      if( m_kernel_shared_root.uart_device_reference_count[port] == 0 ){
+         //release the lock
+      }
+   }
+}
+
+void kernel_shared_root_reference_i2c(u8 port){
+   m_kernel_shared_root.i2c_device_reference_count[port]++;
+}
+
+void kernel_shared_root_dereference_i2c(u8 port){
+   if( m_kernel_shared_root.i2c_device_reference_count[port] ){
+      m_kernel_shared_root.i2c_device_reference_count[port]--;
+      if( m_kernel_shared_root.i2c_device_reference_count[port] == 0 ){
+         //release the lock
+      }
+   }
 }
 
 int kernel_shared_init(){

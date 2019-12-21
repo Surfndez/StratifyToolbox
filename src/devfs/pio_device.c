@@ -29,10 +29,13 @@ int pio_device_ioctl(
    switch(request){
       case I_PIO_SETATTR:
          //can only set pins as output if they are outputs on the kernel_shared settings
-         for(u32 i=0; i < 32; i++){
+         for(enum kernel_shared_direction_channels i= kernel_shared_direction_channel_first;
+             i < kernel_shared_direction_channel_last+1;
+             i++){
             if( (1<<i) & attributes->o_pinmask ){
-               result = kernel_io_is_pin_assigned_to_pio(
-                        mcu_pin(handle->port, i),
+               result = kernel_io_is_direction_assigned(
+                        i,
+                        CORE_PERIPH_PIO,
                         attributes->o_flags
                         );
                if( result < 0 ){

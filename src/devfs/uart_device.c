@@ -9,8 +9,8 @@ int uart_device_open(
       ){
 
    //only open if the pins have been acquired
-
-   return SYSFS_SET_RETURN(EINVAL);
+   kernel_shared_root_reference_uart(handle->port);
+   return mcu_uart_open(handle);
 }
 
 int uart_device_close(
@@ -18,9 +18,8 @@ int uart_device_close(
       ){
 
    //if this is the final reference -- release the pins
-
-
-   return SYSFS_SET_RETURN(EINVAL);
+   kernel_shared_root_dereference_uart(handle->port);
+   return mcu_uart_close(handle);
 }
 
 int uart_device_ioctl(
@@ -28,6 +27,31 @@ int uart_device_ioctl(
       int request,
       void * ctl
       ){
+
+   if( request == I_UART_SETATTR ){
+      int result = 0;
+      switch(handle->port){
+         case 0:
+            result |= kernel_io_is_direction_assigned(kernel_shared_direction_channel13, CORE_PERIPH_UART, PIO_FLAG_SET_INPUT);
+            break;
+         case 1:
+            result |= kernel_io_is_direction_assigned(kernel_shared_direction_channel8, CORE_PERIPH_UART, PIO_FLAG_SET_OUTPUT);
+            result |= kernel_io_is_direction_assigned(kernel_shared_direction_channel3, CORE_PERIPH_UART, PIO_FLAG_SET_INPUT);
+            break;
+         case 3:
+            result |= kernel_io_is_direction_assigned(kernel_shared_direction_channel2, CORE_PERIPH_UART, PIO_FLAG_SET_OUTPUT);
+            result |= kernel_io_is_direction_assigned(kernel_shared_direction_channel1, CORE_PERIPH_UART, PIO_FLAG_SET_INPUT);
+            break;
+         case 5:
+            result |= kernel_io_is_direction_assigned(kernel_shared_direction_channel5, CORE_PERIPH_UART, PIO_FLAG_SET_OUTPUT);
+            result |= kernel_io_is_direction_assigned(kernel_shared_direction_channel6, CORE_PERIPH_UART, PIO_FLAG_SET_INPUT);
+            break;
+      }
+      if( result != 0 ){
+         return SYSFS_SET_RETURN(EINVAL);
+      }
+   }
+
    //verify with gate that IO mode is enabled
    return mcu_uart_ioctl(handle, request, ctl);
 }

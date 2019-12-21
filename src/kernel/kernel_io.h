@@ -2,6 +2,7 @@
 #define KERNEL_REQUEST_IO_GATE_H
 
 #include <sos/sos.h>
+#include "kernel_shared.h"
 
 
 enum toolbox_io_flags {
@@ -65,12 +66,11 @@ int kernel_io_init();
 int kernel_io_set(enum kernel_io_pins pin);
 int kernel_io_clear(enum kernel_io_pins pin);
 
-int kernel_io_is_peripheral_pin_assigned_to_peripheral(
-      mcu_pin_t mcu_pin,
-      u8 core_peripheral
+int kernel_io_is_direction_assigned(
+      enum kernel_shared_direction_channels channel,
+      u8 peripheral_function,
+      u32 io_flags
       );
-
-int kernel_io_is_pin_assigned_to_pio(mcu_pin_t mcu_pin, u32 io_flags);
 
 int kernel_io_request(
       void * args
