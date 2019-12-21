@@ -8,7 +8,7 @@
 
 int kernel_request(int request, void * args){
 #if !_IS_BOOT
-	if( request == MCU_REQUEST_CODE('k',' ','i','o') ){
+	if( request == MCU_REQUEST_CODE('t','b','i','o') ){
 		return kernel_io_request(args);
 	}
 #endif

@@ -4,6 +4,7 @@
 #include <sos/fs/sysfs.h>
 #include <pthread.h>
 
+#if 0
 enum kernel_io_external_pins {
    kernel_io1_primary,
    kernel_io1_secondary,
@@ -38,6 +39,7 @@ enum kernel_io_external_pins {
    kernel_io_rtck,
    kernel_io_external_total
 };
+#endif
 
 typedef struct {
    sysfs_file_t i2c_file;
@@ -45,14 +47,32 @@ typedef struct {
 } kernel_shared_t;
 
 typedef struct {
-   u8 core_peripheral[kernel_io_external_total];
+   u8 peripheral_function;
+   u8 io_flags; //input, output or unspecified
+} kernel_shared_pin_state_t;
+
+typedef struct {
+   kernel_shared_pin_state_t pin_state[kernel_io_external_total];
+   u8 pio_device_reference_count;
+   u8 spi_device_reference_count;
+   u8 uart_device_reference_count[5];
+   u8 i2c_device_reference_count[3];
+   u8 i2s_device_reference_count;
 } kernel_shared_root_t;
 
-
-
-extern kernel_shared_t m_kernel_shared;
-extern kernel_shared_root_t m_kernel_shared_root;
-
 int kernel_shared_init();
+
+void kernel_shared_root_set_pin_state(
+      u8 pin_number,
+      u8 peripheral_function,
+      u8 io_flags
+      );
+
+const kernel_shared_pin_state_t * kernel_shared_get_pin_state(
+      u8 pin_number
+      );
+
+sysfs_file_t * kernel_shared_i2c_file();
+pthread_mutex_t * kernel_shared_i2c_mutex();
 
 #endif // KERNEL_SHARED_H

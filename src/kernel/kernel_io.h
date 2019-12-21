@@ -14,10 +14,20 @@ enum toolbox_io_flags {
    TOOLBOX_IO_GATE_FLAG_DISABLE_DIV10_OUT = (1<<6),
    TOOLBOX_IO_GATE_FLAG_ENABLE_VDD_OUT = (1<<7),
    TOOLBOX_IO_GATE_FLAG_DISABLE_VDD_OUT = (1<<8),
+   TOOLBOX_IO_IS_OUTPUT = (1<<9), //if direction isn't fixed by hardware
+   TOOLBOX_IO_IS_INPUT = (1<<10), //if direction isn't fixed by hardware
+   TOOLBOX_IO_IS_INVERT_DIRECTION = (1<<10) //used for slave configuration of SPI/I2S, TMR/PWM
 };
 
+#define TOOLBOX_IO_PORT 0
+#define TOOLBOX_IO_SWD_PORT 1
+#define TOOLBOX_IO_JTAG_PORT 1
+#define TOOLBOX_IO_PIN_COUNT 13
+#define TOOLBOX_IO_SWD_PIN_COUNT 5
+#define TOOLBOX_IO_PIN_ASSIGNMENT_CHANNEL_COUNT 4
+
 typedef struct {
-   mcu_pin_t channel[4]; //port is 0 for IO, 1 for JTAG
+   mcu_pin_t channel[TOOLBOX_IO_PIN_ASSIGNMENT_CHANNEL_COUNT]; //port is 0 for IO, 1 for SWD
 } toolbox_io_pin_assignment_t;
 
 typedef struct {
@@ -31,6 +41,7 @@ typedef struct {
    toolbox_io_pin_assignment_t pin_assignment;
    u8 peripheral_function; //use CORE_PERIPH_UART, etc
    u8 peripheral_port;
+   u8 pin_number;
 } toolbox_io_attr_t;
 
 enum kernel_io_pins {
@@ -53,6 +64,13 @@ enum kernel_io_pins {
 int kernel_io_init();
 int kernel_io_set(enum kernel_io_pins pin);
 int kernel_io_clear(enum kernel_io_pins pin);
+
+int kernel_io_is_peripheral_pin_assigned_to_peripheral(
+      mcu_pin_t mcu_pin,
+      u8 core_peripheral
+      );
+
+int kernel_io_is_pin_assigned_to_pio(mcu_pin_t mcu_pin, u32 io_flags);
 
 int kernel_io_request(
       void * args

@@ -98,7 +98,7 @@ u16 pcal6416a_read(u8 slave_address){
    }
 
    return sysfs_file_read(
-            &m_kernel_shared.i2c_file,
+            kernel_shared_i2c_file(),
             &value,
             2
             );
@@ -131,7 +131,9 @@ int lock_i2c(u8 slave_address){
    int result;
    //lock mutex
 
-   if( pthread_mutex_lock(&m_kernel_shared.i2c_mutex) < 0 ){
+   if( pthread_mutex_lock(
+          kernel_shared_i2c_mutex()
+          ) < 0 ){
       MCU_DEBUG_LINE_TRACE();
       return -1;
    }
@@ -140,7 +142,7 @@ int lock_i2c(u8 slave_address){
    attributes.o_flags = I2C_FLAG_PREPARE_PTR_DATA;
    attributes.slave_addr[0].addr8[0] = slave_address;
    result = sysfs_file_ioctl(
-            &m_kernel_shared.i2c_file,
+            kernel_shared_i2c_file(),
             I_I2C_SETATTR,
             &attributes
             );
@@ -153,7 +155,9 @@ int lock_i2c(u8 slave_address){
 
 int unlock_i2c(){
 
-   if( pthread_mutex_unlock(&m_kernel_shared.i2c_mutex) < 0 ){
+   if( pthread_mutex_unlock(
+          kernel_shared_i2c_mutex()
+          ) < 0 ){
       return -1;
    }
    //unlock mutex
@@ -170,9 +174,9 @@ int update_register(
    u16 value;
    int result;
 
-   m_kernel_shared.i2c_file.loc = command;
+   kernel_shared_i2c_file()->loc = command;
    result = sysfs_file_read(
-            &m_kernel_shared.i2c_file,
+            kernel_shared_i2c_file(),
             &value,
             2
             );
@@ -180,7 +184,7 @@ int update_register(
    if( result == 2 ){
       value = update_function(value, o_mask);
       result = sysfs_file_write(
-               &m_kernel_shared.i2c_file,
+               kernel_shared_i2c_file(),
                &value,
                2
                );

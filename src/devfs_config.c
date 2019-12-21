@@ -47,9 +47,14 @@ limitations under the License.
 #include "devfs/display_device.h"
 #include "devfs/wifi_phy_device.h"
 #include "devfs/pio_device.h"
+#include "devfs/uart_device.h"
+#include "devfs/i2c_device.h"
+#include "devfs/i2s_device.h"
+#include "devfs/spi_device.h"
 
 #include "config.h"
 #include "link_config.h"
+
 
 //--------------------------------------------Device Filesystem-------------------------------------------------
 
@@ -681,7 +686,7 @@ const devfs_device_t devfs_list[] = {
 	DEVFS_DEVICE("trace", ffifo, 0, &board_trace_config, &board_trace_state, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("null", null, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("zero", zero, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
-	DEVFS_DEVICE("random", random, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
+	//DEVFS_DEVICE("random", random, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //user hardware for random values
 	#endif
 	//MCU peripherals
 	DEVFS_DEVICE("core", mcu_core, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
@@ -701,48 +706,46 @@ const devfs_device_t devfs_list[] = {
 	#endif
 
 	#if !_IS_BOOT
-	DEVFS_DEVICE("display0", display_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 
+	DEVFS_DEVICE("i2c_internal", mcu_i2c, 2, &i2c2_config, 0, 0606, SYSFS_ROOT, S_IFCHR), //internal -- root access
+	//DEVFS_DEVICE("i2c3", mcu_i2c, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PB8 and PB9 and also I2C4
+
+	DEVFS_DEVICE("wifi_phy", wifi_phy_device, 2, &wifi_phy_config, &wifi_phy_state, 0666, SYSFS_ROOT, S_IFCHR),
+
+	//User devices:
+	DEVFS_DEVICE("display0", display_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 	DEVFS_DEVICE("adc0", stream_ffifo, 0, &adc0_stream_ffifo_config, &adc0_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("adc1", stream_ffifo, 1, &adc1_stream_ffifo_config, &adc1_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
-
 	DEVFS_DEVICE("dac0", stream_ffifo, 0, &dac0_stream_ffifo_config, &dac0_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("dac1", stream_ffifo, 0, &dac1_stream_ffifo_config, &dac1_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
 
 	//crypto
+	//DEVFS_DEVICE("crypt", mcu_crypt, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
+	//DEVFS_DEVICE("random", mcu_rng, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 	DEVFS_DEVICE("hash0", mcu_hash, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
-	//DEVFS_DEVICE("crypt", mcu_hash, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
-	//DEVFS_DEVICE("random", mcu_hash, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 
-	DEVFS_DEVICE("i2c0", mcu_i2c, 0, &i2c0_config, 0, 0666, SYSFS_USER, S_IFCHR), //PB8 and PB9 - I2C1
-	DEVFS_DEVICE("i2c1", mcu_i2c, 1, &i2c1_config, 0, 0666, SYSFS_USER, S_IFCHR),
-	DEVFS_DEVICE("i2c2", mcu_i2c, 2, &i2c2_config, 0, 0606, SYSFS_ROOT, S_IFCHR), //internal -- root access
-	DEVFS_DEVICE("i2c3", mcu_i2c, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PB8 and PB9 and also I2C4
-
-	DEVFS_DEVICE("i2s0", mcu_i2c, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PE3, PE4, PE5, PE6 SAI1/SAI4 A/B full duplex
-
-	DEVFS_DEVICE("wifi_phy", wifi_phy_device, 2, &wifi_phy_config, &wifi_phy_state, 0666, SYSFS_ROOT, S_IFCHR),
-	DEVFS_DEVICE("spi3", mcu_spi, 3, &spi3_dma_config, 0, 0666, SYSFS_USER, S_IFCHR),
-
-	DEVFS_DEVICE("uart0", mcu_uart, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PA10 USART1 RX ONLY
-	DEVFS_DEVICE("uart1", mcu_uart, 1, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PA2, PA3 UART2
-	DEVFS_DEVICE("uart3", mcu_uart, 3, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PB8, PB9 UART4
-
-	DEVFS_DEVICE("uart5", mcu_uart, 5, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PC6, PC7 USART6
+	DEVFS_DEVICE("i2c0", i2c_device, 0, &i2c0_config, 0, 0666, SYSFS_USER, S_IFCHR), //PB8 and PB9 - I2C1
+	DEVFS_DEVICE("i2c1", i2c_device, 1, &i2c1_config, 0, 0666, SYSFS_USER, S_IFCHR),
+	DEVFS_DEVICE("i2s0", i2s_device, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PE3, PE4, PE5, PE6 SAI1/SAI4 A/B full duplex
+	DEVFS_DEVICE("pio0", pio_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR), //Mapped to 20 pin header
+	DEVFS_DEVICE("pio1", pio_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR), //Mapped to SWD header
+	DEVFS_DEVICE("spi3", spi_device, 3, &spi3_dma_config, 0, 0666, SYSFS_USER, S_IFCHR),
+	DEVFS_DEVICE("uart0", uart_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PA10 USART1 RX ONLY
+	DEVFS_DEVICE("uart1", uart_device, 1, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PA2, PA3 UART2
+	DEVFS_DEVICE("uart3", uart_device, 3, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PB8, PB9 UART4
+	DEVFS_DEVICE("uart5", uart_device, 5, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PC6, PC7 USART6
 
 	DEVFS_DEVICE("tmr14", mcu_tmr, 14, &tmr14_config, 0, 0666, SYSFS_ROOT, S_IFCHR), //TIM15
-
 	#endif
 
-	DEVFS_DEVICE("pio0", mcu_pio, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOA
-	DEVFS_DEVICE("pio1", mcu_pio, 1, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOB
-	DEVFS_DEVICE("pio2", mcu_pio, 2, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOC
-	DEVFS_DEVICE("pio3", mcu_pio, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOD
-	DEVFS_DEVICE("pio4", mcu_pio, 4, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOE
-	DEVFS_DEVICE("pio5", mcu_pio, 5, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOF
-	DEVFS_DEVICE("pio6", mcu_pio, 6, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOG
-	DEVFS_DEVICE("pio7", mcu_pio, 7, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOH
-
+	DEVFS_DEVICE("pio2", mcu_pio, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOA
+	DEVFS_DEVICE("pio3", mcu_pio, 1, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOB
+	DEVFS_DEVICE("pio4", mcu_pio, 2, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOC
+	DEVFS_DEVICE("pio5", mcu_pio, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOD
+	DEVFS_DEVICE("pio6", mcu_pio, 4, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOE
+	DEVFS_DEVICE("pio7", mcu_pio, 5, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOF
+	DEVFS_DEVICE("pio8", mcu_pio, 6, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOG
+	DEVFS_DEVICE("pio9", mcu_pio, 7, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOH
 
 	DEVFS_DEVICE("tmr0", mcu_tmr, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR), //TIM1
 	DEVFS_DEVICE("tmr1", mcu_tmr, 1, 0, 0, 0666, SYSFS_USER, S_IFCHR), //TIM2
