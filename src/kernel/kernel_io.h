@@ -42,10 +42,10 @@ enum kernel_io_pins {
    kernel_io_charge_fast_enable,
    kernel_io_charge_stat1,
    kernel_io_charge_stat2,
-   kernel_io_charge_proximity_mode,
-   kernel_io_charge_vref_enable,
-   kernel_io_charge_div10_enable,
-   kernel_io_charge_vdd_out_enable,
+   kernel_io_proximity_mode,
+   kernel_io_vref_enable,
+   kernel_io_div10_enable,
+   kernel_io_vdd_out_enable,
    kernel_io_total
 };
 

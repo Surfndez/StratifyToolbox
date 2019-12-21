@@ -7,7 +7,7 @@
 #include "kernel_shared.h"
 
 kernel_shared_t m_kernel_shared;
-
+kernel_shared_root_t m_kernel_shared_root MCU_SYS_MEM;
 
 int kernel_shared_init(){
 	int result;

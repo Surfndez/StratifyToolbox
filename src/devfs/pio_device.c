@@ -1,5 +1,7 @@
 
 #include <mcu/pio.h>
+#include "kernel/kernel_io.h"
+
 #include "pio_device.h"
 
 
