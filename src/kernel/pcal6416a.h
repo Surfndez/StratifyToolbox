@@ -4,6 +4,7 @@
 #include <sos/fs/sysfs.h>
 #include <sos/dev/pio.h>
 
+#define PCAL6116A_PORTX 0x00
 #define PCAL6116A_PORTA 0x20
 #define PCAL6116A_PORTB 0x21
 

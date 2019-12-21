@@ -1,5 +1,5 @@
 
-
+#include <mcu/core.h>
 #include "kernel_shared.h"
 #include "kernel_io.h"
 #include "pcal6416a.h"
@@ -39,6 +39,14 @@ const kernel_io_pin_t internal_pin_table[kernel_io_total] = {
    { PCAL6116A_PORTB, 7+8, 1, 0, PIO_FLAG_SET_OUTPUT }, //kernel_io_charge_vdd_out_enable
 };
 
+#define SPI(port) CORE_PERIPH_SPI, port
+#define UART(port) CORE_PERIPH_UART, port
+#define I2C(port) CORE_PERIPH_I2C, port
+#define I2S(port) CORE_PERIPH_I2S, port
+#define PIO(port) CORE_PERIPH_PIO, port
+#define TMR(port) CORE_PERIPH_TMR, port
+#define NONE(port) 0xff, port
+
 typedef struct MCU_PACK {
    u8 port;
    u8 pin;
@@ -47,40 +55,41 @@ typedef struct MCU_PACK {
    u8 init_state;
    u8 resd; //alignment
    u32 init_flags;
+   u8 core_peripheral[4]; //peripheral functions
 } kernel_io_external_pin_t;
 
 static const kernel_io_external_pin_t external_pin_table[kernel_io_external_total] = {
-   { 1, 8, PCAL6116A_PORTA, 0x00, 0, 0, PIO_FLAG_SET_INPUT }, //IO1 RX
-   { 2, 8, 0x00, 0x00, 0, 0, PIO_FLAG_SET_INPUT }, //IO1 SCL -- direct connection to pullups
-   { 1, 9, PCAL6116A_PORTA, 0x01, 0, 0, PIO_FLAG_SET_INPUT }, //IO2 TX
-   { 0, 1, 0x00, 0x00, 0, 0, PIO_FLAG_SET_INPUT }, //IO2 SDA
-   { 4, 11, PCAL6116A_PORTA, 0x02, 0, 0, PIO_FLAG_SET_INPUT }, //IO3 CS
-   { 1, 10, 0x00, 0x00, 0, 0, PIO_FLAG_SET_INPUT }, //IO3 SCL
-   { 4, 12, PCAL6116A_PORTA, 0x03, 0, 0, PIO_FLAG_SET_INPUT }, //IO4 SCK
-   { 1, 11, 0x00, 0x00, 0, 0, PIO_FLAG_SET_INPUT }, //IO4 SDA
-   { 2, 6, PCAL6116A_PORTA, 0x04, 0, 0, PIO_FLAG_SET_INPUT }, //IO5
-   { 4, 13, PCAL6116A_PORTA, 0x04, 0, 0, PIO_FLAG_SET_INPUT }, //IO5
-   { 2, 7, PCAL6116A_PORTA, 0x05, 0, 0, PIO_FLAG_SET_INPUT }, //IO6
-   { 4, 14, PCAL6116A_PORTA, 0x05, 0, 0, PIO_FLAG_SET_INPUT }, //IO6
-   { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 }, //IO7
-   { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0 }, //IO7
-   { 0, 2, PCAL6116A_PORTA, 0x06, 0, 0, PIO_FLAG_SET_INPUT }, //IO8
-   { 1, 5, PCAL6116A_PORTA, 0x06, 0, 0, PIO_FLAG_SET_INPUT }, //IO8
-   { 0, 3, PCAL6116A_PORTA, 0x07, 0, 0, PIO_FLAG_SET_INPUT }, //IO9
-   { 4, 3, PCAL6116A_PORTA, 0x07, 0, 0, PIO_FLAG_SET_INPUT }, //IO9
-   { 0, 6, PCAL6116A_PORTA, 0+8, 0, 0, PIO_FLAG_SET_INPUT }, //IO10
-   { 4, 4, PCAL6116A_PORTA, 0+8, 0, 0, PIO_FLAG_SET_INPUT }, //IO10
-   { 0, 7, PCAL6116A_PORTA, 1+8, 0, 0, PIO_FLAG_SET_INPUT  }, //IO11
-   { 4, 5, PCAL6116A_PORTA, 1+8, 0, 0, PIO_FLAG_SET_INPUT }, //IO11
-   { 0, 15, PCAL6116A_PORTA, 2+8, 0, 0, PIO_FLAG_SET_INPUT }, //IO12
-   { 4, 6, PCAL6116A_PORTA, 2+8, 0, 0, PIO_FLAG_SET_INPUT }, //IO12
-   { 0, 10, PCAL6116A_PORTA, 3+8, 0, 0, PIO_FLAG_SET_INPUT }, //IO13
-   { 0, 9, PCAL6116A_PORTB, 0x05, 0, 0, PIO_FLAG_SET_INPUT }, //SWDIO_TMS
-   { 1, 13, PCAL6116A_PORTB, 0x00, 0, 0, PIO_FLAG_SET_INPUT }, //SWDIO_TCK
-   { 3, 2, PCAL6116A_PORTB, 0x01, 0, 0, PIO_FLAG_SET_INPUT }, //SWDIO_TDO
-   { 3, 3, PCAL6116A_PORTB, 0x02, 0, 0, PIO_FLAG_SET_INPUT }, //SWDIO_TDI
-   { 3, 6, PCAL6116A_PORTB, 0x03, 0, 0, PIO_FLAG_SET_INPUT }, //SWDIO_RESET
-   { 4, 0, PCAL6116A_PORTB, 0x04, 0, 0, PIO_FLAG_SET_INPUT } //RTCK
+   { 2, 8, PCAL6116A_PORTX, 0x00, 0, 0, PIO_FLAG_SET_INPUT, {TMR(3), NONE(0)} }, //IO1 SCL -- direct connection to pullups
+   { 1, 8, PCAL6116A_PORTA, 0x00, 0, 0, PIO_FLAG_SET_INPUT, {I2C(1), UART(4)} }, //IO1 RX
+   { 0, 1, PCAL6116A_PORTX, 0x00, 0, 0, PIO_FLAG_SET_INPUT, {NONE(0), TMR(2)} }, //IO2 SDA
+   { 1, 9, PCAL6116A_PORTA, 0x01, 0, 0, PIO_FLAG_SET_OUTPUT, {I2C(1), UART(4)} }, //IO2 TX -- debugging output
+   { 4, 11, PCAL6116A_PORTA, 0x02, 0, 0, PIO_FLAG_SET_INPUT, {SPI(4), TMR(1)} }, //IO3 CS
+   { 1, 10, PCAL6116A_PORTX, 0x00, 0, 0, PIO_FLAG_SET_INPUT, {I2C(2), TMR(2)} }, //IO3 SCL
+   { 4, 12, PCAL6116A_PORTA, 0x03, 0, 0, PIO_FLAG_SET_INPUT, {SPI(4), NONE(0)} }, //IO4 SCK
+   { 1, 11, PCAL6116A_PORTX, 0x00, 0, 0, PIO_FLAG_SET_INPUT, {I2C(1), TMR(2)} }, //IO4 SDA
+   { 4, 13, PCAL6116A_PORTA, 0x04, 0, 0, PIO_FLAG_SET_INPUT, {SPI(4), TMR(1)} }, //IO5
+   { 2, 6, PCAL6116A_PORTA, 0x04, 0, 0, PIO_FLAG_SET_INPUT, {UART(6), TMR(3)} }, //IO5
+   { 4, 14, PCAL6116A_PORTA, 0x05, 0, 0, PIO_FLAG_SET_INPUT, {SPI(4), TMR(1)} }, //IO6
+   { 2, 7, PCAL6116A_PORTA, 0x05, 0, 0, PIO_FLAG_SET_INPUT, {UART(6), TMR(3)} }, //IO6
+   { 0xff, 0xff, PCAL6116A_PORTX, 0xff, 0xff, 0xff, 0, {NONE(0), NONE(0)} }, //IO7
+   { 0xff, 0xff, PCAL6116A_PORTX, 0xff, 0xff, 0xff, 0, {NONE(0), NONE(0)} }, //IO7
+   { 0, 2, PCAL6116A_PORTA, 0x06, 0, 0, PIO_FLAG_SET_INPUT, {UART(2), TMR(2)} }, //IO8
+   { 1, 5, PCAL6116A_PORTA, 0x06, 0, 0, PIO_FLAG_SET_INPUT, {PIO(1), TMR(3)} }, //IO8
+   { 0, 3, PCAL6116A_PORTA, 0x07, 0, 0, PIO_FLAG_SET_INPUT, {UART(2), TMR(2)} }, //IO9
+   { 4, 3, PCAL6116A_PORTA, 0x07, 0, 0, PIO_FLAG_SET_INPUT, {I2S(4), NONE(0)} }, //IO9
+   { 0, 6, PCAL6116A_PORTA, 0+8, 0, 0, PIO_FLAG_SET_INPUT, {PIO(0), TMR(3)} }, //IO10
+   { 4, 4, PCAL6116A_PORTA, 0+8, 0, 0, PIO_FLAG_SET_INPUT, {I2S(4), NONE(0)} }, //IO10
+   { 0, 7, PCAL6116A_PORTA, 1+8, 0, 0, PIO_FLAG_SET_INPUT, {PIO(0), TMR(3)} }, //IO11
+   { 4, 5, PCAL6116A_PORTA, 1+8, 0, 0, PIO_FLAG_SET_INPUT, {I2S(4), NONE(0)} }, //IO11
+   { 0, 15, PCAL6116A_PORTA, 2+8, 0, 0, PIO_FLAG_SET_INPUT, {PIO(1), TMR(2)} }, //IO12
+   { 4, 6, PCAL6116A_PORTA, 2+8, 0, 0, PIO_FLAG_SET_INPUT, {I2S(4), NONE(0)} }, //IO12
+   { 0, 10, PCAL6116A_PORTA, 3+8, 0, 0, PIO_FLAG_SET_INPUT, {PIO(0), TMR(1)} }, //IO13
+   { 0, 9, PCAL6116A_PORTB, 5, 0, 0, PIO_FLAG_SET_OUTPUT, {PIO(0), NONE(1)} }, //SWDIO_TMS --SWDIO
+   { 1, 13, PCAL6116A_PORTB, 0, 0, 0, PIO_FLAG_SET_OUTPUT, {PIO(1), TMR(1)} }, //SWDIO_TCK
+   { 3, 2, PCAL6116A_PORTB, 1, 0, 0, PIO_FLAG_SET_OUTPUT, {PIO(3), UART(5)} }, //SWDIO_TDO (UART5-RX)
+   { 3, 3, PCAL6116A_PORTB, 2, 0, 0, PIO_FLAG_SET_INPUT, {PIO(3), TMR(1)} }, //SWDIO_TDI
+   { 3, 6, PCAL6116A_PORTB, 3, 0, 0, PIO_FLAG_SET_OUTPUT, {PIO(3), TMR(1)} }, //SWDIO_RESET
+   { 4, 0, PCAL6116A_PORTB, 4, 0, 0, PIO_FLAG_SET_OUTPUT, {PIO(4), TMR(1)} } //RTCK
 };
 
 static int init_internal_pins();
