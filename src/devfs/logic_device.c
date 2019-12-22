@@ -24,6 +24,7 @@ int logic_device_ioctl(
       void * ctl
       ){
    //verify with gate that IO mode is enabled
+   return 0;
 }
 
 int logic_device_read(

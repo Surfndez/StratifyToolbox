@@ -1,5 +1,5 @@
 
-#include <mcu/pio.h>
+#include <mcu/i2c.h>
 #include "kernel/kernel_io.h"
 
 #include "i2c_device.h"

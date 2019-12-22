@@ -8,17 +8,12 @@
 #include "kernel_shared.h"
 
 
-typedef struct {
-	sysfs_file_t i2c_file;
-} kernel_service_t;
-
-kernel_service_t m_state;
-
 static void * kernel_service_thread_function(void * args);
 static int start_kernel_service_thread();
 
 int kernel_service_init(){
 
+#if 1
 	if( kernel_shared_init() < 0 ){
 		MCU_DEBUG_LINE_TRACE();
 		return -1;
@@ -31,6 +26,7 @@ int kernel_service_init(){
 					);
 		return -1;
 	}
+#endif
 
 	//start a new thread that manages the board IO functions
 

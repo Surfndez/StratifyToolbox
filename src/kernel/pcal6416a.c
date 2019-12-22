@@ -45,21 +45,19 @@ int pcal6416a_init(){
 int pcal6416a_setattr(u8 slave_address, const pio_attr_t * attributes){
    const u32 o_flags = attributes->o_flags;
    const u32 o_pinmask = attributes->o_pinmask;
-   MCU_DEBUG_LINE_TRACE();
 
    if( lock_i2c(slave_address) < 0 ){
-      MCU_DEBUG_LINE_TRACE();
       return -1;
    }
 
    if( o_flags & PIO_FLAG_SET_OUTPUT ){
       //update configuration register
-      mcu_debug_printf("configure 0x%X:0x%X as output\n", slave_address, o_pinmask);
+      //mcu_debug_printf("configure 0x%X:0x%X as output\n", slave_address, o_pinmask);
       if( update_register(command_configuration, o_pinmask, clear_register_bits) < 0 ){
          mcu_debug_printf("Error\n");
       }
    } else if( o_flags & PIO_FLAG_SET_INPUT ){
-      MCU_DEBUG_LINE_TRACE();
+      //mcu_debug_printf("configure 0x%X:0x%X as input\n", slave_address, o_pinmask);
       update_register(command_configuration, o_pinmask, set_register_bits);
 
       if( (o_flags & PIO_FLAG_IS_PULLDOWN) ||
@@ -84,7 +82,6 @@ int pcal6416a_setattr(u8 slave_address, const pio_attr_t * attributes){
       }
    }
 
-   MCU_DEBUG_LINE_TRACE();
    unlock_i2c();
 
    return 0;
@@ -134,7 +131,6 @@ int lock_i2c(u8 slave_address){
    if( pthread_mutex_lock(
           kernel_shared_i2c_mutex()
           ) < 0 ){
-      MCU_DEBUG_LINE_TRACE();
       return -1;
    }
 

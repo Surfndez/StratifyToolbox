@@ -35,6 +35,7 @@ typedef struct {
 
 typedef struct MCU_PACK {
    u8 peripheral_function;
+   u8 peripheral_port;
    u8 io_flags; //input, output or unspecified
 } kernel_shared_direction_state_t;
 
@@ -61,6 +62,7 @@ void kernel_shared_root_dereference_i2c(u8 port);
 void kernel_shared_root_set_direction_state(
       u8 pin_number,
       u8 peripheral_function,
+      u8 peripheral_port,
       u8 io_flags
       );
 

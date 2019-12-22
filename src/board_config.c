@@ -32,6 +32,7 @@ limitations under the License.
 #include "board_config.h"
 #include "config.h"
 #include "link_config.h"
+#include "devfs/st7789h2.h"
 #include "mcu/stm32_bsp.h"
 #include "kernel/kernel_loader.h"
 #include "kernel/kernel_service.h"
@@ -101,15 +102,6 @@ void board_event_handler(int event, void * args){
 			mcu_pio_setattr(&pio_handle, &attr);
 			mcu_pio_clrmask(&pio_handle, (void*)attr.o_pinmask);
 #endif
-
-			//PA1 is the I2C
-			attr.o_flags = PIO_FLAG_SET_INPUT | PIO_FLAG_IS_FLOAT;
-			attr.o_pinmask = (1<<1);
-			pio_handle.port = 0;
-			mcu_pio_open(&pio_handle);
-			mcu_pio_setattr(&pio_handle, &attr);
-
-			break;
 
 		case MCU_BOARD_CONFIG_EVENT_ROOT_DEBUG_INITIALIZED:
 			ST7789H2_Init();
