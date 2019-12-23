@@ -107,7 +107,7 @@ void SystemClock_Config(){
 	/** Enable USB Voltage detector
 	  */
 	//HAL_PWREx_EnableUSBVoltageDetector();
-
+	HAL_PWREx_EnableUSBVoltageDetector();
 }
 
 

@@ -8,7 +8,8 @@
 
 #define SL_CONFIG_VERSION_STRING "0.3"
 #define SL_CONFIG_VERSION_BCD 0x03
-#define SL_CONFIG_DOCUMENT_ID "<invalid>"
+#define SL_CONFIG_DOCUMENT_ID ""
+#define SL_CONFIG_TEAM_ID ""
 #define SL_CONFIG_NAME "StratifyToolbox"
 #define SL_CONFIG_TYPE "os"
 #define SL_CONFIG_PUBLISHER "Stratify Labs, Inc"

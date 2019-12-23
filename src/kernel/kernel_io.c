@@ -1,6 +1,7 @@
 
 #include <errno.h>
 #include <mcu/core.h>
+#include <mcu/pio.h>
 #include "kernel_shared.h"
 #include "kernel_io.h"
 #include "pcal6416a.h"
@@ -21,6 +22,7 @@ typedef struct {
    u8 slave_addr;
    u8 slave_pin;
 } toolbox_pin_t;
+
 
 typedef struct MCU_PACK {
    u8 expansion_port;
@@ -53,6 +55,13 @@ const kernel_io_pin_t internal_pin_table[kernel_io_last+1] = {
 #define TMR(port) {CORE_PERIPH_TMR, port}
 #define NONE(port) {CORE_PERIPH_RESERVED, port}
 
+#define PA(x) {0, x}
+#define PB(x) {1, x}
+#define PC(x) {2, x}
+#define PD(x) {3, x}
+#define PE(x) {4, x}
+#define PX(x) {0xff, x}
+
 typedef struct MCU_PACK {
    u8 peripheral;
    u8 port;
@@ -63,35 +72,38 @@ typedef struct MCU_PACK {
 typedef struct MCU_PACK {
    u8 expansion_port;
    u8 expansion_pin;
-   u8 resd;
-   u8 init_flags; //alignment
+   u8 resd; //alignment
+   u8 init_flags;
+   mcu_pin_t primary;
+   mcu_pin_t secondary;
 } kernel_io_external_pin_t;
 
 static const kernel_io_external_pin_t external_pin_table[kernel_shared_direction_channel_last+1] = {
-   { PCAL6116A_PORTA, 0, 0, IN }, //IO1 RX
-   { PCAL6116A_PORTA, 1, 0, DEBUG_UART_DIRECTION }, //IO2 TX -- debugging output
-   { PCAL6116A_PORTA, 2, 0, IN }, //IO3 CS
-   { PCAL6116A_PORTA, 3, 0, IN }, //IO4 SCK
-   { PCAL6116A_PORTA, 4, 0, IN }, //IO5 MISO
-   { PCAL6116A_PORTA, 5, 0, IN }, //IO6 MOSI
-   { PCAL6116A_PORTX, 0, 0, 0 }, //IO7
-   { PCAL6116A_PORTA, 6, 0, IN }, //IO8 TX
-   { PCAL6116A_PORTA, 7, 0, IN }, //IO9
-   { PCAL6116A_PORTA, 8, 0, IN }, //IO10
-   { PCAL6116A_PORTA, 1+8, 0, IN }, //IO11
-   { PCAL6116A_PORTA, 2+8, 0, IN }, //IO12
-   { PCAL6116A_PORTA, 3+8, 0, IN }, //IO13
-   { PCAL6116A_PORTB, 5, 0, IN }, //SWDIO_TMS --SWDIO
-   { PCAL6116A_PORTB, 0, 0, IN }, //SWDIO_TCK
-   { PCAL6116A_PORTB, 1, 0, IN }, //SWDIO_TDO (UART5-RX)
-   { PCAL6116A_PORTB, 2, 0, IN }, //SWDIO_TDI
-   { PCAL6116A_PORTB, 3, 0, IN }, //SWDIO_RESET
-   { PCAL6116A_PORTB, 4, 0, IN } //RTCK -- will probably not be available
+   { PCAL6116A_PORTA, 0, 0, IN, PB(8), PX(0) }, //IO1 RX
+   { PCAL6116A_PORTA, 1, 0, DEBUG_UART_DIRECTION, PB(9), PX(0) }, //IO2 TX -- debugging output
+   { PCAL6116A_PORTA, 2, 0, IN, PE(11), PX(0) }, //IO3 CS
+   { PCAL6116A_PORTA, 3, 0, IN, PE(12), PX(0) }, //IO4 SCK
+   { PCAL6116A_PORTA, 4, 0, IN, PE(13), PC(6) }, //IO5 MISO
+   { PCAL6116A_PORTA, 5, 0, IN, PE(14), PC(7) }, //IO6 MOSI
+   { PCAL6116A_PORTX, 0, 0, 0, PX(0), PX(0) }, //IO7
+   { PCAL6116A_PORTA, 6, 0, IN, PA(2), PB(5) }, //IO8 TX
+   { PCAL6116A_PORTA, 7, 0, IN, PA(3), PE(3) }, //IO9
+   { PCAL6116A_PORTA, 8, 0, IN, PA(6), PE(4) }, //IO10
+   { PCAL6116A_PORTA, 1+8, 0, IN, PA(7), PE(5) }, //IO11
+   { PCAL6116A_PORTA, 2+8, 0, IN, PA(15), PE(6) }, //IO12
+   { PCAL6116A_PORTA, 3+8, 0, IN, PA(10), PX(0) }, //IO13
+   { PCAL6116A_PORTB, 5, 0, IN, PA(9), PX(0) }, //SWDIO_TMS --SWDIO
+   { PCAL6116A_PORTB, 0, 0, IN, PB(13), PX(0) }, //SWDIO_TCK
+   { PCAL6116A_PORTB, 1, 0, IN, PD(2), PX(0)  }, //SWDIO_TDO (UART5-RX)
+   { PCAL6116A_PORTB, 2, 0, IN, PD(3), PX(0) }, //SWDIO_TDI
+   { PCAL6116A_PORTB, 3, 0, IN, PD(6), PX(0) }, //SWDIO_RESET
+   { PCAL6116A_PORTB, 4, 0, IN, PE(0), PX(0) } //RTCK -- will probably not be available
 };
 
 static int init_internal_pins();
 static int init_external_pins();
 static int set_pin_direction(u32 pin_number, int io_flags);
+static void svcall_set_pin_input(void * args);
 static int set_io_function(const toolbox_io_attr_t * attributes);
 static int acquire_pin(
       enum kernel_shared_direction_channels channel,
@@ -249,7 +261,6 @@ int set_io_function(const toolbox_io_attr_t * attributes){
    int result = 0;
 
    if( attributes->peripheral_function == CORE_PERIPH_I2C ){
-
       switch(attributes->peripheral_port){
          case 0:
             result |= acquire_pin(kernel_shared_direction_channel1, CORE_PERIPH_I2C, 0, IN);
@@ -270,11 +281,7 @@ int set_io_function(const toolbox_io_attr_t * attributes){
             break;
       }
 
-   }
-
-   if( attributes->peripheral_function == CORE_PERIPH_SPI ){
-
-
+   } else if( attributes->peripheral_function == CORE_PERIPH_SPI ){
       if( attributes->o_flags & TOOLBOX_IO_FLAG_IS_INVERT_DIRECTION ){
          //slave
          result |= acquire_pin(kernel_shared_direction_channel3, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, IN);
@@ -300,9 +307,7 @@ int set_io_function(const toolbox_io_attr_t * attributes){
             set_pin_direction(kernel_shared_direction_channel6, OUT);
          }
       }
-   }
-
-   if( attributes->peripheral_function == CORE_PERIPH_I2S ){
+   } else if( attributes->peripheral_function == CORE_PERIPH_I2S ){
       if( attributes->o_flags & TOOLBOX_IO_FLAG_IS_INVERT_DIRECTION ){
          //slave
          result |= acquire_pin(kernel_shared_direction_channel9, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, IN);
@@ -328,9 +333,7 @@ int set_io_function(const toolbox_io_attr_t * attributes){
             set_pin_direction(kernel_shared_direction_channel12, OUT);
          }
       }
-   }
-
-   if( attributes->peripheral_function == CORE_PERIPH_UART ){
+   } else if( attributes->peripheral_function == CORE_PERIPH_UART ){
       switch(attributes->peripheral_port){
          case 0:
             result |= acquire_pin(kernel_shared_direction_channel12, CORE_PERIPH_UART, 0, OUT);
@@ -366,15 +369,13 @@ int set_io_function(const toolbox_io_attr_t * attributes){
             }
             break;
       }
-   }
-
-   if( attributes->peripheral_function == CORE_PERIPH_PIO ){
+   } else if( attributes->peripheral_function == CORE_PERIPH_PIO ){
       if( (attributes->peripheral_port == 0) &&
-          (attributes->pin_number < TOOLBOX_IO_PIN_COUNT) ){
+          (attributes->pin_number <= kernel_shared_direction_channel_last) ){
          if( attributes->o_flags & TOOLBOX_IO_FLAG_IS_OUTPUT ){
-            set_pin_direction(attributes->pin_number*2, OUT);
+            set_pin_direction(attributes->pin_number, OUT);
          } else {
-            set_pin_direction(attributes->pin_number*2, IN);
+            set_pin_direction(attributes->pin_number, IN);
          }
       }
    }
@@ -389,6 +390,17 @@ int set_pin_direction(u32 pin_number, int io_flags){
       return 0;
    }
 
+   //set the mcu pins to inputs
+   cortexm_svcall(
+            svcall_set_pin_input,
+            (void*)&external_pin_table[pin_number].primary
+            );
+
+   cortexm_svcall(
+            svcall_set_pin_input,
+            (void*)&external_pin_table[pin_number].secondary
+            );
+
    if( io_flags == IN ){
       pcal6416a_setmask(
                port,
@@ -401,6 +413,19 @@ int set_pin_direction(u32 pin_number, int io_flags){
                );
    }
    return 0;
+}
+
+void svcall_set_pin_input(void * args){
+   CORTEXM_SVCALL_ENTER();
+   mcu_pin_t * pin = args;
+   devfs_handle_t handle = {0};
+   if( pin->port != 0xff ){
+      handle.port = pin->port;
+      pio_attr_t attributes;
+      attributes.o_pinmask = 1<<pin->pin;
+      attributes.o_flags = PIO_FLAG_SET_INPUT | PIO_FLAG_IS_PULLDOWN;
+      mcu_pio_setattr(&handle, &attributes);
+   }
 }
 
 int init_external_pins(){

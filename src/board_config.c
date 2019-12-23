@@ -65,9 +65,6 @@ void board_trace_event(void * event){
 
 
 void board_event_handler(int event, void * args){
-
-	pio_attr_t attr;
-	devfs_handle_t pio_handle;
 	switch(event){
 		case MCU_BOARD_CONFIG_EVENT_ROOT_TASK_INIT:
 			//check for boot to OS request
@@ -113,9 +110,11 @@ void board_event_handler(int event, void * args){
 #if _IS_BOOT
 			kernel_loader_startup();
 #else
-			sos_led_startup();
 			kernel_service_init();
+			sos_led_startup();
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from RAM");
+			__DSB();
+			__ISB();
 #endif
 			break;
 
