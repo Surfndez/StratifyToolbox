@@ -20,6 +20,8 @@ set(SOURCES
 	devfs/display_device.h
 	devfs/lcd.c
 	devfs/lcd.h
+	devfs/swd_device.c
+	devfs/swd_device.h
 	devfs/spi_device.c
 	devfs/spi_device.h
 	devfs/uart_device.c

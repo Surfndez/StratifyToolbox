@@ -314,7 +314,7 @@ sint8 nm_drv_init(void * arg)
 	
 	M2M_INFO("Chip ID %lx\n", nmi_get_chipid());
 	return M2M_SUCCESS;
-#ifdef NO_HW_CHIP_EN
+#if NO_HW_CHIP_EN
 	ret = chip_wake();
 	if (M2M_SUCCESS != ret) {
 		M2M_ERR("[nmi start]: fail chip_wakeup\n");

@@ -60,7 +60,7 @@ int nm_bsp_toolbox_spi_read_write(
 #define NM_BSP_PRINTF
 
 #define CONF_WINC_USE_SPI	1
-#define NO_HW_CHIP_EN 1
+#define NO_HW_CHIP_EN 0
 
 #define NM_EDGE_INTERRUPT	1
 

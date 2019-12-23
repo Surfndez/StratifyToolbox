@@ -30,7 +30,7 @@ int kernel_service_init(){
 
 
 	//start the WIFI
-#if 0
+#if 1
 	if( sos_board_config.socket_api ){
 		sos_board_config.socket_api->startup(
 					sos_board_config.socket_api->config

@@ -49,6 +49,7 @@
 #include "common/include/nm_common.h"
 #include "devfs/wifi_phy_device.h"
 #include "kernel/wifi_api.h"
+#include "kernel/kernel_io.h"
 
 /*
  *	@fn		nm_bsp_init
@@ -65,6 +66,9 @@ sint8 nm_bsp_init(void)
 			sos_board_config.socket_api->config;
 
 	MCU_DEBUG_LINE_TRACE();
+
+	kernel_io_set(kernel_io_wifi_chip_enable);
+	kernel_io_set(kernel_io_wifi_wake);
 
 	int result;
 	if( (result =
@@ -111,42 +115,16 @@ sint8 nm_bsp_deinit(void)
  */
 void nm_bsp_reset(void){
 	//toggle the HW reset pin
-	const wifi_api_config_t * config = sos_board_config.socket_api->config;
 
 	mcu_debug_log_info(
 				MCU_DEBUG_SOCKET,
 				"reset wifi chip"
 				);
-	int result = sysfs_shared_ioctl(
-				&config->device_config,
-				I_WIFIPHY_ASSERT_RESET,
-				0
-				);
-	if( result < 0 ){
-		mcu_debug_log_error(
-					MCU_DEBUG_SOCKET,
-					"Failed to assert wifi phy reset (%d, %d)",
-					result,
-					errno
-					);
-	}
 
+	kernel_io_clear(kernel_io_wifi_reset);
 	usleep(10*1000);
+	kernel_io_set(kernel_io_wifi_reset);
 
-	result = sysfs_shared_ioctl(
-				&config->device_config,
-				I_WIFIPHY_DEASSERT_RESET,
-				0
-				);
-
-	if( result < 0 ){
-		mcu_debug_log_error(
-					MCU_DEBUG_SOCKET,
-					"Failed to deassert wifi phy reset (%d, %d)",
-					result,
-					errno
-					);
-	}
 }
 
 /*
