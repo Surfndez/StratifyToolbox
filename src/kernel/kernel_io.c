@@ -67,8 +67,6 @@ typedef struct MCU_PACK {
    u8 port;
 } kernel_io_core_peripheral_t;
 
-
-
 typedef struct MCU_PACK {
    u8 expansion_port;
    u8 expansion_pin;
@@ -79,6 +77,7 @@ typedef struct MCU_PACK {
 } kernel_io_external_pin_t;
 
 static const kernel_io_external_pin_t external_pin_table[kernel_shared_direction_channel_last+1] = {
+   { PCAL6116A_PORTX, 0, 0, IN, PX(0), PX(0) }, //IO0 - doesn't exist
    { PCAL6116A_PORTA, 0, 0, IN, PB(8), PX(0) }, //IO1 RX
    { PCAL6116A_PORTA, 1, 0, DEBUG_UART_DIRECTION, PB(9), PX(0) }, //IO2 TX -- debugging output
    { PCAL6116A_PORTA, 2, 0, IN, PE(11), PX(0) }, //IO3 CS
@@ -174,7 +173,7 @@ int kernel_io_request(
    }
 
    if( attributes->o_flags & TOOLBOX_IO_FLAG_ENABLE_VDD_OUT ){
-      kernel_io_clear(kernel_io_vdd_out_enable); //active low
+      kernel_io_clear(kernel_io_vdd_out_enable);
    } else if( attributes->o_flags & TOOLBOX_IO_FLAG_DISABLE_VDD_OUT ){
       kernel_io_set(kernel_io_vdd_out_enable);
    }
@@ -189,19 +188,29 @@ int kernel_io_is_direction_assigned(
       ){
 
 
-   if( kernel_shared_get_direction_state(channel)->peripheral_function
+   const kernel_shared_direction_state_t * direction_state =
+         kernel_shared_get_direction_state(channel);
+
+   if( direction_state->peripheral_function
        != peripheral_function ){
+      mcu_debug_printf("function mismatch %d (%d != %d)\n",
+                       channel,
+                       direction_state->peripheral_function,
+                       peripheral_function
+                       );
       return SYSFS_SET_RETURN(EINVAL);
    }
 
-   int active_flags = kernel_shared_get_direction_state(channel)->io_flags;
+   int active_flags = direction_state->io_flags;
 
    //check for direction conflict
    if( (io_flags & IN) && (active_flags & OUT) ){
+      mcu_debug_printf("dir1 mismatch %d\n", channel);
       return SYSFS_SET_RETURN(EPROTO);
    }
 
    if( (io_flags & OUT) && (active_flags & IN) ){
+      mcu_debug_printf("dir2 mismatch %d\n", channel);
       return SYSFS_SET_RETURN(EPROTO);
    }
 
@@ -370,13 +379,24 @@ int set_io_function(const toolbox_io_attr_t * attributes){
             break;
       }
    } else if( attributes->peripheral_function == CORE_PERIPH_PIO ){
+
       if( (attributes->peripheral_port == 0) &&
           (attributes->pin_number <= kernel_shared_direction_channel_last) ){
+
+         u8 io_flags;
          if( attributes->o_flags & TOOLBOX_IO_FLAG_IS_OUTPUT ){
-            set_pin_direction(attributes->pin_number, OUT);
+            io_flags = OUT;
          } else {
-            set_pin_direction(attributes->pin_number, IN);
+            io_flags = IN;
          }
+         result |= acquire_pin(attributes->pin_number, CORE_PERIPH_PIO, 0, io_flags);
+         if( result == 0 ){
+            set_pin_direction(attributes->pin_number, io_flags);
+         } else {
+            mcu_debug_printf("failed to acquire pin\n");
+         }
+
+
       }
    }
 
@@ -390,7 +410,7 @@ int set_pin_direction(u32 pin_number, int io_flags){
       return 0;
    }
 
-   //set the mcu pins to inputs
+   //set the mcu pins to inputs to prevent driving conflicts
    cortexm_svcall(
             svcall_set_pin_input,
             (void*)&external_pin_table[pin_number].primary
@@ -401,7 +421,7 @@ int set_pin_direction(u32 pin_number, int io_flags){
             (void*)&external_pin_table[pin_number].secondary
             );
 
-   if( io_flags == IN ){
+   if( io_flags & OUT ){
       pcal6416a_setmask(
                port,
                o_pinmask
@@ -439,9 +459,15 @@ int init_external_pins(){
 
          //set the direction control pin
          if( io_pin->init_flags & IN ){
-            kernel_io_set(i);
+            return pcal6416a_setmask(
+                     io_pin->expansion_port,
+                     1<<io_pin->expansion_pin
+                     );
          } else {
-            kernel_io_clear(i);
+            return pcal6416a_clrmask(
+                     io_pin->expansion_port,
+                     1<<io_pin->expansion_pin
+                     );
          }
 
          //all direction control pins are outputs

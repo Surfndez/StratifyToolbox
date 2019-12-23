@@ -4,13 +4,14 @@
 #include "pio_device.h"
 
 const mcu_pin_t io_mcu_pin_table[kernel_shared_direction_channel_last+1] = {
+   { 0xff, 0xff }, //Doesn't exist -- start with pin1
    { 1, 8 }, //PB8
    { 1, 9 }, //PB9
    { 4, 11 }, //PE11
    { 4, 12 }, //PE12
    { 4, 13 }, //PE13
    { 4, 14 }, //PE14
-   { 0xff, 0xff }, //Not connected
+   { 0xff, 0xff }, //Not connected -- ground pin
    { 0, 2 }, //PA2
    { 0, 3 }, //PA3
    { 0, 6 }, //PA6
@@ -69,10 +70,8 @@ int pio_device_ioctl(
                         attributes->o_flags
                         );
                if( result < 0 ){
+                  mcu_debug_printf("Pin is busy with another peripheral\n");
                   return result;
-               }
-               if( result == 0 ){
-                  return SYSFS_SET_RETURN(EBUSY);
                }
             }
          }
@@ -81,9 +80,11 @@ int pio_device_ioctl(
          return setattr(attributes->o_pinmask, attributes->o_flags);
 
       case I_PIO_SETMASK:
+         mcu_debug_printf("set mask 0x%lX\n", (u32)ctl);
          return setmask((u32)ctl);
 
       case I_PIO_CLRMASK:
+         mcu_debug_printf("clr mask 0x%lX\n", (u32)ctl);
          return clrmask((u32)ctl);
 
       case I_PIO_SET:
@@ -119,10 +120,17 @@ int setattr(u32 o_pinmask, u32 o_flags){
    for(u32 i=kernel_shared_direction_channel_first;
        i < kernel_shared_direction_channel_last+1;
        i++){
-      if( o_pinmask & (1<<i) ){
-         pin = io_mcu_pin_table[i];
+      pin = io_mcu_pin_table[i];
+      if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
          handle.port = pin.port;
          attributes.o_pinmask = (1<<pin.pin);
+         mcu_debug_printf(
+                  "0.%d -> %d.%d setattr 0x%lX\n",
+                  i,
+                  pin.port,
+                  pin.pin,
+                  o_flags
+                  );
          mcu_pio_setattr(&handle, &attributes);
       }
    }
@@ -135,10 +143,21 @@ int setmask(u32 o_pinmask){
    for(u32 i=kernel_shared_direction_channel_first;
        i < kernel_shared_direction_channel_last+1;
        i++){
-      if( o_pinmask & (1<<i) ){
-         pin = io_mcu_pin_table[i];
+      pin = io_mcu_pin_table[i];
+      mcu_debug_printf("check %d -> %d.%d\n",
+                       i,
+                       pin.port,
+                       pin.pin
+                       );
+      if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
          handle.port = pin.port;
          u32 pin_mask = 1<<pin.pin;
+         mcu_debug_printf(
+                  "0.%d -> %d.%d set\n",
+                  i,
+                  pin.port,
+                  pin.pin
+                  );
          mcu_pio_setmask(&handle, &pin_mask);
       }
    }
@@ -151,10 +170,16 @@ int clrmask(u32 o_pinmask){
    for(u32 i=kernel_shared_direction_channel_first;
        i < kernel_shared_direction_channel_last+1;
        i++){
-      if( o_pinmask & (1<<i) ){
-         pin = io_mcu_pin_table[i];
+      pin = io_mcu_pin_table[i];
+      if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
          handle.port = pin.port;
          u32 pin_mask = 1<<pin.pin;
+         mcu_debug_printf(
+                  "0.%d -> %d.%d set\n",
+                  i,
+                  pin.port,
+                  pin.pin
+                  );
          mcu_pio_clrmask(&handle, &pin_mask);
       }
    }
@@ -176,10 +201,12 @@ int get(u32 * o_pinmask){
        i < kernel_shared_direction_channel_last+1;
        i++){
       pin = io_mcu_pin_table[i];
-      handle.port = pin.port;
-      mcu_pio_get(&handle, &tmp);
-      if( tmp & 1<<pin.pin ){
-         result |= 1<<i;
+      if( pin.port != 0xff ){
+         handle.port = pin.port;
+         mcu_pio_get(&handle, &tmp);
+         if( tmp & 1<<pin.pin ){
+            result |= 1<<i;
+         }
       }
    }
    *o_pinmask = result;

@@ -5,6 +5,7 @@
 #include <pthread.h>
 
 enum kernel_shared_direction_channels {
+   kernel_shared_direction_channel0,
    kernel_shared_direction_channel1,
    kernel_shared_direction_channel2,
    kernel_shared_direction_channel3,
@@ -24,7 +25,7 @@ enum kernel_shared_direction_channels {
    kernel_shared_direction_channel_tdi,
    kernel_shared_direction_channel_reset,
    kernel_shared_direction_channel_rtck,
-   kernel_shared_direction_channel_first = kernel_shared_direction_channel1,
+   kernel_shared_direction_channel_first = kernel_shared_direction_channel0,
    kernel_shared_direction_channel_last = kernel_shared_direction_channel_rtck
 };
 

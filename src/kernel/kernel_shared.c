@@ -19,12 +19,12 @@ int kernel_shared_init(){
 
 	pthread_mutexattr_t mutex_attr;
 	pthread_mutexattr_init(&mutex_attr);
+	pthread_mutexattr_setpshared(&mutex_attr, 1);
 	pthread_mutex_init(
 				&m_kernel_shared.i2c_mutex,
 				&mutex_attr
 				);
 
-	mcu_debug_log_info(MCU_DEBUG_USER0, "init kernel service");
 	m_kernel_shared.i2c_file.fs = &(sysfs_list[1]);
 	m_kernel_shared.i2c_file.flags = O_RDWR;
 	m_kernel_shared.i2c_file.loc = 0;
@@ -45,10 +45,6 @@ int kernel_shared_init(){
 		return -1;
 	}
 
-	mcu_debug_log_info(
-				MCU_DEBUG_USER0,
-				"set I2C attr"
-				);
 	result = sysfs_file_ioctl(&m_kernel_shared.i2c_file, I_I2C_SETATTR, 0);
 	if( result < 0 ){
 		mcu_debug_log_error(
@@ -66,12 +62,17 @@ void svcall_init(void * args){
    MCU_UNUSED_ARGUMENT(args);
    for(enum kernel_shared_direction_channels channel
        = kernel_shared_direction_channel_first;
-       channel < kernel_shared_direction_channel_first+1;
+       channel < kernel_shared_direction_channel_last+1;
        channel++){
       kernel_shared_direction_state_t * direction_state =
             m_kernel_shared_root.direction_state + channel;
 
-      direction_state->peripheral_function = CORE_PERIPH_PIO;
+      if( (channel == kernel_shared_direction_channel0) ||
+          (channel == kernel_shared_direction_channel7) ){
+         direction_state->peripheral_function = CORE_PERIPH_RESERVED;
+      } else {
+         direction_state->peripheral_function = CORE_PERIPH_PIO;
+      }
       direction_state->peripheral_port = 0;
       direction_state->io_flags = 0;
    }

@@ -99,6 +99,7 @@ void board_event_handler(int event, void * args){
 			mcu_pio_setattr(&pio_handle, &attr);
 			mcu_pio_clrmask(&pio_handle, (void*)attr.o_pinmask);
 #endif
+			break;
 
 		case MCU_BOARD_CONFIG_EVENT_ROOT_DEBUG_INITIALIZED:
 			ST7789H2_Init();
@@ -113,8 +114,6 @@ void board_event_handler(int event, void * args){
 			kernel_service_init();
 			sos_led_startup();
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from RAM");
-			__DSB();
-			__ISB();
 #endif
 			break;
 

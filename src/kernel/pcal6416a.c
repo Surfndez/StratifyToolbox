@@ -47,6 +47,7 @@ int pcal6416a_setattr(u8 slave_address, const pio_attr_t * attributes){
    const u32 o_pinmask = attributes->o_pinmask;
 
    if( lock_i2c(slave_address) < 0 ){
+      mcu_debug_log_error(MCU_DEBUG_USER0, "%s():%d", __FUNCTION__, __LINE__);
       return -1;
    }
 
@@ -54,7 +55,7 @@ int pcal6416a_setattr(u8 slave_address, const pio_attr_t * attributes){
       //update configuration register
       //mcu_debug_printf("configure 0x%X:0x%X as output\n", slave_address, o_pinmask);
       if( update_register(command_configuration, o_pinmask, clear_register_bits) < 0 ){
-         mcu_debug_printf("Error\n");
+         mcu_debug_log_error(MCU_DEBUG_USER0, "%s():%d", __FUNCTION__, __LINE__);
       }
    } else if( o_flags & PIO_FLAG_SET_INPUT ){
       //mcu_debug_printf("configure 0x%X:0x%X as input\n", slave_address, o_pinmask);
@@ -72,7 +73,7 @@ int pcal6416a_setattr(u8 slave_address, const pio_attr_t * attributes){
                   command_pullup_pulldown_selection,
                   o_pinmask,
                   (o_flags & PIO_FLAG_IS_PULLUP) ? set_register_bits : clear_register_bits
-                  );
+                                                   );
       } else {
          update_register(
                   command_pullup_pulldown_enable,
@@ -117,6 +118,7 @@ int pcal6416a_setmask(u8 slave_address, u16 o_mask){
 
 int pcal6416a_clrmask(u8 slave_address, u16 o_mask){
    if( lock_i2c(slave_address) < 0 ){
+      mcu_debug_log_error(MCU_DEBUG_USER0, "%s():%d", __FUNCTION__, __LINE__);
       return -1;
    }
    int result = update_register(command_output, o_mask, clear_register_bits);
@@ -131,6 +133,11 @@ int lock_i2c(u8 slave_address){
    if( pthread_mutex_lock(
           kernel_shared_i2c_mutex()
           ) < 0 ){
+      mcu_debug_log_error(
+               MCU_DEBUG_USER0,
+               "failed to lock mutex for 0x%X",
+               slave_address
+               );
       return -1;
    }
 
@@ -183,6 +190,16 @@ int update_register(
                kernel_shared_i2c_file(),
                &value,
                2
+               );
+      if( result != 2 ){
+         mcu_debug_log_error(MCU_DEBUG_USER0, "%s():%d", __FUNCTION__, __LINE__);
+      }
+   } else {
+      mcu_debug_log_error(
+               MCU_DEBUG_USER0,
+               "%s():%d",
+               __FUNCTION__,
+               __LINE__
                );
    }
 
