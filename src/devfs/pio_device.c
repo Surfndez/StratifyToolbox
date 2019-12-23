@@ -80,11 +80,9 @@ int pio_device_ioctl(
          return setattr(attributes->o_pinmask, attributes->o_flags);
 
       case I_PIO_SETMASK:
-         mcu_debug_printf("set mask 0x%lX\n", (u32)ctl);
          return setmask((u32)ctl);
 
       case I_PIO_CLRMASK:
-         mcu_debug_printf("clr mask 0x%lX\n", (u32)ctl);
          return clrmask((u32)ctl);
 
       case I_PIO_SET:
@@ -124,13 +122,6 @@ int setattr(u32 o_pinmask, u32 o_flags){
       if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
          handle.port = pin.port;
          attributes.o_pinmask = (1<<pin.pin);
-         mcu_debug_printf(
-                  "0.%d -> %d.%d setattr 0x%lX\n",
-                  i,
-                  pin.port,
-                  pin.pin,
-                  o_flags
-                  );
          mcu_pio_setattr(&handle, &attributes);
       }
    }
@@ -144,20 +135,9 @@ int setmask(u32 o_pinmask){
        i < kernel_shared_direction_channel_last+1;
        i++){
       pin = io_mcu_pin_table[i];
-      mcu_debug_printf("check %d -> %d.%d\n",
-                       i,
-                       pin.port,
-                       pin.pin
-                       );
       if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
          handle.port = pin.port;
          u32 pin_mask = 1<<pin.pin;
-         mcu_debug_printf(
-                  "0.%d -> %d.%d set\n",
-                  i,
-                  pin.port,
-                  pin.pin
-                  );
          mcu_pio_setmask(&handle, &pin_mask);
       }
    }
@@ -174,12 +154,6 @@ int clrmask(u32 o_pinmask){
       if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
          handle.port = pin.port;
          u32 pin_mask = 1<<pin.pin;
-         mcu_debug_printf(
-                  "0.%d -> %d.%d set\n",
-                  i,
-                  pin.port,
-                  pin.pin
-                  );
          mcu_pio_clrmask(&handle, &pin_mask);
       }
    }
