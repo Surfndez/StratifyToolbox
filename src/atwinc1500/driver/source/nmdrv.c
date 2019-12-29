@@ -311,7 +311,6 @@ sint8 nm_drv_init(void * arg)
 	return;
 #endif
 	
-	
 	M2M_INFO("Chip ID %lx\n", nmi_get_chipid());
 #if NO_HW_CHIP_EN
 	ret = chip_wake();
@@ -327,9 +326,6 @@ sint8 nm_drv_init(void * arg)
 		goto ERR2;
 	}
 #endif
-	for(u32 i=0; i < 10; i++){
-		M2M_INFO("Chip ID %lx - %d\n", nmi_get_chipid(), i);
-	}
 //#ifdef ARDUINO
 	if ((REV(GET_CHIPID()) & 0xff0) != REV_3A0 && (REV(GET_CHIPID()) & 0xff0) != REV_B0) {
 		ret = M2M_ERR_INVALID;
@@ -338,16 +334,13 @@ sint8 nm_drv_init(void * arg)
 //#endif
 #ifdef CONF_WINC_USE_SPI
 	/* Must do this after global reset to set SPI data packet size. */
-	M2M_INFO("SPI Init");
 	nm_spi_init();
 #endif
-	M2M_INFO("wait for bootrom %d", u8Mode);
 	ret = wait_for_bootrom(u8Mode);
 	if (M2M_SUCCESS != ret) {
 		goto ERR2;
 	}
 		
-	M2M_INFO("wait for firmware start %d", u8Mode);
 	ret = wait_for_firmware_start(u8Mode);
 	if (M2M_SUCCESS != ret) {
 		goto ERR2;
@@ -359,7 +352,6 @@ sint8 nm_drv_init(void * arg)
 		/*continue running*/
 	}
 	
-	M2M_INFO("enable interrupts");
 	ret = enable_interrupts();
 	if (M2M_SUCCESS != ret) {
 		M2M_ERR("failed to enable interrupts..\n");

@@ -241,7 +241,7 @@ int nm_bsp_toolbox_spi_read_write(
 		return M2M_ERR_BUS_FAIL;
 	}
 
-#if 1
+#if 0
 	for(int i=0; i < u16Sz; i++){
 		mcu_debug_printf("SPI[%d]: ", i);
 		if( pu8Mosi ){

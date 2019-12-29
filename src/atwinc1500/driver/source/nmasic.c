@@ -491,7 +491,7 @@ sint8 wait_for_firmware_start(uint8 arg)
 	while (checkValue != reg)
 	{
 		nm_bsp_sleep(2); /* TODO: Why bus error if this delay is not here. */
-		M2M_DBG("%x %x %x\n",(unsigned int)nm_read_reg(0x108c),(unsigned int)nm_read_reg(0x108c),(unsigned int)nm_read_reg(0x14A0));
+		//M2M_DBG("%x %x %x\n",(unsigned int)nm_read_reg(0x108c),(unsigned int)nm_read_reg(0x108c),(unsigned int)nm_read_reg(0x14A0));
 		reg = nm_read_reg(regAddress);
 		if(++cnt >= u32Timeout)
 		{
