@@ -42,7 +42,7 @@
 
 #ifdef CONF_WINC_USE_SPI
 
-#define USE_OLD_SPI_SW
+//#define USE_OLD_SPI_SW 1
 
 #include "bus_wrapper/include/nm_bus_wrapper.h"
 #include "nmspi.h"

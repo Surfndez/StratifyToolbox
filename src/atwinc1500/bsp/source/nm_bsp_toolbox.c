@@ -121,8 +121,11 @@ void nm_bsp_reset(void){
 				"reset wifi chip"
 				);
 
+	kernel_io_clear(kernel_io_wifi_chip_enable);
 	kernel_io_clear(kernel_io_wifi_reset);
 	usleep(10*1000);
+	kernel_io_set(kernel_io_wifi_chip_enable);
+	usleep(5*1000);
 	kernel_io_set(kernel_io_wifi_reset);
 
 }
