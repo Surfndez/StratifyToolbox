@@ -211,7 +211,7 @@ int nm_bsp_toolbox_spi_read_write(
 					);
 	}
 
-	//execute the full duplex transfer
+	//execute the half duplex transfer
 	result = -1;
 	if( pu8Mosi ){ //master output
 

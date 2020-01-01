@@ -166,7 +166,7 @@ int wifi_api_fsync(int s){
 }
 
 struct hostent * wifi_api_gethostbyname(const char *name){
-	return 0;
+	return m2m_gethostbyname((u8*)name);
 }
 
 int wifi_api_gethostbyname_r(

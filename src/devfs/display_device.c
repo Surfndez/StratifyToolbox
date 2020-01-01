@@ -129,6 +129,7 @@ int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
 			return SYSFS_SET_RETURN(EPERM);
 		}
 
+		//bitmap must be at least as big as the window
 		if( bmap->area.width < m_window.area.width ){
 			MCU_DEBUG_LINE_TRACE();
 			return SYSFS_SET_RETURN(EINVAL);
@@ -139,9 +140,8 @@ int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
 			return SYSFS_SET_RETURN(EINVAL);
 		}
 
-		//start the cursor at the window area of the bitmap
-		//bitmap is
-		sg_cursor_set(&y_cursor, bmap, m_window.point);
+		//the entire whole bitmap is written to the window
+		sg_cursor_set(&y_cursor, bmap, sg_point(0,0));
 
 		/* Prepare to write to LCD RAM */
 

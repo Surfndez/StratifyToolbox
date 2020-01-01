@@ -5,12 +5,18 @@ set(SOURCES
 	kernel/kernel_request.c
 	kernel/kernel_io.c
 	kernel/kernel_io.h
+	kernel/kernel_touch.c
+	kernel/kernel_touch.h
 	kernel/kernel_service.c
 	kernel/kernel_service.h
 	kernel/kernel_shared.c
 	kernel/kernel_shared.h
 	kernel/wifi_api.c
 	kernel/wifi_api.h
+	kernel/i2c_internal.c
+	kernel/i2c_internal.h
+	kernel/ft5446.c
+	kernel/ft5446.h
 	kernel/pcal6416a.c
 	kernel/pcal6416a.h
 

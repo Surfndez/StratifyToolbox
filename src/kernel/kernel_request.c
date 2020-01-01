@@ -3,13 +3,20 @@
 #include <mbedtls_api.h>
 #include <sapi/sg.h>
 #include <sos/crypt_api.h>
+#include <ToolboxAPI/toolbox_io.h>
+#include <ToolboxAPI/toolbox_touch.h>
 
 #include "kernel_io.h"
+#include "kernel_touch.h"
 
 int kernel_request(int request, void * args){
 #if !_IS_BOOT
-	if( request == MCU_REQUEST_CODE('t','b','i','o') ){
+	if( request == TOOLBOX_IO_REQUEST ){
 		return kernel_io_request(args);
+	}
+
+	if( request == TOOLBOX_TOUCH_REQUEST ){
+		return kernel_touch_request(args);
 	}
 #endif
 	return 0;
@@ -25,6 +32,7 @@ const void * kernel_request_api(u32 request){
 		//case MBEDTLS_API_REQUEST:
 			//return &mbedtls_api;
 #endif
+			//switchthis overt to the hardware crypt unit
 		case CRYPT_SHA256_API_REQUEST:
 			return &tinycrypt_sha256_hash_api;
 	}

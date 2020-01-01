@@ -6,15 +6,22 @@
 #include "kernel_service.h"
 #include "kernel_io.h"
 #include "kernel_shared.h"
-
+#include "i2c_internal.h"
 
 static void * kernel_service_thread_function(void * args);
 static int start_kernel_service_thread();
 
 int kernel_service_init(){
-
 	if( kernel_shared_init() < 0 ){
 		MCU_DEBUG_LINE_TRACE();
+		return -1;
+	}
+
+	if( i2c_internal_init() < 0 ){
+		mcu_debug_log_error(
+					MCU_DEBUG_USER0,
+					"failed to init internal I2C"
+					);
 		return -1;
 	}
 
