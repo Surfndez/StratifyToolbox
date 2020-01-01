@@ -64,3 +64,12 @@ Scanning the internal I2C Bus:
 sl cloud.install:id=2Cd5njdQwfvvxB1yJTK1
 sl app.run:path=i2ctool,terminal,args='--action=scan --port=2'
 ```
+
+## Fonts and Icons
+
+Convert SVG files and copy to the `/home/` filesystem.
+
+```
+fonttool --action=convert --icon --input=StratifyToolbox/assets/icons/group1 --output=StratifyToolbox/assets
+sl fs.copy:source=host@StratifyToolbox/assets/group1.svic,dest=device@/home/group1.svic
+```
