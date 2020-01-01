@@ -1,6 +1,7 @@
 #ifndef KERNEL_SHARED_H
 #define KERNEL_SHARED_H
 
+#include <ToolboxAPI/toolbox_touch.h>
 #include <sos/fs/sysfs.h>
 #include <pthread.h>
 
@@ -32,6 +33,7 @@ enum kernel_shared_direction_channels {
 typedef struct {
    sysfs_file_t i2c_file;
    pthread_mutex_t i2c_mutex;
+   toolbox_touch_packet_t last_touch_packet;
 } kernel_shared_t;
 
 typedef struct MCU_PACK {
@@ -73,5 +75,6 @@ const kernel_shared_direction_state_t * kernel_shared_get_direction_state(
 
 sysfs_file_t * kernel_shared_i2c_file();
 pthread_mutex_t * kernel_shared_i2c_mutex();
+toolbox_touch_packet_t * kernel_shared_last_touch_packet();
 
 #endif // KERNEL_SHARED_H

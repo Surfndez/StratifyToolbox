@@ -8,8 +8,8 @@ typedef struct MCU_PACK {
 	u8 x_low;
 	u8 y_high;
 	u8 y_low;
-	u8 w;
-	u8 m;
+	u8 pressure;
+	u8 area;
 } ft5446_touch_t;
 
 typedef struct MCU_PACK {

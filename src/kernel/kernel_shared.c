@@ -64,6 +64,10 @@ sysfs_file_t * kernel_shared_i2c_file(){
    return &m_kernel_shared.i2c_file;
 }
 
+toolbox_touch_packet_t * kernel_shared_last_touch_packet(){
+   return &m_kernel_shared.last_touch_packet;
+}
+
 pthread_mutex_t * kernel_shared_i2c_mutex(){
    return &m_kernel_shared.i2c_mutex;
 }
