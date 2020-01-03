@@ -34,6 +34,7 @@ int display_device_close(const devfs_handle_t * handle){
 
 int display_device_ioctl(const devfs_handle_t * handle, int request, void * ctl){
 	display_attr_t * attr = ctl;
+	display_palette_t * incoming_palette = ctl;
 	int result;
 
 	switch(request){
@@ -97,6 +98,15 @@ int display_device_ioctl(const devfs_handle_t * handle, int request, void * ctl)
 		case I_DISPLAY_GETPALETTE:
 			memcpy(ctl, &m_display_palette, sizeof(m_display_palette));
 			return SYSFS_RETURN_SUCCESS;
+
+		case I_DISPLAY_SETPALETTE:
+			if( incoming_palette->count == m_display_palette.count ){
+				mcu_debug_log_info(MCU_DEBUG_USER0, "update palette colors");
+				memcpy(m_display_palette.colors, incoming_palette->colors, m_display_palette.count*sizeof(u16));
+				return SYSFS_RETURN_SUCCESS;
+			}
+
+			return SYSFS_SET_RETURN(EINVAL);
 	}
 
 	return SYSFS_SET_RETURN(EINVAL);
@@ -151,6 +161,7 @@ int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
 				sg_color_t color = sg_cursor_get_pixel_increment(&x_cursor, 1, 0);
 				//get the LCD color from the palette
 				m_row_buffer[w] = m_display_colors[color & 0x0f];
+			//	mcu_debug_printf("apply color 0x%04X\n", m_row_buffer[w]);
 			}
 			//use a row buffer
 			LCD_IO_WriteDataBlockRgb(
