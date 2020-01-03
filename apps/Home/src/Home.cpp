@@ -36,7 +36,7 @@ Home::Home(Application & application)
             .set_label("1")
             .set_theme_style(Theme::style_brand_primary)
             .set_drawing_point(ux::DrawingPoint(0,0))
-            .set_drawing_area(ux::DrawingArea(300,300))
+            .set_drawing_area(ux::DrawingArea(200,200))
             );
 
    add_component(
@@ -45,15 +45,6 @@ Home::Home(Application & application)
             .set_label("2")
             .set_theme_style(Theme::style_brand_secondary)
             .set_drawing_point(ux::DrawingPoint(350,0))
-            .set_drawing_area(ux::DrawingArea(300,300))
-            );
-
-   add_component(
-            "Button",
-            &(* new ux::Button())
-            .set_label("light")
-            .set_theme_style(Theme::style_light)
-            .set_drawing_point(ux::DrawingPoint(0,350))
             .set_drawing_area(ux::DrawingArea(300,300))
             );
 
@@ -69,7 +60,7 @@ Home::Home(Application & application)
    add_component(
             "Button",
             &(* new ux::Button())
-            .set_label("success")
+            .set_label("yes")
             .set_theme_style(Theme::style_success)
             .set_drawing_point(ux::DrawingPoint(0,350))
             .set_drawing_area(ux::DrawingArea(300,300))
@@ -78,7 +69,7 @@ Home::Home(Application & application)
    add_component(
             "Button",
             &(* new ux::Button())
-            .set_label("danger")
+            .set_label("no")
             .set_theme_style(Theme::style_danger)
             .set_drawing_point(ux::DrawingPoint(0,700))
             .set_drawing_area(ux::DrawingArea(300,300))
@@ -87,12 +78,11 @@ Home::Home(Application & application)
    add_component(
             "Button",
             &(* new ux::Button())
-            .set_label("warning")
+            .set_label("warn")
             .set_theme_style(Theme::style_warning)
-            .set_drawing_point(ux::DrawingPoint(350,700))
+            .set_drawing_point(ux::DrawingPoint(350,675))
             .set_drawing_area(ux::DrawingArea(300,300))
             );
-
 
 }
 
