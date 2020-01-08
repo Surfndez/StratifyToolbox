@@ -72,6 +72,6 @@ Convert SVG files and copy to the `/home/` filesystem.
 ```
 fonttool --action=convert --icon --input=StratifyToolbox/assets/icons/group1 --output=StratifyToolbox/assets
 sl fs.copy:source=host@StratifyToolbox/assets/group1.svic,dest=device@/home/group1.svic
-fonttool --action=convert --theme --input=StratifyToolbox/assets/themes/theme-default.json -bpp=4
+fonttool --action=convert --theme --input=StratifyToolbox/assets/themes/theme-default.json --output=StratifyToolbox/assets/theme-default.sth --bpp=4
 sl fs.copy:source=host@StratifyToolbox/assets/theme-default.sth,dest=device@/home/default.sth
 ```
