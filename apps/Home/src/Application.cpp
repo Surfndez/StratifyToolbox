@@ -10,7 +10,5 @@ Application::Application(const sys::Cli & cli)
             "home",
             new Home(*this)
             );
-
-
 }
 

@@ -161,7 +161,6 @@ int display_device_write(const devfs_handle_t * handle, devfs_async_t * async){
 				sg_color_t color = sg_cursor_get_pixel_increment(&x_cursor, 1, 0);
 				//get the LCD color from the palette
 				m_row_buffer[w] = m_display_colors[color & 0x0f];
-			//	mcu_debug_printf("apply color 0x%04X\n", m_row_buffer[w]);
 			}
 			//use a row buffer
 			LCD_IO_WriteDataBlockRgb(
@@ -201,8 +200,8 @@ int display_device_getinfo(const devfs_handle_t * handle, void * ctl){
 	info->rows = DISPLAY_HEIGHT;
 	info->freq = 30;
 	info->bits_per_pixel = DISPLAY_PALETTE_BITS_PER_PIXEL;
-	info->margin_left = 8;
-	info->margin_right = 8;
+	info->margin_left = 0;
+	info->margin_right = 0;
 	info->margin_top = 0;
 	info->margin_bottom = 0;
 	return SYSFS_RETURN_SUCCESS;

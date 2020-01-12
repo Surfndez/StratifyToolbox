@@ -6,11 +6,11 @@
 #ifndef SL_CONFIG_H_
 #define SL_CONFIG_H_
 
-#define SL_CONFIG_VERSION_STRING "0.1"
-#define SL_CONFIG_VERSION_BCD 0x01
-#define SL_CONFIG_DOCUMENT_ID ""
+#define SL_CONFIG_VERSION_STRING "1.28"
+#define SL_CONFIG_VERSION_BCD 0x11C
+#define SL_CONFIG_DOCUMENT_ID "Kvp7xXzdO94kyCWAAcmW"
 #define SL_CONFIG_TEAM_ID ""
-#define SL_CONFIG_NAME "Home"
+#define SL_CONFIG_NAME "HelloWorld"
 #define SL_CONFIG_TYPE "app"
 #define SL_CONFIG_PUBLISHER "Stratify Labs, Inc"
 #define SL_CONFIG_PERMISSIONS "public"

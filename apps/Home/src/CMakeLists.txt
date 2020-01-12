@@ -6,8 +6,4 @@ set(SOURCES
 	Application.hpp
 	Home.cpp
 	Home.hpp
-	Launcher.cpp
-	Launcher.hpp
-	Splash.cpp
-	Splash.hpp
 	PARENT_SCOPE)

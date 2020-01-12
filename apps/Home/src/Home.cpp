@@ -2,9 +2,6 @@
 #include "Application.hpp"
 
 #include <sapi/ux.hpp>
-#include <sapi/ux/Button.hpp>
-#include <sapi/ux/ProgressBar.hpp>
-#include <sapi/ux/ToggleSwitch.hpp>
 
 Home::Home(Application & application)
    : toolbox::ApplicationScene<Application>(application){
@@ -12,14 +9,12 @@ Home::Home(Application & application)
    update_period() = chrono::Milliseconds(10);
    add_component(
             "ToggleSwitch",
-            &(* new ux::ToggleSwitch())
+            &(* new ToggleSwitch())
             .set_state(true)
-            .set_drawing_point(ux::DrawingPoint(20,800))
+            .set_drawing_point(DrawingPoint(20,800))
             .set_drawing_area(ux::DrawingArea(200,150))
             .set_event_handler(
-               [&](ux::Component * object, const ux::Event & event){
-               //ux::ToggleSwitch * toggle_switch =
-               //static_cast<ux::ToggleSwitch *>(object);
+               [&](Component * object, const ux::Event & event){
 
                if( event.type() == ux::ToggleSwitchEvent::event_type() ){
                   application.printer().info("New state is %d",
@@ -31,15 +26,18 @@ Home::Home(Application & application)
 
          );
 
-   const ux::DrawingArea control_icon_area(200,200);
-   const ux::DrawingPoint control_icon_start(800,10);
+   const ux::DrawingArea control_icon_area(200,250);
+   const ux::DrawingPoint control_icon_start(800,0);
+   const drawing_size_t control_icon_spacing = 250;
+   const u8 control_border_size = 0;
+   const enum Theme::style control_icon_style = Theme::style_dark;
 
    add_component(
             "WifiButton",
             &(* new ux::Button())
-            .set_border_size(1)
-            .set_icon_name("battery-half")
-            .set_theme_style(Theme::style_light)
+            .set_border_size(control_border_size)
+            .set_icon_name("wifi")
+            .set_theme_style(control_icon_style)
             .set_drawing_point(control_icon_start)
             .set_drawing_area(control_icon_area)
             );
@@ -47,40 +45,30 @@ Home::Home(Application & application)
    add_component(
             "LaunchButton",
             &(* new ux::Button())
-            .set_border_size(1)
-            .set_icon_name("star")
-            .set_theme_style(Theme::style_light)
-            .set_drawing_point(control_icon_start + ux::DrawingPoint::Y(control_icon_area.height()))
+            .set_border_size(control_border_size)
+            .set_icon_name("rocket")
+            .set_theme_style(control_icon_style)
+            .set_drawing_point(control_icon_start + ux::DrawingPoint::Y(control_icon_spacing))
             .set_drawing_area(control_icon_area)
             );
 
    add_component(
             "EjectButton",
             &(* new ux::Button())
-            .set_border_size(1)
-            .set_icon_name("bars")
-            .set_theme_style(Theme::style_light)
-            .set_drawing_point(control_icon_start + ux::DrawingPoint::Y(2*control_icon_area.height()))
-            .set_drawing_area(control_icon_area)
-            );
-
-   add_component(
-            "EjectButton",
-            &(* new ux::Button())
-            .set_border_size(1)
-            .set_icon_name("toolbox")
-            .set_theme_style(Theme::style_light)
-            .set_drawing_point(control_icon_start + ux::DrawingPoint::Y(3*control_icon_area.height()))
+            .set_border_size(control_border_size)
+            .set_icon_name("eject")
+            .set_theme_style(control_icon_style)
+            .set_drawing_point(control_icon_start + ux::DrawingPoint::Y(2*control_icon_spacing))
             .set_drawing_area(control_icon_area)
             );
 
    add_component(
             "SettingsButton",
             &(* new ux::Button())
-            .set_border_size(1)
-            .set_icon_name("toolbox")
-            .set_theme_style(Theme::style_light)
-            .set_drawing_point(control_icon_start + ux::DrawingPoint::Y(4*control_icon_area.height()))
+            .set_border_size(control_border_size)
+            .set_icon_name("wrench")
+            .set_theme_style(control_icon_style)
+            .set_drawing_point(control_icon_start + ux::DrawingPoint::Y(3*control_icon_spacing))
             .set_drawing_area(control_icon_area)
             );
 
@@ -90,7 +78,7 @@ Home::Home(Application & application)
             .set_label("1")
             .set_theme_style(Theme::style_brand_primary)
             .set_drawing_point(ux::DrawingPoint(50,50))
-            .set_drawing_area(ux::DrawingArea(200,600))
+            .set_drawing_area(ux::DrawingArea(200,200))
             );
 
    add_component(
@@ -111,6 +99,7 @@ Home::Home(Application & application)
             .set_theme_style(Theme::style_danger)
             .set_drawing_point(ux::DrawingPoint(100,400))
             .set_drawing_area(ux::DrawingArea(400,100))
+            .set_antialias(false)
             .set_event_handler(
                [&](ux::Component * object, const ux::Event & event){
 
@@ -140,6 +129,7 @@ Home::Home(Application & application)
             .set_drawing_point(ux::DrawingPoint(100,550))
             .set_drawing_area(ux::DrawingArea(400,50))
             );
+
 
 
 }

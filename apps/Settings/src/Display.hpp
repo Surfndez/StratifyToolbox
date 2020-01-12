@@ -1,5 +1,5 @@
-#ifndef HOME_HPP
-#define HOME_HPP
+#ifndef DISPLAY_HPP
+#define DISPLAY_HPP
 
 #include <sapi/var/Vector.hpp>
 #include <sapi/ux/Scene.hpp>
@@ -8,10 +8,9 @@
 class Application;
 
 
-class Home : public toolbox::ApplicationScene<Application> {
+class Display : public toolbox::ApplicationScene<Application> {
 public:
-   Home(Application & application);
-   //~Home();
+   Display(Application & application);
 
 
 

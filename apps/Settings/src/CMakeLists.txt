@@ -2,4 +2,11 @@
 set(SOURCES
 	sl_config.h
 	main.cpp
-	PARENT_SCOPE)
+	Application.cpp
+	Application.hpp
+	Display.cpp
+	Display.hpp
+	Settings.cpp
+	Settings.hpp
+	PARENT_SCOPE
+	)

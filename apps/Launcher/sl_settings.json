@@ -1,15 +1,15 @@
 {
    "description": "HelloWorld is a simple demo app that uses the standard output to print a simple message.",
    "github": "https://github.com/StratifyLabs/HelloWorld",
-	 "name": "Home",
+   "name": "Launcher",
    "permissions": "public",
    "publisher": "Stratify Labs, Inc",
-	 "tags": "Toolbox",
+   "tags": "utility",
    "type": "app",
    "uid": "9cQyOTk3fZXOuMtPyf5j9X4H4b83",
-	 "version": "0.1",
+   "version": "0.1",
    "ramSize": 0,
    "timestamp": 1552198313,
-	 "documentId": "",
+   "documentId": "",
    "hardwareId": ""
 }
