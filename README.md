@@ -70,8 +70,10 @@ sl app.run:path=i2ctool,terminal,args='--action=scan --port=2'
 Convert SVG files and copy to the `/home/` filesystem.
 
 ```
-fonttool --action=convert --icon --input=StratifyToolbox/assets/icons/group1 --output=StratifyToolbox/assets
-sl fs.copy:source=host@StratifyToolbox/assets/group1.svic,dest=device@/home/group1.svic
-fonttool --action=convert --theme --input=StratifyToolbox/assets/themes/theme-default.json --output=StratifyToolbox/assets/theme-default.sth --bpp=4
+fonttool --action=convert --icon --input=StratifyToolbox/assets/icons/group1 --output=StratifyToolbox/assets/device
+sl fs.copy:source=host@StratifyToolbox/assets/device/group1.svic,dest=device@/home/group1.svic
+fonttool --action=convert --theme --input=StratifyToolbox/assets/themes/theme-default.json --output=StratifyToolbox/assets/device/theme-default.sth --bpp=4
+fonttool --action=convert --input=StratifyToolbox/assets/fonts/roboto-r.svg --output=StratifyToolbox/assets/device --canvas=256 --downsample=2
 sl fs.copy:source=host@StratifyToolbox/assets/theme-default.sth,dest=device@/home/default.sth
+sl fs.copy:source=host@StratifyToolbox/assets/device,dest=device@/home
 ```
