@@ -24,7 +24,7 @@ Settings::Settings(Application & application)
                     .set_icon("chevron-right")
                     )
             .append(ListItem()
-                    .set_key("Apps")
+                    .set_key("About")
                     .set_icon("chevron-right")
                     )
             .set_item_height(250)
@@ -43,6 +43,9 @@ Settings::Settings(Application & application)
                   if( item.key() == "Display" ){
                      application.printer().info("set scene collection to Display");
                      scene_collection()->set_current_scene("Display");
+                  } else if( item.key() == "About" ){
+                     application.printer().info("set scene collection to Display");
+                     scene_collection()->set_current_scene("About");
                   }
                }
 

@@ -38,9 +38,9 @@ Display::Display(Application & application)
             &(* new Button())
             .set_icon_name("chevron-left")
             .set_border_size(0)
-            .set_theme_style(Theme::style_light)
+            .set_theme_style(Theme::style_outline_brand_primary)
             .set_drawing_point(DrawingPoint(0,0))
-            .set_drawing_area(DrawingArea(200,200))
+            .set_drawing_area(DrawingArea(150,200))
             .set_event_handler(
                [&](Component * object, const Event & event){
 
@@ -56,8 +56,27 @@ Display::Display(Application & application)
             })
          );
 
+   //just right of the button
+   add_background_component(
+            &(* new Label())
+            .set_label("Settings")
+            .set_border_size(0)
+            .set_align_left()
+            .set_theme_style(Theme::style_light)
+            .set_drawing_point(DrawingPoint(150,0))
+            .set_drawing_area(DrawingArea(750,200))
+            );
 
-
+   //just right of the button
+   add_background_component(
+            &(* new Label())
+            .set_label("Display")
+            .set_border_size(0)
+            .set_align_right()
+            .set_theme_style(Theme::style_light)
+            .set_drawing_point(DrawingPoint(600,0))
+            .set_drawing_area(DrawingArea(375,200))
+            );
 
 }
 

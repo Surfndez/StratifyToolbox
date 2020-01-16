@@ -19,4 +19,4 @@ private:
 
 };
 
-#endif // HOME_HPP
+#endif // DISPLAY_HPP

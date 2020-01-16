@@ -2,6 +2,8 @@
 set(SOURCES
 	sl_config.h
 	main.cpp
+	About.cpp
+	About.hpp
 	Application.cpp
 	Application.hpp
 	Display.cpp

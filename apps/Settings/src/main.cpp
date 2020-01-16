@@ -5,6 +5,6 @@
 int main(int argc, char * argv[]){
    Cli cli(argc, argv, SOS_GIT_HASH);
    Application application(cli);
-   application.run("Display");
+   application.run("About");
    return 0;
 }

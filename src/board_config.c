@@ -37,7 +37,7 @@ limitations under the License.
 #include "kernel/kernel_loader.h"
 #include "kernel/kernel_service.h"
 
-#define TRACE_COUNT 8
+#define TRACE_COUNT 32
 #define TRACE_FRAME_SIZE sizeof(link_trace_event_t)
 #define TRACE_BUFFER_SIZE (sizeof(link_trace_event_t)*TRACE_COUNT)
 static char trace_buffer[TRACE_FRAME_SIZE*TRACE_COUNT];

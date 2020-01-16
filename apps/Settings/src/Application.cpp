@@ -2,6 +2,7 @@
 #include "Application.hpp"
 #include "Settings.hpp"
 #include "Display.hpp"
+#include "About.hpp"
 
 Application::Application(const sys::Cli & cli)
    : toolbox::Application(cli){
@@ -14,6 +15,11 @@ Application::Application(const sys::Cli & cli)
    scene_collection().add_scene(
             "Display",
             new Display(*this)
+            );
+
+   scene_collection().add_scene(
+            "About",
+            new About(*this)
             );
 }
 
