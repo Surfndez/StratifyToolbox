@@ -6,4 +6,6 @@ set(SOURCES
 	Application.hpp
 	Home.cpp
 	Home.hpp
+	WidgetWindow.cpp
+	WidgetWindow.hpp
 	PARENT_SCOPE)
