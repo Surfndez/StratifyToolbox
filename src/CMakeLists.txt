@@ -7,6 +7,8 @@ set(SOURCES
 	kernel/kernel_io.h
 	kernel/kernel_touch.c
 	kernel/kernel_touch.h
+	kernel/kernel_app.c
+	kernel/kernel_app.h
 	kernel/kernel_service.c
 	kernel/kernel_service.h
 	kernel/kernel_shared.c

@@ -91,7 +91,7 @@ const sos_board_config_t sos_board_config = {
 	.sys_memory_size = SOS_BOARD_SYSTEM_MEMORY_SIZE,
 	.start = sos_default_thread,
 	.start_args = &link_transport,
-	.start_stack_size = 8192,
+	.start_stack_size = 4096,
 	#if !_IS_BOOT
 	.socket_api = &wifi_api,
 	#else

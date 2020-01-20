@@ -95,22 +95,11 @@ Home::Home(Application & application)
 				.set_event_handler([&](Component * object, const Event & event){
 
 					if( event.type() == ButtonEvent::event_type() ){
-						 const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
+						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
 
 						if( button_event.id() == ButtonEvent::id_released ){
 							printer().info("launch settings");
-							String result = Sys::install(
-							"/home/Settings",
-							Appfs::is_default,
-							4096
-							);
-
-							printer().info("installed to %s", result.cstring());
-
-							if( result.is_empty() ){
-								printer().error("failed to install (%d)", errno);
-							}
-							exit(1);
+							Application::launch("/home/Settings", String() );
 						}
 
 
@@ -118,7 +107,7 @@ Home::Home(Application & application)
 
 
 				})
-				);
+			);
 
 
 

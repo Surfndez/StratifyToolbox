@@ -101,7 +101,7 @@ int display_device_ioctl(const devfs_handle_t * handle, int request, void * ctl)
 
 		case I_DISPLAY_SETPALETTE:
 			if( incoming_palette->count == m_display_palette.count ){
-				mcu_debug_log_info(MCU_DEBUG_USER0, "update palette colors");
+				//mcu_debug_log_info(MCU_DEBUG_USER0, "update palette colors");
 				memcpy(m_display_palette.colors, incoming_palette->colors, m_display_palette.count*sizeof(u16));
 				return SYSFS_RETURN_SUCCESS;
 			}

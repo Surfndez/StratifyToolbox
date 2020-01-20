@@ -31,7 +31,7 @@ TopNavigation::TopNavigation(const var::String& name){
 				.set_border_size(0)
 				.set_align_right()
 				.set_padding(30)
-				.set_theme_style(Theme::style_light)
+				.set_theme_style(Theme::style_brand_primary)
 				.set_drawing_point(DrawingPoint(200,0))
 				.set_drawing_area(DrawingArea(800,1000))
 				);

@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#include "kernel_service.h"
 #include "wifi_api.h"
 #include "socket/include/m2m_socket.h"
 #include "driver/include/m2m_wifi.h"
@@ -277,6 +278,21 @@ int start_wifi_thread(const void * config){
 
 	int result;
 	const wifi_api_config_t * wifi_config = config;
+
+	u32 stack_size = wifi_config->thread_stack_size;
+	if( stack_size == 0 ){
+		stack_size = 2048;
+	}
+
+	return kernel_service_start_thread(
+				wifi_api_thread_function,
+				(void*)config,
+				stack_size,
+				SCHED_OTHER,
+				0
+				);
+
+#if 0
 	pthread_attr_t attr;
 	pthread_t tmp;
 
@@ -310,5 +326,6 @@ int start_wifi_thread(const void * config){
 									(void*)config);
 
 	return result;
+#endif
 }
 

@@ -5,9 +5,11 @@
 #include <sos/crypt_api.h>
 #include <ToolboxAPI/toolbox_io.h>
 #include <ToolboxAPI/toolbox_touch.h>
+#include <ToolboxAPI/toolbox_app.h>
 
 #include "kernel_io.h"
 #include "kernel_touch.h"
+#include "kernel_app.h"
 
 int kernel_request(int request, void * args){
 #if !_IS_BOOT
@@ -17,6 +19,10 @@ int kernel_request(int request, void * args){
 
 	if( request == TOOLBOX_TOUCH_REQUEST ){
 		return kernel_touch_request(args);
+	}
+
+	if( request == TOOLBOX_APP_REQUEST ){
+		return kernel_app_request(args);
 	}
 #endif
 	return 0;
