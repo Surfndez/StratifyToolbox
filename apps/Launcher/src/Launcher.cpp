@@ -18,6 +18,7 @@ Launcher::Launcher(Application & application)
 
 	if( launcher_object.is_valid() ){
 
+		int count = 0;
 		var::Vector<String> keys = launcher_object.keys();
 		for(const auto & key: keys){
 			JsonObject item_object = launcher_object.at(key).to_object();
@@ -25,7 +26,16 @@ Launcher::Launcher(Application & application)
 									 .set_key(item_object.at("name").to_string())
 									 .set_icon("chevron-right")
 									 );
+			count++;
+			if( count == 4 ){
+				break;
+			}
 		}
+
+		list->append(ListItem()
+								 .set_key("Exit")
+								 .set_icon("ellipsis-v")
+								 );
 
 		list->set_item_height(200)
 				.set_drawing_point(DrawingPoint(0,0))
@@ -35,6 +45,10 @@ Launcher::Launcher(Application & application)
 
 			if( event.type() == ListEvent::event_type() ){
 				const ListItem & item = event.reinterpret<ListEvent>().item();
+
+				if( item.key() == "Exit" ){
+					Application::go_home();
+				}
 
 				printer().info("Launch %s", item.key().cstring());
 			}

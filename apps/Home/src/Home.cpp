@@ -72,6 +72,24 @@ Home::Home(Application & application)
 				.set_theme_style(control_icon_style)
 				.set_drawing_point(control_icon_start + ux::DrawingPoint::Y(control_icon_spacing))
 				.set_drawing_area(control_icon_area)
+				.set_event_handler([&](Component * object, const Event & event){
+
+					if( event.type() == ButtonEvent::event_type() ){
+						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
+
+						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "SettingsButton" ){
+							printer().info("launch settings");
+							Application::launch("/home/Settings", String() );
+						}
+
+						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "LaunchButton" ){
+							printer().info("launch Launcher");
+							Application::launch("/home/Launcher", String() );
+						}
+
+					}
+
+				})
 				);
 
 	add_component(
@@ -101,7 +119,6 @@ Home::Home(Application & application)
 							printer().info("launch settings");
 							Application::launch("/home/Settings", String() );
 						}
-
 
 					}
 
