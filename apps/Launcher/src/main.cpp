@@ -1,7 +1,10 @@
 
-#include <cstdio>
+#include <sapi/sys.hpp>
+#include "Application.hpp"
 
 int main(int argc, char * argv[]){
-	printf("Hello World\n");
-	return 0;
+	 Cli cli(argc, argv, SOS_GIT_HASH);
+	 Application application(cli);
+	 application.run("Launcher");
+	 return 0;
 }

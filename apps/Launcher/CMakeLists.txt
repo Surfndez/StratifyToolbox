@@ -19,7 +19,7 @@ elseif( ${SOS_BUILD_CONFIG} STREQUAL link )
 endif()
 
 # This will set the default RAM used by the application
-set(SOS_RAM_SIZE 4096)
+set(SOS_RAM_SIZE 131072)
 
 #Add sources to the project
 sos_sdk_add_subdirectory(SOS_SOURCELIST ${CMAKE_SOURCE_DIR}/src)
@@ -28,17 +28,11 @@ list(
 	SOS_SOURCELIST
 	${SOURCES}
 	${CMAKE_SOURCE_DIR}/sl_settings.json
-	${CMAKE_SOURCE_DIR}/README.md)
+	)
 
 get_filename_component(SOS_NAME ${CMAKE_SOURCE_DIR} NAME)
 project(${SOS_NAME} CXX C)
 
-if( ${SOS_BUILD_CONFIG} STREQUAL arm )
-	#This will cross compile for all supported ARM architetures
-	include(${SOS_TOOLCHAIN_CMAKE_PATH}/sos-app-std.cmake)
-elseif( ${SOS_BUILD_CONFIG} STREQUAL link )
-	#This will compile natively. If the program uses hardware, it can "link" to a board over USB
-	set(SOS_ARCH link)
-	set(SOS_CONFIG release)
-	include(${SOS_TOOLCHAIN_CMAKE_PATH}/sos-app.cmake)
-endif()
+set(SOS_LIBRARIES ToolboxAPI)
+set(SOS_ARCH v7em_f5dh)
+include(${SOS_TOOLCHAIN_CMAKE_PATH}/sos-app.cmake)

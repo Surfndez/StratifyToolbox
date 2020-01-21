@@ -97,7 +97,7 @@ Home::Home(Application & application)
 					if( event.type() == ButtonEvent::event_type() ){
 						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
 
-						if( button_event.id() == ButtonEvent::id_released ){
+						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "SettingsButton" ){
 							printer().info("launch settings");
 							Application::launch("/home/Settings", String() );
 						}
