@@ -33,6 +33,25 @@ Control::Control(Application & application)
 				})
 				);
 
+	const u32 rows = 3;
+	const u32 columns = 4;
+
+	for(u32 row=0; row < rows; row++){
+		for(u32 column=0; column < columns; column++){
+			String label;
+			label.format("io%d", row*columns + column);
+			add_component(
+						label,
+						(* new ux::Button())
+						.set_border_size(1)
+						.set_label(label)
+						.set_theme_style(static_cast<Theme::style>(Theme::style_brand_primary + row))
+						.set_drawing_point(DrawingPoint(column*250+25, 200 + row*225+25))
+						.set_drawing_area(DrawingArea(200, 175))
+						);
+		}
+	}
+
 
 
 }
