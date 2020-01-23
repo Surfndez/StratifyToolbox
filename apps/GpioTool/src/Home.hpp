@@ -11,9 +11,6 @@ class Application;
 class Home : public toolbox::ApplicationScene<Application> {
 public:
    Home(Application & application);
-   //~Home();
-
-
 
 private:
 

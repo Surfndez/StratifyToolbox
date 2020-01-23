@@ -4,6 +4,8 @@ set(SOURCES
 	main.cpp
 	Application.cpp
 	Application.hpp
+	About.cpp
+	About.hpp
 	Home.cpp
 	Home.hpp
 	Configuration.cpp

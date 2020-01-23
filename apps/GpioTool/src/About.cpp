@@ -1,15 +1,14 @@
-#include "Control.hpp"
+#include "About.hpp"
 #include "Application.hpp"
 
 #include <sapi/var.hpp>
 #include <sapi/sys.hpp>
 #include <sapi/ux.hpp>
 
-Control::Control(Application & application)
+About::About(Application & application)
 	: toolbox::ApplicationScene<Application>(application){
 
 	update_period() = chrono::Milliseconds(10);
-
 
 	add_component(
 				"BackButton",

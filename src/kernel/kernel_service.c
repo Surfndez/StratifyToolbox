@@ -9,6 +9,8 @@
 #include "kernel_shared.h"
 #include "i2c_internal.h"
 
+#define RUN_KERNEL_APP 0
+
 static void * kernel_service_thread_function(void * args);
 
 int kernel_service_init(){
@@ -57,6 +59,7 @@ int kernel_service_init(){
 	}
 #endif
 
+#if RUN_KERNEL_APP
 	if( kernel_app_init() < 0 ){
 		mcu_debug_log_fatal(
 					MCU_DEBUG_USER0,
@@ -64,6 +67,7 @@ int kernel_service_init(){
 					);
 		return -1;
 	}
+#endif
 
 	return 0;
 }
@@ -80,7 +84,9 @@ void * kernel_service_thread_function(void * args){
 		//check the power button
 
 		//manage the currently running application -- relaunch home if it crashes
+#if RUN_KERNEL_APP
 		kernel_app_update();
+#endif
 
 		usleep(50000UL);
 
