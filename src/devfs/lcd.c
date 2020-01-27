@@ -73,8 +73,8 @@ void LCD_IO_Init(){
 		mcu_debug_printf("failed to configure MPU for LCD memory\n");
 	}
 	//sychronize data since mpu has been updated
-	mcu_core_disable_cache();
-	mcu_core_enable_cache();
+	//mcu_core_disable_cache();
+	//mcu_core_enable_cache();
 
 #if 0
 	while(1){

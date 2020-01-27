@@ -102,7 +102,9 @@ void board_event_handler(int event, void * args){
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_ROOT_DEBUG_INITIALIZED:
+			mcu_core_disable_cache();
 			ST7789H2_Init();
+			mcu_core_enable_cache();
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_START_LINK:

@@ -35,8 +35,8 @@ const stm32_config_t stm32_config = {
 MCU_DECLARE_SECRET_KEY_32(secret_key)
 
 
-//#define CONFIG_CACHE MCU_BOARD_CONFIG_FLAG_ENABLE_CACHE
-#define CONFIG_CACHE 0
+#define CONFIG_CACHE MCU_BOARD_CONFIG_FLAG_ENABLE_CACHE
+//#define CONFIG_CACHE 0
 
 const mcu_board_config_t mcu_board_config = {
 		.core_cpu_freq = SOS_BOARD_SYSTEM_CLOCK,
