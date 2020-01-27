@@ -38,18 +38,32 @@ Control::Control(Application & application)
 
 	for(u32 row=0; row < rows; row++){
 		for(u32 column=0; column < columns; column++){
+			u32 pin = row*columns + column;
 			String label;
-			label.format("io%d", row*columns + column);
+			label.format("io%d", pin);
 			add_component(
 						label,
 						(* new ux::Button())
 						.set_border_size(1)
 						.set_label(label)
-						.set_theme_style(static_cast<Theme::style>(Theme::style_brand_primary + row))
+						.set_theme_style(static_cast<Theme::style>(pin % Theme::last_style))
 						.set_drawing_point(DrawingPoint(column*250+25, 200 + row*225+25))
 						.set_drawing_area(DrawingArea(200, 175))
 						);
 		}
+	}
+
+	const DrawingArea pin_area(45,40);
+	const u32 pins = 20;
+	for(u32 pin=0; pin < pins; pin++){
+		add_component(
+					String().format("%d", pin),
+					(* new ux::Label())
+					.set_border_size(1)
+					.set_theme_style(static_cast<Theme::style>(pin % Theme::last_style))
+					.set_drawing_point(DrawingPoint(pin*pin_area.width()+50, 1000-pin_area.height()))
+					.set_drawing_area(pin_area)
+					);
 	}
 
 

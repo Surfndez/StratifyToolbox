@@ -85,32 +85,22 @@ int kernel_loader_startup(){
 		struct timespec start, stop;
 
 		clock_gettime(CLOCK_REALTIME, &start);
-
 		if( read(fd, &hdr, sizeof(hdr) == sizeof(hdr)) ){
-
 			if( read(fd, &dib, sizeof(dib) == sizeof(dib)) ){
-
 				lseek(fd, 138, SEEK_SET);
-
 				u16 row_buffer[300];
-
 				for(u32 j = 0; j < 54; j++){
 					read(fd, row_buffer, sizeof(row_buffer));
 					cortexm_svcall(set_cursor_svcall, (void*)j);
 					cortexm_svcall(write_row_svcall, row_buffer);
 				}
-
-
 			} else {
 				mcu_debug_printf("failed to read dib\n");
 			}
-
-
 		} else {
 			mcu_debug_printf("failed to read hdr\n");
 
 		}
-
 		close(fd);
 		clock_gettime(CLOCK_REALTIME, &stop);
 

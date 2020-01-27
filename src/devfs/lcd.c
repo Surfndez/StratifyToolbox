@@ -28,6 +28,8 @@ volatile u64 * const m_reg_location = (u64*)0x60000000;
 #define ASSERT_CS() (GPIOD->BSRR = (GPIO_PIN_7<<16)) //RESET
 #define DEASSERT_CS() (GPIOD->BSRR = GPIO_PIN_7) //SET
 
+#define DELAY() cortexm_delay_us(1)
+
 void LCD_IO_Assert_CS(){
 #if MANUAL_FMC_CHIP_SELECT > 0
 	ASSERT_CS();
@@ -103,9 +105,9 @@ void LCD_IO_WriteReg(u8 Reg){
 	transaction.data.second = Reg; //register value
 	*m_reg_location = transaction.raw;
 	__DSB();
-	cortexm_delay_us(1);
+	DELAY();
 	SET_DATA();
-	cortexm_delay_us(1);
+	DELAY();
 }
 
 void LCD_IO_WriteDataBlock(const u8 * data, int nbyte){
