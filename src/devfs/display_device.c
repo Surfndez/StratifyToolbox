@@ -210,8 +210,19 @@ int display_device_getinfo(const devfs_handle_t * handle, void * ctl){
 int display_device_clear(const devfs_handle_t * handle, void * ctl){
 	MCU_UNUSED_ARGUMENT(handle);
 	MCU_UNUSED_ARGUMENT(ctl);
-	for(u32 i=0; i < DISPLAY_HEIGHT; i++){
-		ST7789H2_DrawHLine(m_display_colors[0], 0, i, ST7789H2_LCD_PIXEL_WIDTH);
+
+	//blank the window
+	ST7789H2_SetWindow(
+				m_window.point.x,
+				m_window.point.y,
+				m_window.area.width,
+				m_window.area.height
+				);
+
+	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
+
+	for(u32 i=0; i < m_window.area.height; i++){
+		ST7789H2_DrawHLine(m_display_colors[0], 0, i, m_window.area.width);
 	}
 
 	return SYSFS_RETURN_SUCCESS;

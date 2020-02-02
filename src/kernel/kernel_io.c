@@ -201,16 +201,9 @@ int kernel_io_is_direction_assigned(
       return SYSFS_SET_RETURN(EINVAL);
    }
 
-   int active_flags = direction_state->io_flags;
-
-   //check for direction conflict
-   if( (io_flags & IN) && (active_flags & OUT) ){
-      mcu_debug_printf("dir1 mismatch %d\n", channel);
-      return SYSFS_SET_RETURN(EPROTO);
-   }
-
-   if( (io_flags & OUT) && (active_flags & IN) ){
-      mcu_debug_printf("dir2 mismatch %d\n", channel);
+	 //if pin is OUT and voltage tranlastor is IN there will be two driving sources
+	 if( (io_flags & OUT) && (direction_state->io_flags & IN) ){
+			mcu_debug_printf("dir conflict %d\n", channel);
       return SYSFS_SET_RETURN(EPROTO);
    }
 

@@ -10,6 +10,8 @@ set(SOURCES
 	Home.hpp
 	Configuration.cpp
 	Configuration.hpp
+	PinConfiguration.cpp
+	PinConfiguration.hpp
 	Control.cpp
 	Control.hpp
 	PARENT_SCOPE)

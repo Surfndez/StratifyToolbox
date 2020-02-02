@@ -88,10 +88,4 @@ toolbox_touch_packet_t * kernel_shared_last_touch_packet();
 const toolbox_app_request_t * kernel_shared_app_request();
 void kernel_shared_set_app_request(const toolbox_app_request_t * request);
 
-int kernel_shared_create_thread(
-		void * (*thread_function)(void*),
-		void * thread_argument,
-		u32 stack_size
-		);
-
 #endif // KERNEL_SHARED_H

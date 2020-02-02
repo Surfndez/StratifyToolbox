@@ -12,7 +12,6 @@ kernel_shared_root_t m_kernel_shared_root MCU_SYS_MEM;
 static void svcall_init(void * args);
 
 int kernel_shared_init(){
-	int result;
 
 	memset(&m_kernel_shared, 0, sizeof(m_kernel_shared));
 	cortexm_svcall(svcall_init, 0);
@@ -161,10 +160,3 @@ void kernel_shared_root_dereference_i2c(u8 port){
 	}
 }
 
-int kernel_shared_create_thread(
-		void * (*thread_function)(void*),
-		void * thread_argument,
-		u32 stack_size
-		){
-
-}

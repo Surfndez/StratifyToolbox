@@ -90,7 +90,7 @@ Home::Home(Application & application)
 					}
 
 				})
-				);
+			);
 
 	add_component(
 				"EjectButton",

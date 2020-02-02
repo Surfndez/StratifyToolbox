@@ -14,6 +14,7 @@ public:
 
 private:
 
+	 var::Array<s8, toolbox::Io::last_io_pin> m_pin_states;
 
 };
 

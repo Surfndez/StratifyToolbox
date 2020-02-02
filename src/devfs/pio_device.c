@@ -92,7 +92,7 @@ int pio_device_ioctl(
          return get(ctl);
    }
 
-   return mcu_pio_ioctl(handle, request, ctl);
+	 return SYSFS_SET_RETURN(EINVAL);
 }
 
 
