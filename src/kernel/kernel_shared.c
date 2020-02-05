@@ -23,8 +23,8 @@ void svcall_init(void * args){
 	CORTEXM_SVCALL_ENTER();
 	MCU_UNUSED_ARGUMENT(args);
 	for(enum kernel_shared_direction_channels channel
-			= kernel_shared_direction_channel_first;
-			channel < kernel_shared_direction_channel_last+1;
+			= first_kernel_shared_direction_channel;
+			channel < last_kernel_shared_direction_channel+1;
 			channel++){
 		kernel_shared_direction_state_t * direction_state =
 				m_kernel_shared_root.direction_state + channel;
@@ -92,8 +92,8 @@ pthread_mutex_t * kernel_shared_i2c_mutex(){
 static void release_peripheral_lock(
 		u8 peripheral_function,
 		u8 peripheral_port){
-	for(enum kernel_shared_direction_channels channel = kernel_shared_direction_channel_first;
-			channel < kernel_shared_direction_channel_first+1;
+	for(enum kernel_shared_direction_channels channel = first_kernel_shared_direction_channel;
+			channel < first_kernel_shared_direction_channel+1;
 			channel++){
 		kernel_shared_direction_state_t * direction_state =
 				m_kernel_shared_root.direction_state + channel;

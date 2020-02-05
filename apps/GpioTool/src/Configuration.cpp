@@ -77,6 +77,10 @@ Configuration::Configuration(Application & application)
 								button_event.name().cstring()
 								);
 
+								application.model().insert(
+								"pinName",
+								JsonString(io_information.name())
+								);
 								scene_collection()->set_current_scene("PinConfiguration");
 
 

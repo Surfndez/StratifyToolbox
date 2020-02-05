@@ -221,8 +221,16 @@ int display_device_clear(const devfs_handle_t * handle, void * ctl){
 
 	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, (uint8_t*)NULL, 0);   /* RAM write data command */
 
+	for(sg_size_t w=0; w < m_window.area.width; w++){
+		m_row_buffer[w] = m_display_colors[0];
+	}
+
 	for(u32 i=0; i < m_window.area.height; i++){
-		ST7789H2_DrawHLine(m_display_colors[0], 0, i, m_window.area.width);
+		//use a row buffer
+		LCD_IO_WriteDataBlockRgb(
+					(u8*)m_row_buffer,
+					m_window.area.width*2
+					);
 	}
 
 	return SYSFS_RETURN_SUCCESS;

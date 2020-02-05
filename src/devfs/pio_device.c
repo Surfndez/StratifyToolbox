@@ -3,7 +3,7 @@
 #include "kernel/kernel_io.h"
 #include "pio_device.h"
 
-const mcu_pin_t io_mcu_pin_table[kernel_shared_direction_channel_last+1] = {
+const mcu_pin_t io_mcu_pin_table[last_kernel_shared_direction_channel+1] = {
    { 0xff, 0xff }, //Doesn't exist -- start with pin1
    { 1, 8 }, //PB8
    { 1, 9 }, //PB9
@@ -60,8 +60,8 @@ int pio_device_ioctl(
    switch(request){
       case I_PIO_SETATTR:
          //can only set pins as output if they are outputs on the kernel_shared settings
-         for(enum kernel_shared_direction_channels i= kernel_shared_direction_channel_first;
-             i < kernel_shared_direction_channel_last+1;
+         for(enum kernel_shared_direction_channels i= first_kernel_shared_direction_channel;
+             i < last_kernel_shared_direction_channel+1;
              i++){
             if( (1<<i) & attributes->o_pinmask ){
                result = kernel_io_is_direction_assigned(
@@ -115,8 +115,8 @@ int setattr(u32 o_pinmask, u32 o_flags){
    devfs_handle_t handle = {0};
    pio_attr_t attributes;
    attributes.o_flags = o_flags;
-   for(u32 i=kernel_shared_direction_channel_first;
-       i < kernel_shared_direction_channel_last+1;
+   for(u32 i=first_kernel_shared_direction_channel;
+       i < last_kernel_shared_direction_channel+1;
        i++){
       pin = io_mcu_pin_table[i];
       if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
@@ -131,8 +131,8 @@ int setattr(u32 o_pinmask, u32 o_flags){
 int setmask(u32 o_pinmask){
    mcu_pin_t pin;
    devfs_handle_t handle = {0};
-   for(u32 i=kernel_shared_direction_channel_first;
-       i < kernel_shared_direction_channel_last+1;
+   for(u32 i=first_kernel_shared_direction_channel;
+       i < last_kernel_shared_direction_channel+1;
        i++){
       pin = io_mcu_pin_table[i];
       if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
@@ -147,8 +147,8 @@ int setmask(u32 o_pinmask){
 int clrmask(u32 o_pinmask){
    mcu_pin_t pin;
    devfs_handle_t handle = {0};
-   for(u32 i=kernel_shared_direction_channel_first;
-       i < kernel_shared_direction_channel_last+1;
+   for(u32 i=first_kernel_shared_direction_channel;
+       i < last_kernel_shared_direction_channel+1;
        i++){
       pin = io_mcu_pin_table[i];
       if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
@@ -171,8 +171,8 @@ int get(u32 * o_pinmask){
    u32 result = 0;
    u32 tmp;
    devfs_handle_t handle = {0};
-   for(u32 i=kernel_shared_direction_channel_first;
-       i < kernel_shared_direction_channel_last+1;
+   for(u32 i=first_kernel_shared_direction_channel;
+       i < last_kernel_shared_direction_channel+1;
        i++){
       pin = io_mcu_pin_table[i];
       if( pin.port != 0xff ){

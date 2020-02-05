@@ -27,8 +27,8 @@ enum kernel_shared_direction_channels {
    kernel_shared_direction_channel_tdi,
    kernel_shared_direction_channel_reset,
    kernel_shared_direction_channel_rtck,
-   kernel_shared_direction_channel_first = kernel_shared_direction_channel0,
-   kernel_shared_direction_channel_last = kernel_shared_direction_channel_rtck
+	 first_kernel_shared_direction_channel = kernel_shared_direction_channel0,
+	 last_kernel_shared_direction_channel = kernel_shared_direction_channel_rtck
 };
 
 typedef struct {
@@ -51,7 +51,7 @@ enum kernel_shared_app {
 };
 
 typedef struct {
-   kernel_shared_direction_state_t direction_state[kernel_shared_direction_channel_last+1];
+	 kernel_shared_direction_state_t direction_state[last_kernel_shared_direction_channel+1];
    u8 pio_device_reference_count;
    u8 spi_device_reference_count;
    u8 uart_device_reference_count[5];

@@ -4,6 +4,7 @@
 #include <sapi/var/Vector.hpp>
 #include <sapi/ux/Scene.hpp>
 #include <ToolboxAPI/Application.hpp>
+#include <ToolboxAPI/Io.hpp>
 
 class Application;
 
@@ -13,7 +14,6 @@ public:
 	 PinConfiguration(Application & application);
 
 private:
-
 
 };
 

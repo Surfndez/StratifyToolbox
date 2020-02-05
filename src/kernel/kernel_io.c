@@ -76,7 +76,7 @@ typedef struct MCU_PACK {
    mcu_pin_t secondary;
 } kernel_io_external_pin_t;
 
-static const kernel_io_external_pin_t external_pin_table[kernel_shared_direction_channel_last+1] = {
+static const kernel_io_external_pin_t external_pin_table[last_kernel_shared_direction_channel+1] = {
    { PCAL6116A_PORTX, 0, 0, IN, PX(0), PX(0) }, //IO0 - doesn't exist
    { PCAL6116A_PORTA, 0, 0, IN, PB(8), PX(0) }, //IO1 RX
    { PCAL6116A_PORTA, 1, 0, DEBUG_UART_DIRECTION, PB(9), PX(0) }, //IO2 TX -- debugging output
@@ -110,6 +110,8 @@ static int acquire_pin(
       u8 peripheral_port,
       u8 io_flags
       );
+
+static int get_pin_direction_mask();
 
 int kernel_io_init(){
    if( pcal6416a_init() < 0 ){
@@ -156,9 +158,9 @@ int kernel_io_request(
       }
    } else if( attributes->o_flags & TOOLBOX_IO_FLAG_SET_SWD_FUNCTION ){
 
-   } else if( attributes->o_flags & TOOLBOX_IO_FLAG_SET_SWD_FUNCTION ){
-
-   }
+	 } else if( attributes->o_flags & TOOLBOX_IO_FLAG_GET_DIRECTION ){
+		 return get_pin_direction_mask();
+	 }
 
    if( attributes->o_flags & TOOLBOX_IO_FLAG_ENABLE_DIV10_OUT ){
       kernel_io_clear(kernel_io_vref_enable); //active low
@@ -374,7 +376,7 @@ int set_io_function(const toolbox_io_attr_t * attributes){
    } else if( attributes->peripheral_function == CORE_PERIPH_PIO ){
 
       if( (attributes->peripheral_port == 0) &&
-          (attributes->pin_number <= kernel_shared_direction_channel_last) ){
+					(attributes->pin_number <= last_kernel_shared_direction_channel) ){
 
          u8 io_flags;
          if( attributes->o_flags & TOOLBOX_IO_FLAG_IS_OUTPUT ){
@@ -394,6 +396,18 @@ int set_io_function(const toolbox_io_attr_t * attributes){
    }
 
    return 0;
+}
+
+int get_pin_direction_mask(){
+	int result = 0;
+	for(int i=first_kernel_shared_direction_channel;
+			i <= last_kernel_shared_direction_channel;
+			i++){
+		if( kernel_shared_get_direction_state(i)->io_flags & OUT ){
+			result |= (1<<i);
+		}
+	}
+	return result;
 }
 
 int set_pin_direction(u32 pin_number, int io_flags){
@@ -442,8 +456,8 @@ void svcall_set_pin_input(void * args){
 }
 
 int init_external_pins(){
-   for(enum kernel_shared_direction_channels i = kernel_shared_direction_channel_first;
-       i < kernel_shared_direction_channel_last+1;
+	 for(enum kernel_shared_direction_channels i = first_kernel_shared_direction_channel;
+			 i < last_kernel_shared_direction_channel+1;
        i++){
       int result;
       const kernel_io_external_pin_t * io_pin = external_pin_table + i;
