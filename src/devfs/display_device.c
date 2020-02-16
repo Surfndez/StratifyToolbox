@@ -13,7 +13,7 @@ static int m_is_initialized MCU_SYS_MEM;
 #define DISPLAY_PALETTE_BITS_PER_PIXEL 4
 #define DISPLAY_PALETTE_COLOR_COUNT (1<<DISPLAY_PALETTE_BITS_PER_PIXEL)
 static display_palette_t m_display_palette MCU_SYS_MEM;
-static u16 m_display_colors[DISPLAY_PALETTE_COLOR_COUNT];
+static sg_color_t m_display_colors[DISPLAY_PALETTE_COLOR_COUNT];
 static u32 m_o_flags MCU_SYS_MEM;
 static u16 m_row_buffer[DISPLAY_WIDTH];
 static sg_region_t m_window;
@@ -102,7 +102,11 @@ int display_device_ioctl(const devfs_handle_t * handle, int request, void * ctl)
 		case I_DISPLAY_SETPALETTE:
 			if( incoming_palette->count == m_display_palette.count ){
 				//mcu_debug_log_info(MCU_DEBUG_USER0, "update palette colors");
-				memcpy(m_display_palette.colors, incoming_palette->colors, m_display_palette.count*sizeof(u16));
+				memcpy(
+							m_display_palette.colors,
+							incoming_palette->colors,
+							m_display_palette.count*sizeof(sg_color_t)
+							);
 				return SYSFS_RETURN_SUCCESS;
 			}
 
