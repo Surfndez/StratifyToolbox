@@ -9,28 +9,14 @@
 Configuration::Configuration(Application & application)
 	: toolbox::ApplicationLayout<Application>(application){
 
-	event_loop()->set_update_period(chrono::Milliseconds(10));
-
 	add_component(
-				"BackButton",
+				"BackHome",
 				(* new ux::Button())
 				.set_border_size(1)
 				.set_icon_name("chevron-left")
 				.set_theme_style(Theme::style_danger)
 				.set_drawing_point(DrawingPoint(0, 0))
 				.set_drawing_area(DrawingArea(200, 200))
-				.set_event_handler([&](Component * object, const Event & event){
-
-					if( event.type() == ButtonEvent::event_type() ){
-						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-
-						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "BackButton" ){
-							//scene_collection()->set_current_scene("Home");
-						}
-					}
-
-
-				})
 			);
 
 	const u32 columns = 4;
@@ -62,33 +48,6 @@ Configuration::Configuration(Application & application)
 							)
 						)
 					.set_drawing_area(button_area)
-					.set_event_handler([&](Component * object, const Event & event){
-
-
-						if( event.type() == ButtonEvent::event_type() ){
-							toolbox::IoInformation io_information(object->name());
-							const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-
-
-							if( button_event.id() == ButtonEvent::id_released ){
-								application.printer().info(
-								"button %s %s",
-								object->name().cstring(),
-								button_event.name().cstring()
-								);
-
-								application.model().insert(
-								"pinName",
-								JsonString(io_information.name())
-								);
-								//scene_collection()->set_current_scene("PinConfiguration");
-
-
-							}
-
-						}
-
-					})
 				);
 
 

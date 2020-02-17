@@ -10,32 +10,18 @@
 Control::Control(Application & application)
 	: toolbox::ApplicationLayout<Application>(application){
 
-	event_loop()->set_update_period(chrono::Milliseconds(10));
-
 	for(auto & value: m_pin_states){
 		value = -1;
 	}
 
 	add_component(
-				"BackButton",
+				"BackHome",
 				(* new ux::Button())
 				.set_border_size(1)
 				.set_icon_name("chevron-left")
 				.set_theme_style(Theme::style_danger)
 				.set_drawing_point(DrawingPoint(0, 0))
 				.set_drawing_area(DrawingArea(200, 200))
-				.set_event_handler([&](Component * object, const Event & event){
-
-					if( event.type() == ButtonEvent::event_type() ){
-						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-
-						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "BackButton" ){
-							//scene_collection()->set_current_scene("Home");
-						}
-					}
-
-
-				})
 			);
 
 	const u32 columns = 4;
@@ -69,34 +55,6 @@ Control::Control(Application & application)
 							)
 						)
 					.set_drawing_area(button_area)
-					.set_event_handler([&](Component * object, const Event & event){
-
-
-						if( event.type() == ButtonEvent::event_type() ){
-							toolbox::IoInformation io_information(object->name());
-							const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-
-
-							if( button_event.id() == ButtonEvent::id_released ){
-								application.printer().info("button %s %s", object->name().cstring(), button_event.name().cstring() );
-
-								Pin pin(
-								Pin::Port(0),
-								Pin::PinNumber(io_information.physical_pin_number())
-								);
-
-								pin.open();
-								printer().info("pin %d value is %d",
-								io_information.physical_pin_number(),
-								pin.get_value()
-								);
-
-
-							}
-
-						}
-
-					})
 				);
 
 		add_component(
@@ -111,48 +69,6 @@ Control::Control(Application & application)
 							)
 						)
 					.set_drawing_area(pin_area)
-					.set_event_handler([pin_area, this](Component * object, const Event & event){
-
-						if( (event.type() == SystemEvent::event_type()) &&
-						(event.id() == SystemEvent::id_update) ){
-							toolbox::IoInformation io_information(object->name());
-
-							Pin pin(
-							Pin::Port(0),
-							Pin::PinNumber(io_information.physical_pin_number())
-							);
-
-							pin.open();
-
-							int current_value = pin.get_value();
-
-							if( current_value != m_pin_states.at(io_information.physical_pin_number())){
-
-								if( pin.get_value() == true ){
-									object->erase();
-									object->set_drawing_point(
-									DrawingPoint(
-									(io_information.physical_pin_number()-1)*pin_area.width()+50,
-									1000-2*pin_area.height()
-									));
-								} else {
-									object->erase();
-									object->set_drawing_point(
-									DrawingPoint(
-									(io_information.physical_pin_number()-1)*pin_area.width()+50,
-									1000-pin_area.height()
-									));
-								}
-
-								object->redraw();
-							}
-
-							m_pin_states.at(io_information.physical_pin_number()) = current_value;
-
-						}
-
-
-					})
 				);
 
 		column++;
