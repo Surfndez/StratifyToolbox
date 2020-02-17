@@ -36,7 +36,7 @@ Configuration::Configuration(Application & application)
 		enum Theme::style style = Theme::style_brand_primary;
 
 		add_component(
-					info.name(),
+					"Configure-" + info.name(),
 					(* new ux::Button())
 					.set_border_size(1)
 					.set_label(info.name())

@@ -1,5 +1,6 @@
 
 #include <sapi/ux.hpp>
+#include <sapi/var.hpp>
 
 #include "Application.hpp"
 #include "Home.hpp"
@@ -48,18 +49,17 @@ ux::Layout & Application::create_layout(){
 					DrawingArea(1000,1000)
 					)
 				.set_enabled(false)
-			#if 0
-				.add_component(
-					"PinConfiguration",
-					(* new PinConfiguration(*this))
-					.set_drawing_point(
-						DrawingPoint(0,0)
-						)
-					.set_drawing_area(
-						DrawingArea(1000,1000)
-						)
+				)
+			.add_component(
+				"PinConfiguration",
+				(* new PinConfiguration(*this))
+				.set_drawing_point(
+					DrawingPoint(0,0)
 					)
-			#endif
+				.set_drawing_area(
+					DrawingArea(1000,1000)
+					)
+				.set_enabled(false)
 				)
 			.set_event_handler(handle_application_event)
 			.set_drawing_area(
@@ -80,7 +80,8 @@ void Application::handle_application_event(
 
 		if( button_event.id() == ButtonEvent::id_released ){
 			printf("Pushed button %s\n", button_event.name().cstring());
-			if( button_event.name() == "ConfigurationButton" ){
+			if( (button_event.name() == "ConfigurationButton") ||
+					(button_event.name() == "BackConfiguration") ){
 				layout->transition("Configuration");
 			} else if( button_event.name() == "ControlButton" ){
 				layout->transition("Control");
@@ -91,6 +92,16 @@ void Application::handle_application_event(
 				go_home();
 			} else if( button_event.name() == "BackHome" ){
 				layout->transition("Home");
+			} else if( button_event.name().find("Configure") == 0 ){
+				//update the data model with the currently selected pin
+
+				model().insert(
+							"pinConfiguration",
+							JsonString(button_event.name())
+							);
+
+				layout->transition("PinConfiguration");
+
 			}
 		}
 
