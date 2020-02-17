@@ -9,7 +9,7 @@
 class Application;
 
 
-class PinConfiguration : public toolbox::ApplicationScene<Application> {
+class PinConfiguration : public toolbox::ApplicationLayout<Application> {
 public:
 	 PinConfiguration(Application & application);
 

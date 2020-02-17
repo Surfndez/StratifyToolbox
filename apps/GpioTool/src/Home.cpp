@@ -6,10 +6,9 @@
 #include <sapi/ux.hpp>
 
 Home::Home(Application & application)
-	: toolbox::ApplicationScene<Application>(application){
+	: toolbox::ApplicationLayout<Application>(application){
 
-	update_period() = chrono::Milliseconds(10);
-
+	event_loop()->set_update_period(chrono::Milliseconds(10));
 
 	add_component(
 				"ControlButton",
@@ -23,7 +22,7 @@ Home::Home(Application & application)
 					if( event.type() == ButtonEvent::event_type() ){
 						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
 						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "ControlButton" ){
-							scene_collection()->set_current_scene("Control");
+							//scene_collection()->set_current_scene("Control");
 						}
 					}
 				})
@@ -41,7 +40,7 @@ Home::Home(Application & application)
 					if( event.type() == ButtonEvent::event_type() ){
 						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
 						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "ConfigurationButton" ){
-							scene_collection()->set_current_scene("Configuration");
+							//scene_collection()->set_current_scene("Configuration");
 						}
 					}
 				})
@@ -59,13 +58,11 @@ Home::Home(Application & application)
 					if( event.type() == ButtonEvent::event_type() ){
 						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
 						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "AboutButton" ){
-							scene_collection()->set_current_scene("About");
+							//scene_collection()->set_current_scene("About");
 						}
 					}
 				})
 				);
-
-
 
 	add_component(
 				"ExitButton",
@@ -85,8 +82,6 @@ Home::Home(Application & application)
 					}
 				})
 				);
-
-
 
 }
 

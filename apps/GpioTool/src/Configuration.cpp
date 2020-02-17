@@ -7,9 +7,9 @@
 #include <sapi/ux.hpp>
 
 Configuration::Configuration(Application & application)
-	: toolbox::ApplicationScene<Application>(application){
+	: toolbox::ApplicationLayout<Application>(application){
 
-	update_period() = chrono::Milliseconds(10);
+	event_loop()->set_update_period(chrono::Milliseconds(10));
 
 	add_component(
 				"BackButton",
@@ -25,7 +25,7 @@ Configuration::Configuration(Application & application)
 						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
 
 						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "BackButton" ){
-							scene_collection()->set_current_scene("Home");
+							//scene_collection()->set_current_scene("Home");
 						}
 					}
 
@@ -81,7 +81,7 @@ Configuration::Configuration(Application & application)
 								"pinName",
 								JsonString(io_information.name())
 								);
-								scene_collection()->set_current_scene("PinConfiguration");
+								//scene_collection()->set_current_scene("PinConfiguration");
 
 
 							}

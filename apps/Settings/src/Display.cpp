@@ -5,7 +5,7 @@
 #include <sapi/ux.hpp>
 
 Display::Display(Application & application)
-	: toolbox::ApplicationScene<Application>(application){
+	: toolbox::ApplicationLayout<Application>(application){
 
 	update_period() = chrono::Milliseconds(10);
 

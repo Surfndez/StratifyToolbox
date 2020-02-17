@@ -8,7 +8,7 @@
 class Application;
 
 
-class Control : public toolbox::ApplicationScene<Application> {
+class Control : public toolbox::ApplicationLayout<Application> {
 public:
 	 Control(Application & application);
 

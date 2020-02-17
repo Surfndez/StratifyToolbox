@@ -7,7 +7,7 @@
 
 class Application;
 
-class Launcher : public toolbox::ApplicationScene<Application> {
+class Launcher : public toolbox::ApplicationLayout<Application> {
 public:
 	Launcher(Application & application);
 };

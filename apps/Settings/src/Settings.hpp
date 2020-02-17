@@ -8,7 +8,7 @@
 class Application;
 
 
-class Settings : public toolbox::ApplicationScene<Application> {
+class Settings : public toolbox::ApplicationLayout<Application> {
 public:
    Settings(Application & application);
 

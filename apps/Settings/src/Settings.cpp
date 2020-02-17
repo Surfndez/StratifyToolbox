@@ -4,7 +4,7 @@
 #include <sapi/ux.hpp>
 
 Settings::Settings(Application & application)
-	: toolbox::ApplicationScene<Application>(application){
+	: toolbox::ApplicationLayout<Application>(application){
 
 	update_period() = chrono::Milliseconds(10);
 	add_component(

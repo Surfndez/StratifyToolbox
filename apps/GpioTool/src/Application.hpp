@@ -9,6 +9,7 @@ class Application : public toolbox::Application {
 public:
    Application(const sys::Cli & cli);
 
+	 ux::Layout& create_layout();
 
 private:
 

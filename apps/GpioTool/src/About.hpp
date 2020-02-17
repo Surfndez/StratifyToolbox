@@ -8,7 +8,7 @@
 class Application;
 
 
-class About : public toolbox::ApplicationScene<Application> {
+class About : public toolbox::ApplicationLayout<Application> {
 public:
 	 About(Application & application);
 

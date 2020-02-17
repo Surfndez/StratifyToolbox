@@ -5,7 +5,7 @@
 #include "Application.hpp"
 
 About::About(Application & application)
-	: toolbox::ApplicationScene<Application>(application){
+	: toolbox::ApplicationLayout<Application>(application){
 
 	update_period() = chrono::Milliseconds(10);
 
