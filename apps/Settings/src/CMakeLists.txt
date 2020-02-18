@@ -11,8 +11,5 @@ set(SOURCES
 	Settings.cpp
 	Settings.hpp
 
-	TopNavigation.cpp
-	TopNavigation.hpp
-
 	PARENT_SCOPE
 	)

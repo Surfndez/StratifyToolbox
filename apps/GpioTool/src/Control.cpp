@@ -6,6 +6,7 @@
 #include <sapi/sys.hpp>
 #include <sapi/ux.hpp>
 #include <ToolboxAPI/toolbox.hpp>
+#include <ToolboxAPI/components/TopNavigation.hpp>
 
 Control::Control(Application & application)
 	: toolbox::ApplicationLayout<Application>(application){
@@ -15,14 +16,11 @@ Control::Control(Application & application)
 	}
 
 	add_component(
-				"BackHome",
-				(* new ux::Button())
-				.set_border_size(1)
-				.set_icon_name("chevron-left")
-				.set_theme_style(Theme::style_danger)
-				.set_drawing_point(DrawingPoint(0, 0))
-				.set_drawing_area(DrawingArea(200, 200))
-			);
+				"ConfigurationTopNavigation",
+				(* new toolbox::TopNavigation("Control", "BackHome", event_loop()))
+				.set_drawing_area(DrawingArea(1000,175))
+				);
+
 
 	const u32 columns = 4;
 
@@ -31,8 +29,8 @@ Control::Control(Application & application)
 				toolbox::IoInformation::type_io
 				);
 
-	u32 row = 0;
-	u32 column = 1;
+	u32 row = 1;
+	u32 column = 0;
 
 	const DrawingArea button_area(225,200);
 	const DrawingArea pin_area(45,40);
@@ -51,7 +49,7 @@ Control::Control(Application & application)
 					.set_drawing_point(
 						DrawingPoint(
 							column*(button_area.width()+25)+25/2,
-							row*(button_area.height()+25)+25
+							row*(button_area.height()+25)
 							)
 						)
 					.set_drawing_area(button_area)

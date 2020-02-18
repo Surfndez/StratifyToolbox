@@ -61,7 +61,11 @@ ux::Layout & Application::create_layout(){
 					)
 				.set_enabled(false)
 				)
-			.set_event_handler(handle_application_event)
+			.set_event_handler([this](ux::Component * object,
+												 const ux::Event & event){
+		Application::handle_application_event(*this, object, event);
+	}
+			)
 			.set_drawing_area(
 				DrawingArea(1000,1000)
 				);
@@ -70,6 +74,7 @@ ux::Layout & Application::create_layout(){
 
 
 void Application::handle_application_event(
+		Application & application,
 		ux::Component * object,
 		const ux::Event & event
 		){

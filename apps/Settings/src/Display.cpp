@@ -1,19 +1,19 @@
 #include "Display.hpp"
 #include "Application.hpp"
-#include "TopNavigation.hpp"
 
+#include <ToolboxAPI/components/TopNavigation.hpp>
 #include <sapi/ux.hpp>
 
 Display::Display(Application & application)
 	: toolbox::ApplicationLayout<Application>(application){
 
-	update_period() = chrono::Milliseconds(10);
-
 	add_component(
-				"TopNavigation",
-				(* new TopNavigation("Display"))
+				"DisplayTopNavigation",
+				(* new toolbox::TopNavigation("Display", "BackHome", event_loop()))
+				.set_drawing_area(DrawingArea(1000,175))
 				);
 
+#if 0
 	add_component(
 				"SunButton",
 				(* new Button())
@@ -33,12 +33,8 @@ Display::Display(Application & application)
 				.set_theme_style(Theme::style_brand_primary)
 				.set_drawing_point(ux::DrawingPoint(100,750))
 				.set_drawing_area(ux::DrawingArea(800,100))
-				.set_antialias(false)
-				.set_event_handler(
-					[&](ux::Component * object, const ux::Event & event){
-
-				})
 			);
+#endif
 
 }
 

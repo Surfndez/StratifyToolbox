@@ -6,57 +6,50 @@
 Settings::Settings(Application & application)
 	: toolbox::ApplicationLayout<Application>(application){
 
-	update_period() = chrono::Milliseconds(10);
 	add_component(
 				"List",
-				(* new List())
-				.append(ListItem()
-								.set_key("Account")
-								.set_value("tgil")
-								.set_icon("chevron-right")
-								)
-				.append(ListItem()
-								.set_key("Display")
-								.set_icon("chevron-right")
-								)
-				.append(ListItem()
-								.set_key("About")
-								.set_icon("chevron-right")
-								)
-				.append(ListItem()
-								.set_key("Exit")
-								.set_icon("ellipsis-v")
-								)
+				(* new List(event_loop()))
 				.set_item_height(250)
+				.set_vertical_scroll_enabled()
+				.add_component(
+					"Account",
+					(* new ListItem())
+					.set_key("Account")
+					.set_value("tgil")
+					.set_icon("chevron-right")
+					.set_theme_style(Theme::style_outline_dark)
+					)
+				.add_component(
+					"Display",
+					(* new ListItem())
+					.set_key("Display")
+					.set_icon("chevron-right")
+					.set_theme_style(Theme::style_outline_dark)
+					)
+				.add_component(
+					"Wifi",
+					(* new ListItem())
+					.set_key("Wifi")
+					.set_icon("chevron-right")
+					.set_theme_style(Theme::style_outline_dark)
+					)
+				.add_component(
+					"About",
+					(* new ListItem())
+					.set_key("About")
+					.set_icon("chevron-right")
+					.set_theme_style(Theme::style_outline_dark)
+					)
+				.add_component(
+					"Exit",
+					(* new ListItem())
+					.set_key("Exit")
+					.set_icon("ellipsis-v")
+					.set_theme_style(Theme::style_outline_dark)
+					)
 				.set_drawing_point(DrawingPoint(0,0))
 				.set_drawing_area(DrawingArea(1000,1000))
-				.set_theme_style(Theme::style_brand_primary)
-				.set_event_handler(
-					[&](Component * object, const Event & event){
-
-					if( event.type() == ListEvent::event_type() ){
-						const ListItem & item = event.reinterpret<ListEvent>().item();
-
-						if( item.key() == "Display" ){
-							application.printer().info("set scene collection to Display");
-							scene_collection()->set_current_scene("Display");
-						} else if( item.key() == "About" ){
-							application.printer().info("set scene collection to About");
-							scene_collection()->set_current_scene("About");
-						} else if( item.key() == "Exit" ){
-							Application::launch("/home/Home");
-						}
-
-
-					}
-
-				})
-
 			);
-
-
-
-
 
 }
 

@@ -1,19 +1,20 @@
 #include <sapi/sys.hpp>
+#include <sapi/ux.hpp>
+#include <ToolboxAPI/components/TopNavigation.hpp>
 
-#include "TopNavigation.hpp"
 #include "About.hpp"
 #include "Application.hpp"
 
 About::About(Application & application)
 	: toolbox::ApplicationLayout<Application>(application){
 
-	update_period() = chrono::Milliseconds(10);
 
 	SysInfo info = Sys::get_info();
 
 	add_component(
-				"TopNavigation",
-				(* new TopNavigation("About"))
+				"DisplayTopNavigation",
+				(* new toolbox::TopNavigation("About", "BackHome", event_loop()))
+				.set_drawing_area(DrawingArea(1000,175))
 				);
 
 	add_component(

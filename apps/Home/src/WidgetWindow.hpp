@@ -3,7 +3,7 @@
 
 #include <sapi/ux.hpp>
 
-class WidgetWindow : public CompoundComponent {
+class WidgetWindow {
 public:
 	WidgetWindow(const var::String& name);
 };

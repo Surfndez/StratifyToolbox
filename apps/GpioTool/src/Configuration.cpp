@@ -1,6 +1,8 @@
 #include "Configuration.hpp"
 #include "Application.hpp"
 
+
+#include <ToolboxAPI/components/TopNavigation.hpp>
 #include <sapi/var.hpp>
 #include <sapi/sys.hpp>
 #include <sapi/hal.hpp>
@@ -9,15 +11,12 @@
 Configuration::Configuration(Application & application)
 	: toolbox::ApplicationLayout<Application>(application){
 
+
 	add_component(
-				"BackHome",
-				(* new ux::Button())
-				.set_border_size(1)
-				.set_icon_name("chevron-left")
-				.set_theme_style(Theme::style_danger)
-				.set_drawing_point(DrawingPoint(0, 0))
-				.set_drawing_area(DrawingArea(200, 200))
-			);
+				"ConfigurationTopNavigation",
+				(* new toolbox::TopNavigation("Configuration", "BackHome", event_loop()))
+				.set_drawing_area(DrawingArea(1000,175))
+				);
 
 	const u32 columns = 4;
 
@@ -26,14 +25,14 @@ Configuration::Configuration(Application & application)
 				toolbox::IoInformation::type_io
 				);
 
-	u32 row = 0;
-	u32 column = 1;
+	u32 row = 1;
+	u32 column = 0;
 
 	const DrawingArea button_area(225,200);
 	const DrawingArea pin_area(45,40);
 
 	for(const auto & info: io_information_list){
-		enum Theme::style style = Theme::style_brand_primary;
+		enum Theme::style style = Theme::style_outline_dark;
 
 		add_component(
 					"Configure-" + info.name(),

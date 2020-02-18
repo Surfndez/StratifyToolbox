@@ -5,18 +5,16 @@
 #include <sapi/sys.hpp>
 #include <sapi/ux.hpp>
 #include <ToolboxAPI/Io.hpp>
+#include <ToolboxAPI/components/TopNavigation.hpp>
 
 PinConfiguration::PinConfiguration(Application & application)
 	: toolbox::ApplicationLayout<Application>(application){
 
+
 	add_component(
-				"BackConfiguration",
-				(* new ux::Button())
-				.set_border_size(1)
-				.set_icon_name("chevron-left")
-				.set_theme_style(Theme::style_danger)
-				.set_drawing_point(DrawingPoint(0, 0))
-				.set_drawing_area(DrawingArea(175, 175))
+				"ConfigurationTopNavigation",
+				(* new toolbox::TopNavigation("Pin Configuration", "BackConfiguration", event_loop()))
+				.set_drawing_area(DrawingArea(1000,175))
 				);
 
 	DrawingArea label_area(1000,150);

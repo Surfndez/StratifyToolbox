@@ -14,7 +14,11 @@ public:
 
 private:
 
-	 static void handle_application_event(ux::Component * object, const ux::Event & event);
+	 static void handle_application_event(
+			 Application & application,
+			 ux::Component * object,
+			 const ux::Event & event
+			 );
 
 
 };
