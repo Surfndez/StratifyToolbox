@@ -13,15 +13,17 @@ Display::Display(Application & application)
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
-#if 0
+	const drawing_size_t icon_size = 500;
 	add_component(
 				"SunButton",
 				(* new Button())
 				.set_icon_name("sun")
 				.set_border_size(0)
+				.set_horizontal_padding(0)
+				.set_vertical_padding(0)
 				.set_theme_style(Theme::style_outline_warning)
-				.set_drawing_point(DrawingPoint(250,200))
-				.set_drawing_area(DrawingArea(500,500))
+				.set_drawing_point(DrawingPoint(500-icon_size/2,500-icon_size/2))
+				.set_drawing_area(DrawingArea(icon_size,icon_size))
 				);
 
 
@@ -34,7 +36,6 @@ Display::Display(Application & application)
 				.set_drawing_point(ux::DrawingPoint(100,750))
 				.set_drawing_area(ux::DrawingArea(800,100))
 			);
-#endif
 
 }
 

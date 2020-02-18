@@ -68,9 +68,7 @@ void Application::handle_application_event(
 	Layout * layout = static_cast<Layout*>(object);
 
 	if( event.type() == ListEvent::event_type() ){
-
 		const ListEvent & list_event = event.reinterpret<ListEvent>();
-
 		if( list_event.item().name() == "Display" ){
 			layout->transition("Display");
 		} else if( list_event.item().name() == "About" ){
@@ -88,8 +86,5 @@ void Application::handle_application_event(
 		}
 
 	}
-
-
-
 
 }
