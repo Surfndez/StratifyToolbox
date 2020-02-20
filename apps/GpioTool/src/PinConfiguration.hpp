@@ -3,13 +3,12 @@
 
 #include <sapi/var/Vector.hpp>
 #include <sapi/ux/Scene.hpp>
-#include <ToolboxAPI/Application.hpp>
-#include <ToolboxAPI/Io.hpp>
+#include <ToolboxAPI/toolbox.hpp>
 
 class Application;
 
 
-class PinConfiguration : public toolbox::ApplicationLayout<Application> {
+class PinConfiguration : public ApplicationLayout<Application> {
 public:
 	 PinConfiguration(Application & application);
 

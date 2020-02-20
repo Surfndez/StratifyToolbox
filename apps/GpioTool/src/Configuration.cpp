@@ -9,20 +9,20 @@
 #include <sapi/ux.hpp>
 
 Configuration::Configuration(Application & application)
-	: toolbox::ApplicationLayout<Application>(application){
+	: ApplicationLayout<Application>(application){
 
 
 	add_component(
 				"ConfigurationTopNavigation",
-				(* new toolbox::TopNavigation("Configuration", "BackHome", event_loop()))
+				(* new TopNavigation("Configuration", "BackHome", event_loop()))
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
 	const u32 columns = 4;
 
-	var::Vector<toolbox::IoInformation> io_information_list =
-			toolbox::Io::io_information_list(
-				toolbox::IoInformation::type_io
+	var::Vector<IoInformation> io_information_list =
+			Io::io_information_list(
+				IoInformation::type_io
 				);
 
 	u32 row = 1;

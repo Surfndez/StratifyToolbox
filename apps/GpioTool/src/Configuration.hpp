@@ -3,12 +3,12 @@
 
 #include <sapi/var/Vector.hpp>
 #include <sapi/ux/Scene.hpp>
-#include <ToolboxAPI/Application.hpp>
+#include <ToolboxAPI/toolbox.hpp>
 
 class Application;
 
 
-class Configuration : public toolbox::ApplicationLayout<Application> {
+class Configuration : public ApplicationLayout<Application> {
 public:
 	 Configuration(Application & application);
 

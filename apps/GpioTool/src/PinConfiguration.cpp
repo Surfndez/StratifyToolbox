@@ -8,12 +8,12 @@
 #include <ToolboxAPI/components/TopNavigation.hpp>
 
 PinConfiguration::PinConfiguration(Application & application)
-	: toolbox::ApplicationLayout<Application>(application){
+	: ApplicationLayout<Application>(application){
 
 
 	add_component(
 				"ConfigurationTopNavigation",
-				(* new toolbox::TopNavigation("Pin Configuration", "BackConfiguration", event_loop()))
+				(* new TopNavigation("Pin Configuration", "BackConfiguration", event_loop()))
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
@@ -146,8 +146,8 @@ PinConfiguration::PinConfiguration(Application & application)
 					application.model().remove("pinConfiguration");
 					var::Vector<String> items = pin_configuration.split("-");
 					if( items.count() > 1 ){
-						toolbox::IoInformation info(items.at(1));
-						toolbox::Io io(info.io_pin());
+						IoInformation info(items.at(1));
+						Io io(info.io_pin());
 
 						this->find<Label>(
 									"PinValue"

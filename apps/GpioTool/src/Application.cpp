@@ -10,7 +10,7 @@
 #include "Control.hpp"
 
 Application::Application(const sys::Cli & cli)
-	: toolbox::Application(cli)
+	: ToolboxApplication(cli)
 {
 
 }

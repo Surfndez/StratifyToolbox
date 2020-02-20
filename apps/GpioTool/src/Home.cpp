@@ -6,7 +6,7 @@
 #include <sapi/ux.hpp>
 
 Home::Home(Application & application)
-	: toolbox::ApplicationLayout<Application>(application){
+	: ApplicationLayout<Application>(application){
 
 	add_component(
 				"ControlButton",

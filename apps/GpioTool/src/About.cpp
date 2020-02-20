@@ -6,7 +6,7 @@
 #include <sapi/ux.hpp>
 
 About::About(Application & application)
-	: toolbox::ApplicationLayout<Application>(application){
+	: ApplicationLayout<Application>(application){
 
 	event_loop()->set_update_period(chrono::Milliseconds(10));
 

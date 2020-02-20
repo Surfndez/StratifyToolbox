@@ -6,10 +6,10 @@
 #include <sapi/sys.hpp>
 #include <sapi/ux.hpp>
 #include <ToolboxAPI/toolbox.hpp>
-#include <ToolboxAPI/components/TopNavigation.hpp>
+#include <ToolboxAPI/components.hpp>
 
 Control::Control(Application & application)
-	: toolbox::ApplicationLayout<Application>(application){
+	: ApplicationLayout<Application>(application){
 
 	for(auto & value: m_pin_states){
 		value = -1;
@@ -17,16 +17,16 @@ Control::Control(Application & application)
 
 	add_component(
 				"ConfigurationTopNavigation",
-				(* new toolbox::TopNavigation("Control", "BackHome", event_loop()))
+				(* new TopNavigation("Control", "BackHome", event_loop()))
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
 
 	const u32 columns = 4;
 
-	var::Vector<toolbox::IoInformation> io_information_list =
-			toolbox::Io::io_information_list(
-				toolbox::IoInformation::type_io
+	var::Vector<IoInformation> io_information_list =
+			Io::io_information_list(
+				IoInformation::type_io
 				);
 
 	u32 row = 1;
@@ -53,21 +53,7 @@ Control::Control(Application & application)
 							)
 						)
 					.set_drawing_area(button_area)
-				);
-
-		add_component(
-					String().format("io%d", pin),
-					(* new ux::Label())
-					.set_border_size(1)
-					.set_theme_style(style)
-					.set_drawing_point(
-						DrawingPoint(
-							(pin-1)*pin_area.width()+50,
-							1000-pin_area.height()
-							)
-						)
-					.set_drawing_area(pin_area)
-				);
+					);
 
 		column++;
 		if( column == columns ){
@@ -76,6 +62,55 @@ Control::Control(Application & application)
 		}
 	}
 
+	add_component(
+				"PinMarkerBar",
+				(* new PinMarkerBar(
+					 event_loop(),
+					 IoInformation::type_io
+					 )
+				 )
+				//bottom 10% of screen (full width)
+				.set_drawing_point(DrawingPoint(0,900))
+				.set_drawing_area(DrawingArea(1000,100))
+				);
+
+	set_event_handler(Control::handle_event);
+
+}
+
+void Control::handle_event(
+		ux::Component * object,
+		const ux::Event & event
+		){
+	Control * control = object->reinterpret<Control>();
+
+	if( event.type() == SystemEvent::event_type() ){
+		if( event.id() == SystemEvent::id_update ){
+
+			var::Vector<IoInformation> io_information_list =
+					Io::io_information_list(
+						IoInformation::type_io
+						);
+
+			//check the value of the pins and update accordingly
+			for(const auto & info: io_information_list){
+
+				PinMarkerBar * pin_marker_bar =
+						control->find<PinMarkerBar>("PinMarkerBar");
+
+				if( pin_marker_bar != nullptr ){
+					Io io(info.io_pin());
+					pin_marker_bar->set_pin_marker_elevated(
+								info.io_pin(),
+								io.value()
+								);
+				} else {
+					//assert
+				}
+			}
+		}
+
+	}
 }
 
 
