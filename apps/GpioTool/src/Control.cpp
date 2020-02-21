@@ -8,8 +8,20 @@
 #include <ToolboxAPI/toolbox.hpp>
 #include <ToolboxAPI/components.hpp>
 
-Control::Control(Application & application)
-	: ApplicationLayout<Application>(application){
+const var::String Control::pin_button_name(
+		const IoInformation & information
+		){
+	return information.name();
+}
+
+const var::String Control::pin_marker_name(
+		const IoInformation & information){
+	return PinMarkerBar::pin_marker_name(information.io_pin());
+}
+
+
+Control::Control(Application & app)
+	: ApplicationLayout<Application>(app){
 
 	for(auto & value: m_pin_states){
 		value = -1;
@@ -49,17 +61,22 @@ Control::Control(Application & application)
 
 	PinMarkerBar * pin_marker_bar = find<PinMarkerBar>("PinMarkerBar");
 	if( pin_marker_bar == nullptr ){
-		printf("pin marker bar is null\n");
+		application().printer().error("pin marker bar is null");
 		exit(1);
 	}
 
 	for(const auto & info: io_information_list){
-		u16 pin = info.physical_pin_number();
-		enum Theme::style style =
-				static_cast<Theme::style>(pin % Theme::last_style);
+		enum Theme::style style;
+
+		Io io(info.io_pin());
+		if( io.is_output() ){
+			style = Theme::style_brand_secondary;
+		} else {
+			style = Theme::style_outline_brand_secondary;
+		}
 
 		add_component(
-					info.name(),
+					pin_button_name(info),
 					(* new ux::Button())
 					.set_border_size(1)
 					.set_label(info.name())
@@ -89,11 +106,9 @@ Control::Control(Application & application)
 
 }
 
-void Control::handle_event(
-		ux::Component * object,
+void Control::handle_control_event(
 		const ux::Event & event
 		){
-	Control * control = object->reinterpret<Control>();
 
 	if( event.type() == SystemEvent::event_type() ){
 		if( event.id() == SystemEvent::id_update ){
@@ -107,7 +122,7 @@ void Control::handle_event(
 			for(const auto & info: io_information_list){
 
 				PinMarkerBar * pin_marker_bar =
-						control->find<PinMarkerBar>("PinMarkerBar");
+						find<PinMarkerBar>("PinMarkerBar");
 
 				if( pin_marker_bar != nullptr ){
 					Io io(info.io_pin());
@@ -116,9 +131,11 @@ void Control::handle_event(
 								io.value()
 								);
 
-					Button * button = control->find<Button>(info.name());
-					if( button != nullptr ){
+					Button * button = find<Button>(
+								pin_button_name(info)
+								);
 
+					if( button != nullptr ){
 						pin_marker_bar->set_pin_marker_state(
 									info.io_pin(), button->theme_state()
 									);
@@ -127,12 +144,22 @@ void Control::handle_event(
 				} else {
 					//assert
 				}
-
-
-
 			}
 		}
+	} else if( event.type() == ButtonEvent::event_type() ){
+		if( event.id() == ButtonEvent::id_released ){
+			const ButtonEvent & button_event =
+					event.reinterpret<ButtonEvent>();
 
+			application().printer().info("toggle " + button_event.name());
+			IoInformation information(button_event.name());
+			Io io(information);
+			if( io.is_output() ){
+				io << !io.value();
+			}
+
+
+		}
 	}
 }
 

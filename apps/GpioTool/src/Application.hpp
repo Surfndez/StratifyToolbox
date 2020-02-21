@@ -20,6 +20,7 @@ private:
 			 const ux::Event & event
 			 );
 
+	 void toggle_direction();
 
 };
 

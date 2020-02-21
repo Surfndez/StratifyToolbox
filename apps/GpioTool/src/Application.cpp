@@ -1,6 +1,7 @@
 
 #include <sapi/ux.hpp>
 #include <sapi/var.hpp>
+#include <ToolboxAPI/components.hpp>
 
 #include "Application.hpp"
 #include "Home.hpp"
@@ -65,10 +66,10 @@ ux::Layout & Application::create_layout(){
 												 const ux::Event & event){
 		Application::handle_application_event(*this, object, event);
 	}
-			)
-			.set_drawing_area(
-				DrawingArea(1000,1000)
-				);
+	)
+	.set_drawing_area(
+	DrawingArea(1000,1000)
+	);
 
 }
 
@@ -79,7 +80,7 @@ void Application::handle_application_event(
 		const ux::Event & event
 		){
 
-	Layout * layout = static_cast<Layout*>(object);
+	Layout * layout = object->reinterpret<Layout>();
 	if( event.type() == ButtonEvent::event_type() ){
 		const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
 
@@ -107,9 +108,69 @@ void Application::handle_application_event(
 
 				layout->transition("PinConfiguration");
 
+			} else if( button_event.name() == "DirectionButton" ){
+				application.toggle_direction();
 			}
 		}
 
+	}
+
+}
+
+void Application::toggle_direction(){
+	Label * pin_value_label =
+			event_loop()->layout()->find<Label>("PinValue");
+	if( pin_value_label == nullptr ){
+		//assert here
+		printf("Pin value not found\n");
+		return;
+	}
+
+	IoInformation information(pin_value_label->label());
+	if( information.is_valid() ){
+		printer().info("Toggle IO for " + information.name());
+		Io io(information.io_pin());
+
+		Label * direction_label =
+				event_loop()->layout()->find<Label>("DirectionValue");
+		Button * toggle_button =
+				event_loop()->layout()->find<Button>("DirectionButton");
+		Button * control_button =
+				event_loop()->layout()->find<Button>(
+					Control::pin_button_name(information)
+					);
+		Button * configuration_button =
+				event_loop()->layout()->find<Button>(
+					Configuration::pin_button_name(information)
+					);
+		PinMarkerBar * pin_marker_bar =
+				event_loop()->layout()->find<PinMarkerBar>("PinMarkerBar");
+
+
+		if( io.is_output() ){
+			io.set_input();
+			direction_label->set_label("Input");
+			toggle_button->set_theme_style(Theme::style_outline_brand_secondary);
+			control_button->set_theme_style(Theme::style_outline_brand_secondary);
+			configuration_button->set_theme_style(Theme::style_outline_brand_secondary);
+			pin_marker_bar->set_pin_marker_style(
+						information.io_pin(),
+						Theme::style_outline_brand_secondary
+						);
+		} else {
+			io.set_output();
+			direction_label->set_label("Output");
+			toggle_button->set_theme_style(Theme::style_brand_secondary);
+			control_button->set_theme_style(Theme::style_brand_secondary);
+			configuration_button->set_theme_style(Theme::style_brand_secondary);
+			pin_marker_bar->set_pin_marker_style(
+						information.io_pin(),
+						Theme::style_brand_secondary
+						);
+		}
+		direction_label->redraw();
+		toggle_button->redraw();
+		control_button->redraw();
 	}
 
 }

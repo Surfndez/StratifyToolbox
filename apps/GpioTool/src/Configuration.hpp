@@ -12,6 +12,9 @@ class Configuration : public ApplicationLayout<Application> {
 public:
 	 Configuration(Application & application);
 
+	 static const var::String pin_button_name(
+			 const IoInformation& information
+			 );
 private:
 
 

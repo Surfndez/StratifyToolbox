@@ -8,6 +8,12 @@
 #include <sapi/hal.hpp>
 #include <sapi/ux.hpp>
 
+const var::String Configuration::pin_button_name(
+		const IoInformation & information){
+	return "Configure-" + information.name();
+}
+
+
 Configuration::Configuration(Application & application)
 	: ApplicationLayout<Application>(application){
 
@@ -29,13 +35,19 @@ Configuration::Configuration(Application & application)
 	u32 column = 0;
 
 	const DrawingArea button_area(225,200);
-	const DrawingArea pin_area(45,40);
 
 	for(const auto & info: io_information_list){
-		enum Theme::style style = Theme::style_outline_dark;
+		enum Theme::style style;
+
+		Io io(info.io_pin());
+		if( io.is_output() ){
+			style = Theme::style_brand_secondary;
+		} else {
+			style = Theme::style_outline_brand_secondary;
+		}
 
 		add_component(
-					"Configure-" + info.name(),
+					pin_button_name(info),
 					(* new ux::Button())
 					.set_border_size(1)
 					.set_label(info.name())

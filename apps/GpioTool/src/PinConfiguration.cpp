@@ -143,45 +143,11 @@ PinConfiguration::PinConfiguration(Application & application)
 			}
 		}
 
-		if( (event.type() == ButtonEvent::event_type()) &&
-				(event.id() == ButtonEvent::id_released) ){
-			const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-
-			if( button_event.name() == "DirectionButton" ){
-				toggle_direction();
-			}
-
-		}
-
 	});
 
 
 }
 
-void PinConfiguration::toggle_direction(){
-	Label * pin_value_label = find<Label>("PinValue");
-	if( pin_value_label == nullptr ){
-		//assert here
-		return;
-	}
-
-	IoInformation information(pin_value_label->label());
-	if( information.is_valid() ){
-		application().printer().info("Toggle IO for " + information.name());
-		Io io(information.io_pin());
-
-		Label * direction_label = find<Label>("DirectionValue");
-		if( io.is_output() ){
-			io.set_input();
-			direction_label->set_label("Input");
-		} else {
-			io.set_output();
-			direction_label->set_label("Output");
-		}
-		direction_label->redraw();
-	}
-
-}
 
 void PinConfiguration::update_display_values(){
 	String pin_configuration =
@@ -193,6 +159,18 @@ void PinConfiguration::update_display_values(){
 		if( items.count() > 1 ){
 			IoInformation info(items.at(1));
 			Io io(info.io_pin());
+
+			if( io.is_output() ){
+				find<Button>("DirectionButton")
+						->set_theme_style(
+							Theme::style_brand_secondary
+							).redraw();
+			} else {
+				find<Button>("DirectionButton")
+						->set_theme_style(
+							Theme::style_outline_brand_secondary
+							).redraw();
+			}
 
 			this->find<Label>(
 						"PinValue"

@@ -15,7 +15,6 @@ public:
 private:
 
 	 void update_display_values();
-	 void toggle_direction();
 };
 
 #endif // CONFIGURATION_HPP
