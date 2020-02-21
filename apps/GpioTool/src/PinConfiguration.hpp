@@ -12,7 +12,12 @@ class PinConfiguration : public ApplicationLayout<Application> {
 public:
 	 PinConfiguration(Application & application);
 
+	 void set_io_pin(enum Io::io_pins pin){
+		 m_io_pin = pin;
+	 }
+
 private:
+	 enum Io::io_pins m_io_pin;
 
 	 void update_display_values();
 };

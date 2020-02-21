@@ -1,5 +1,6 @@
 #include "Control.hpp"
 #include "Application.hpp"
+#include "PinConfiguration.hpp"
 
 #include <sapi/var.hpp>
 #include <sapi/hal.hpp>
@@ -147,9 +148,10 @@ void Control::handle_control_event(
 			}
 		}
 	} else if( event.type() == ButtonEvent::event_type() ){
+		const ButtonEvent & button_event =
+				event.reinterpret<ButtonEvent>();
 		if( event.id() == ButtonEvent::id_released ){
-			const ButtonEvent & button_event =
-					event.reinterpret<ButtonEvent>();
+
 
 			application().printer().info("toggle " + button_event.name());
 			IoInformation information(button_event.name());
@@ -158,7 +160,16 @@ void Control::handle_control_event(
 				io << !io.value();
 			}
 
+		} else if( event.id() == ButtonEvent::id_held ){
 
+			event_loop()
+					->layout()
+					->find<PinConfiguration>("PinConfiguration")
+					->set_io_pin(
+						IoInformation(button_event.name()).io_pin()
+						);
+
+			event_loop()->layout()->transition("PinConfiguration");
 		}
 	}
 }

@@ -150,54 +150,44 @@ PinConfiguration::PinConfiguration(Application & application)
 
 
 void PinConfiguration::update_display_values(){
-	String pin_configuration =
-			application().model().at("pinConfiguration").to_string();
+	IoInformation info(m_io_pin);
+	Io io(info.io_pin());
 
-	if( pin_configuration.is_empty() == false ){
-		application().model().remove("pinConfiguration");
-		var::Vector<String> items = pin_configuration.split("-");
-		if( items.count() > 1 ){
-			IoInformation info(items.at(1));
-			Io io(info.io_pin());
+	if( io.is_output() ){
+		find<Button>("DirectionButton")
+				->set_theme_style(
+					Theme::style_brand_secondary
+					).redraw();
+	} else {
+		find<Button>("DirectionButton")
+				->set_theme_style(
+					Theme::style_outline_brand_secondary
+					).redraw();
+	}
 
-			if( io.is_output() ){
-				find<Button>("DirectionButton")
-						->set_theme_style(
-							Theme::style_brand_secondary
-							).redraw();
-			} else {
-				find<Button>("DirectionButton")
-						->set_theme_style(
-							Theme::style_outline_brand_secondary
-							).redraw();
-			}
+	this->find<Label>(
+				"PinValue"
+				)->set_label(
+				info.name()
+				).redraw();
 
-			this->find<Label>(
-						"PinValue"
-						)->set_label(
-						info.name()
-						).redraw();
+	this->find<Label>(
+				"ValueValue"
+				)->set_label(
+				io.value() ? "High" : "Low"
+										 ).redraw();
 
-			this->find<Label>(
-						"ValueValue"
-						)->set_label(
-						io.value() ? "High" : "Low"
+	this->find<Label>(
+				"DirectionValue"
+				)->set_label(
+				io.is_output() ? "Output" : "Input"
 												 ).redraw();
 
-			this->find<Label>(
-						"DirectionValue"
-						)->set_label(
-						io.is_output() ? "Output" : "Input"
-														 ).redraw();
-
-			this->find<Label>(
-						"FunctionValue"
-						)->set_label(
-						"Uart::Tx"
-						).redraw();
-
-		}
-	}
+	this->find<Label>(
+				"FunctionValue"
+				)->set_label(
+				"Uart::Tx"
+				).redraw();
 }
 
 
