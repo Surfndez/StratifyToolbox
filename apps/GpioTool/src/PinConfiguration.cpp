@@ -11,10 +11,11 @@ PinConfiguration::PinConfiguration(Application & application)
 	: ApplicationLayout<Application>(application){
 
 
+	const drawing_size_t navigation_bar_height = 175;
 	add_component(
 				"ConfigurationTopNavigation",
 				(* new TopNavigation("Pin Configuration", "BackConfiguration", event_loop()))
-				.set_drawing_area(DrawingArea(1000,175))
+				.set_drawing_area(DrawingArea(1000,navigation_bar_height))
 				);
 
 	DrawingArea label_area(1000,150);
@@ -125,11 +126,11 @@ PinConfiguration::PinConfiguration(Application & application)
 
 				.set_drawing_point(
 					DrawingPoint(
-						25, 225
+						25, navigation_bar_height
 						)
 					)
 				.set_drawing_area(
-					DrawingArea(950,775)
+					DrawingArea(950,1000-navigation_bar_height)
 					)
 
 				);
@@ -138,49 +139,89 @@ PinConfiguration::PinConfiguration(Application & application)
 
 		if( event.type() == SystemEvent::event_type() ){
 			if( event.id() == SystemEvent::id_update ){
-
-				String pin_configuration =
-						application.model().at("pinConfiguration").to_string();
-
-				if( pin_configuration.is_empty() == false ){
-					application.model().remove("pinConfiguration");
-					var::Vector<String> items = pin_configuration.split("-");
-					if( items.count() > 1 ){
-						IoInformation info(items.at(1));
-						Io io(info.io_pin());
-
-						this->find<Label>(
-									"PinValue"
-									)->set_label(
-									info.name()
-									).redraw();
-
-						this->find<Label>(
-									"ValueValue"
-									)->set_label(
-									io.value() ? "High" : "Low"
-															 ).redraw();
-
-						this->find<Label>(
-									"DirectionValue"
-									)->set_label(
-									io.is_output() ? "Output" : "Input"
-															 ).redraw();
-
-						this->find<Label>(
-									"FunctionValue"
-									)->set_label(
-									"Uart::Tx"
-									).redraw();
-
-					}
-				}
+				update_display_values();
 			}
 		}
+
+		if( (event.type() == ButtonEvent::event_type()) &&
+				(event.id() == ButtonEvent::id_released) ){
+			const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
+
+			if( button_event.name() == "DirectionButton" ){
+				toggle_direction();
+			}
+
+		}
+
 	});
 
 
 }
+
+void PinConfiguration::toggle_direction(){
+	Label * pin_value_label = find<Label>("PinValue");
+	if( pin_value_label == nullptr ){
+		//assert here
+		return;
+	}
+
+	IoInformation information(pin_value_label->label());
+	if( information.is_valid() ){
+		application().printer().info("Toggle IO for " + information.name());
+		Io io(information.io_pin());
+
+		Label * direction_label = find<Label>("DirectionValue");
+		if( io.is_output() ){
+			io.set_input();
+			direction_label->set_label("Input");
+		} else {
+			io.set_output();
+			direction_label->set_label("Output");
+		}
+		direction_label->redraw();
+	}
+
+}
+
+void PinConfiguration::update_display_values(){
+	String pin_configuration =
+			application().model().at("pinConfiguration").to_string();
+
+	if( pin_configuration.is_empty() == false ){
+		application().model().remove("pinConfiguration");
+		var::Vector<String> items = pin_configuration.split("-");
+		if( items.count() > 1 ){
+			IoInformation info(items.at(1));
+			Io io(info.io_pin());
+
+			this->find<Label>(
+						"PinValue"
+						)->set_label(
+						info.name()
+						).redraw();
+
+			this->find<Label>(
+						"ValueValue"
+						)->set_label(
+						io.value() ? "High" : "Low"
+												 ).redraw();
+
+			this->find<Label>(
+						"DirectionValue"
+						)->set_label(
+						io.is_output() ? "Output" : "Input"
+														 ).redraw();
+
+			this->find<Label>(
+						"FunctionValue"
+						)->set_label(
+						"Uart::Tx"
+						).redraw();
+
+		}
+	}
+}
+
 
 
 
