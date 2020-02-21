@@ -29,8 +29,11 @@ Control::Control(Application & app)
 	}
 
 	add_component(
-				"ConfigurationTopNavigation",
-				(* new TopNavigation("Control", "BackHome", event_loop()))
+				"ControlTopNavigation",
+				(* new TopNavigation(
+					 TopNavigationAttributes()
+					 .set_title("GPIO Tool"),
+					 event_loop()))
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 

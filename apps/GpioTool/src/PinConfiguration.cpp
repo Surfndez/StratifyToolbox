@@ -13,8 +13,14 @@ PinConfiguration::PinConfiguration(Application & application)
 
 	const drawing_size_t navigation_bar_height = 175;
 	add_component(
-				"ConfigurationTopNavigation",
-				(* new TopNavigation("Pin Configuration", "BackConfiguration", event_loop()))
+				"PinConfigurationTopNavigation",
+				(* new TopNavigation(
+					 TopNavigationAttributes()
+					 .set_left_icon_name("chevron-left")
+					 .set_title("Pin Configuration"),
+					 event_loop()
+					 )
+				 )
 				.set_drawing_area(DrawingArea(1000,navigation_bar_height))
 				);
 

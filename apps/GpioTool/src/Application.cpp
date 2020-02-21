@@ -20,16 +20,6 @@ ux::Layout & Application::create_layout(){
 
 	return (Layout&)(*(new Layout(event_loop())))
 			.add_component(
-				"Home",
-				(* new Home(*this))
-				.set_drawing_point(
-					DrawingPoint(0,0)
-					)
-				.set_drawing_area(
-					DrawingArea(1000,1000)
-					)
-				)
-			.add_component(
 				"Control",
 				(* new Control(*this))
 				.set_drawing_point(
@@ -38,18 +28,6 @@ ux::Layout & Application::create_layout(){
 				.set_drawing_area(
 					DrawingArea(1000,1000)
 					)
-				.set_enabled(false)
-				)
-			.add_component(
-				"Configuration",
-				(* new Configuration(*this))
-				.set_drawing_point(
-					DrawingPoint(0,0)
-					)
-				.set_drawing_area(
-					DrawingArea(1000,1000)
-					)
-				.set_enabled(false)
 				)
 			.add_component(
 				"PinConfiguration",
@@ -85,7 +63,6 @@ void Application::handle_application_event(
 		const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
 
 		if( button_event.id() == ButtonEvent::id_released ){
-			printf("Pushed button %s\n", button_event.name().cstring());
 			if( (button_event.name() == "ConfigurationButton") ||
 					(button_event.name() == "BackConfiguration") ){
 				layout->transition("Configuration");

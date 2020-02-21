@@ -20,7 +20,10 @@ Configuration::Configuration(Application & application)
 
 	add_component(
 				"ConfigurationTopNavigation",
-				(* new TopNavigation("Configuration", "BackHome", event_loop()))
+				(* new TopNavigation(
+					 TopNavigationAttributes()
+					 .set_title("Configuration"),
+					 event_loop()))
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
