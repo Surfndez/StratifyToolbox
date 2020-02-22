@@ -1,23 +1,24 @@
 #include "PinConfiguration.hpp"
 #include "Application.hpp"
+#include "Control.hpp"
 
 #include <sapi/var.hpp>
 #include <sapi/sys.hpp>
 #include <sapi/ux.hpp>
 #include <ToolboxAPI/Io.hpp>
-#include <ToolboxAPI/components/TopNavigation.hpp>
+#include <ToolboxAPI/components.hpp>
 
 PinConfiguration::PinConfiguration(Application & application)
-	: ApplicationLayout<Application>(application){
+	: ApplicationLayout<Application>(whatis_name(), application){
 
 
 	const drawing_size_t navigation_bar_height = 175;
 	add_component(
-				"PinConfigurationTopNavigation",
 				(* new TopNavigation(
+					 top_navigation_name(),
 					 TopNavigationAttributes()
 					 .set_left_icon_name("chevron-left")
-					 .set_title("Pin Configuration"),
+					 .set_title("Pin Settings"),
 					 event_loop()
 					 )
 				 )
@@ -28,14 +29,14 @@ PinConfiguration::PinConfiguration(Application & application)
 	DrawingArea value_area(1000,200);
 
 	add_component(
-				"PinConfigurationVerticalLayout",
-				(* new ux::Layout(event_loop()))
+				(* new ux::Layout(
+					 "PinConfigurationVerticalLayout",
+					 event_loop()))
 				.set_flow(ux::Layout::flow_vertical)
 				.set_vertical_scroll_enabled()
 
 				.add_component(
-					"PinLabel",
-					(* new ux::Label())
+					Component::create<ux::Label>("PinLabel")
 					.set_label("Pin")
 					.set_align_left()
 					.set_border_size(0)
@@ -44,18 +45,16 @@ PinConfiguration::PinConfiguration(Application & application)
 					)
 
 				.add_component(
-					"PinValue",
-					(* new ux::Label())
+					Component::create<ux::Label>("PinValue")
 					.set_label("?")
 					.set_align_left()
 					.set_border_size(0)
-					.set_theme_style(Theme::style_outline_brand_primary)
+					.set_theme_style(Theme::style_outline_brand_secondary)
 					.set_drawing_area(value_area)
 					)
 
 				.add_component(
-					"ValueLabel",
-					(* new ux::Label())
+					Component::create<ux::Label>("ValueLabel")
 					.set_label("Value")
 					.set_align_left()
 					.set_border_size(0)
@@ -64,18 +63,16 @@ PinConfiguration::PinConfiguration(Application & application)
 					)
 
 				.add_component(
-					"ValueValue",
-					(* new ux::Label())
+					Component::create<ux::Label>("ValueValue")
 					.set_label("---")
 					.set_align_left()
 					.set_border_size(0)
-					.set_theme_style(Theme::style_outline_brand_primary)
+					.set_theme_style(Theme::style_outline_brand_secondary)
 					.set_drawing_area(value_area)
 					)
 
 				.add_component(
-					"DirectionLabel",
-					(* new ux::Label())
+					Component::create<ux::Label>("DirectionLabel")
 					.set_label("Direction")
 					.set_align_left()
 					.set_border_size(0)
@@ -84,34 +81,30 @@ PinConfiguration::PinConfiguration(Application & application)
 					)
 
 				.add_component(
-					"DirectionLayout",
-					(* new ux::Layout(event_loop()))
+					(* new ux::Layout("DirectionLayout", event_loop()))
 					.set_flow(Layout::flow_horizontal)
 
 					.add_component(
-						"DirectionValue",
-						(* new ux::Label())
+						Component::create<ux::Label>(direction_value_name())
 						.set_label("Output")
 						.set_align_left()
 						.set_border_size(0)
-						.set_theme_style(Theme::style_outline_brand_primary)
+						.set_theme_style(Theme::style_outline_brand_secondary)
 						.set_drawing_area(DrawingArea(600,1000))
 						)
 
 					.add_component(
-						"DirectionButton",
-						(* new ux::Button())
+						Component::create<ux::Button>(direction_button_name())
 						.set_label("Toggle")
 						.set_border_size(1)
-						.set_theme_style(Theme::style_outline_brand_primary)
+						.set_theme_style(Theme::style_outline_brand_secondary)
 						.set_drawing_area(DrawingArea(400,1000))
 						)
 					.set_drawing_area(value_area)
 					)
 
 				.add_component(
-					"FunctionLabel",
-					(* new ux::Label())
+					Component::create<ux::Label>("FunctionLabel")
 					.set_label("Function")
 					.set_align_left()
 					.set_border_size(0)
@@ -120,12 +113,11 @@ PinConfiguration::PinConfiguration(Application & application)
 					)
 
 				.add_component(
-					"FunctionValue",
-					(* new ux::Label())
+					Component::create<ux::Label>("FunctionValue")
 					.set_label("GPIO")
 					.set_align_left()
 					.set_border_size(0)
-					.set_theme_style(Theme::style_outline_brand_primary)
+					.set_theme_style(Theme::style_outline_brand_secondary)
 					.set_drawing_area(value_area)
 					)
 
@@ -146,6 +138,23 @@ PinConfiguration::PinConfiguration(Application & application)
 		if( event.type() == SystemEvent::event_type() ){
 			if( event.id() == SystemEvent::id_update ){
 				update_display_values();
+			}
+		}
+
+		if( event.type() == ButtonEvent::event_type() ){
+			if( event.id() == ButtonEvent::id_released ){
+				if( event.reinterpret<ButtonEvent>().name() ==
+						find<TopNavigation>(top_navigation_name())->left_button_name()
+						){
+					event_loop()->layout()->transition("Control");
+				}
+
+				if( event.reinterpret<ButtonEvent>().name() ==
+						PinConfiguration::direction_button_name()
+						){
+					toggle_direction();
+				}
+
 			}
 		}
 
@@ -194,6 +203,61 @@ void PinConfiguration::update_display_values(){
 				)->set_label(
 				"Uart::Tx"
 				).redraw();
+}
+
+void PinConfiguration::toggle_direction(){
+	Label * pin_value_label =
+			event_loop()->layout()->find<Label>("PinValue");
+	if( pin_value_label == nullptr ){
+		//assert here
+		printf("Pin value not found\n");
+		return;
+	}
+
+	IoInformation information(pin_value_label->label());
+	if( information.is_valid() ){
+		Io io(information.io_pin());
+
+		Label * direction_label =
+				event_loop()->layout()->find<Label>( PinConfiguration::direction_value_name() );
+		Button * toggle_button =
+				event_loop()->layout()->find<Button>( PinConfiguration::direction_button_name() );
+
+		Button * control_button =
+				event_loop()->layout()->find<Button>(
+					Control::pin_button_name(information)
+					);
+
+		PinMarkerBar * pin_marker_bar =
+				event_loop()->layout()->find<PinMarkerBar>(
+					Control::pin_marker_bar_name()
+					);
+
+
+		if( io.is_output() ){
+			io.set_input();
+			direction_label->set_label("Input");
+			toggle_button->set_theme_style(Theme::style_outline_brand_secondary);
+			control_button->set_theme_style(Theme::style_outline_brand_secondary);
+			pin_marker_bar->set_pin_marker_style(
+						information.io_pin(),
+						Theme::style_outline_brand_secondary
+						);
+		} else {
+			io.set_output();
+			direction_label->set_label("Output");
+			toggle_button->set_theme_style(Theme::style_brand_secondary);
+			control_button->set_theme_style(Theme::style_brand_secondary);
+			pin_marker_bar->set_pin_marker_style(
+						information.io_pin(),
+						Theme::style_brand_secondary
+						);
+		}
+		direction_label->redraw();
+		toggle_button->redraw();
+		control_button->redraw();
+	}
+
 }
 
 

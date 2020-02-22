@@ -32,7 +32,7 @@ void translate_touch(toolbox_touch_t * toolbox_touch, const ft5446_touch_t * dev
 	toolbox_touch->o_flags = 0;
 
 	if( is_pressed(device_touch) ){
-		toolbox_touch->o_flags |= TOOLBOX_TOUCH_FLAG_IS_PRESSED;
+		//toolbox_touch->o_flags |= TOOLBOX_TOUCH_FLAG_IS_PRESSED;
 	}
 
 	if( is_active(device_touch) ){
@@ -49,31 +49,34 @@ int kernel_touch_init(){
 }
 
 int kernel_touch_request(void * args){
-   toolbox_touch_packet_t * touch_packet = args;
-   ft5446_packet_t device_packet;
+	toolbox_touch_packet_t * touch_packet = args;
+	ft5446_packet_t device_packet;
 
-   touch_packet->count = ft5446_read(&device_packet);
+	touch_packet->count = ft5446_read(&device_packet);
 
-   int count = touch_packet->count;
+	int count = touch_packet->count;
 
-   for(int i = 0; i < 2; i++){
-      if( touch_packet->count < i+1 ){
-         //check to see if the last touch was active and release it
-         if( kernel_shared_last_touch_packet()->count > i ){
-            touch_packet->point[i] = kernel_shared_last_touch_packet()->point[i];
-            touch_packet->point[i].o_flags = TOOLBOX_TOUCH_FLAG_IS_RELEASED;
-            count = i+1;
-         }
-      } else {
-         //this is an active touch
-         translate_touch(touch_packet->point + i, device_packet.point + i);
-      }
-   }
+	for(int i = 0; i < 2; i++){
+		if( touch_packet->count < i+1 ){
+			//check to see if the last touch was active and release it
+			if( kernel_shared_last_touch_packet()->count > i ){
+				touch_packet->point[i] = kernel_shared_last_touch_packet()->point[i];
+				touch_packet->point[i].o_flags = TOOLBOX_TOUCH_FLAG_IS_RELEASED;
+				count = i+1;
+			}
+		} else {
+			//this is an active touch
+			translate_touch(touch_packet->point + i, device_packet.point + i);
+			if( kernel_shared_last_touch_packet()->count < i+1  ){
+				touch_packet->point[i].o_flags |= TOOLBOX_TOUCH_FLAG_IS_PRESSED;
+			}
+		}
+	}
 
-   //last packet is copied without adjusted count
-   *(kernel_shared_last_touch_packet()) = *touch_packet;
+	//last packet is copied without adjusted count
+	*(kernel_shared_last_touch_packet()) = *touch_packet;
 
-   //adjust the count that is returned to account for release events
-   touch_packet->count = count;
-   return count;
+	//adjust the count that is returned to account for release events
+	touch_packet->count = count;
+	return count;
 }

@@ -22,18 +22,20 @@ const var::String Control::pin_marker_name(
 
 
 Control::Control(Application & app)
-	: ApplicationLayout<Application>(app){
+	: ApplicationLayout<Application>("Control", app){
 
 	for(auto & value: m_pin_states){
 		value = -1;
 	}
 
 	add_component(
-				"ControlTopNavigation",
-				(* new TopNavigation(
-					 TopNavigationAttributes()
-					 .set_title("GPIO Tool"),
-					 event_loop()))
+				Component::create<TopNavigation>(
+					top_navigation_name(),
+					TopNavigationAttributes()
+					.set_left_icon_name("times")
+					.set_right_icon_name("info")
+					.set_title("GPIO Tool"),
+					event_loop())
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
@@ -52,12 +54,11 @@ Control::Control(Application & app)
 	const DrawingArea pin_area(45,40);
 
 	add_component(
-				"PinMarkerBar",
-				(* new PinMarkerBar(
-					 event_loop(),
-					 IoInformation::type_io
-					 )
-				 )
+				Component::create<PinMarkerBar>(
+					pin_marker_bar_name(),
+					event_loop(),
+					IoInformation::type_io
+					)
 				//bottom 10% of screen (full width)
 				.set_drawing_point(DrawingPoint(0,900))
 				.set_drawing_area(DrawingArea(1000,100))
@@ -80,8 +81,9 @@ Control::Control(Application & app)
 		}
 
 		add_component(
-					pin_button_name(info),
-					(* new ux::Button())
+					Component::create<ux::Button>(
+						pin_button_name(info)
+						)
 					.set_border_size(1)
 					.set_label(info.name())
 					.set_theme_style(style)
@@ -106,76 +108,100 @@ Control::Control(Application & app)
 		}
 	}
 
-	set_event_handler(Control::handle_event);
+	set_event_handler(Control::event_handler);
 
 }
 
-void Control::handle_control_event(
+void Control::local_event_handler(
 		const ux::Event & event
 		){
 
 	if( event.type() == SystemEvent::event_type() ){
 		if( event.id() == SystemEvent::id_update ){
-
-			var::Vector<IoInformation> io_information_list =
-					Io::io_information_list(
-						IoInformation::type_io
-						);
-
-			//check the value of the pins and update accordingly
-			for(const auto & info: io_information_list){
-
-				PinMarkerBar * pin_marker_bar =
-						find<PinMarkerBar>("PinMarkerBar");
-
-				if( pin_marker_bar != nullptr ){
-					Io io(info.io_pin());
-					pin_marker_bar->set_pin_marker_elevated(
-								info.io_pin(),
-								io.value()
-								);
-
-					Button * button = find<Button>(
-								pin_button_name(info)
-								);
-
-					if( button != nullptr ){
-						pin_marker_bar->set_pin_marker_state(
-									info.io_pin(), button->theme_state()
-									);
-					}
-
-				} else {
-					//assert
-				}
-			}
+			update_pin_markers();
 		}
 	} else if( event.type() == ButtonEvent::event_type() ){
 		const ButtonEvent & button_event =
 				event.reinterpret<ButtonEvent>();
 		if( event.id() == ButtonEvent::id_released ){
 
-
-			application().printer().info("toggle " + button_event.name());
-			IoInformation information(button_event.name());
-			Io io(information);
-			if( io.is_output() ){
-				io << !io.value();
+			application().printer().info("Handle button "	+ button_event.name());
+			if( handle_io_button_press(button_event) == false ){
+				if( button_event.name() ==
+						find<TopNavigation>(top_navigation_name())->left_button_name()
+						){
+					//exit the application and launch the home screen
+					application().go_home();
+				} else if( button_event.name() ==
+									 find<TopNavigation>(top_navigation_name())->right_button_name()
+									 ){
+					event_loop()->layout()->transition("About");
+				}
 			}
 
-		} else if( event.id() == ButtonEvent::id_held ){
 
+		} else if( event.id() == ButtonEvent::id_held ){
 			event_loop()
 					->layout()
 					->find<PinConfiguration>("PinConfiguration")
 					->set_io_pin(
 						IoInformation(button_event.name()).io_pin()
 						);
-
 			event_loop()->layout()->transition("PinConfiguration");
 		}
 	}
 }
+
+bool Control::handle_io_button_press(const ux::ButtonEvent& button_event){
+	IoInformation information(button_event.name());
+	if( information.is_valid() ){
+		Io io(information);
+		if( io.is_output() ){
+			io << !io.value();
+		}
+		return true;
+	}
+	return false;
+}
+
+
+void Control::update_pin_markers(){
+	var::Vector<IoInformation> io_information_list =
+			Io::io_information_list(
+				IoInformation::type_io
+				);
+
+	//check the value of the pins and update accordingly
+	for(const auto & info: io_information_list){
+
+		PinMarkerBar * pin_marker_bar =
+				find<PinMarkerBar>(pin_marker_bar_name());
+
+		if( pin_marker_bar != nullptr ){
+			Io io(info.io_pin());
+			pin_marker_bar->set_pin_marker_elevated(
+						info.io_pin(),
+						io.value()
+						);
+
+			Button * button = find<Button>(
+						pin_button_name(info)
+						);
+
+			if( button != nullptr ){
+				pin_marker_bar->set_pin_marker_state(
+							info.io_pin(), button->theme_state()
+							);
+			}
+
+		} else {
+			//assert
+		}
+	}
+
+}
+
+
 
 
 

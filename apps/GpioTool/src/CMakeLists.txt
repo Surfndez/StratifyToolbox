@@ -6,10 +6,6 @@ set(SOURCES
 	Application.hpp
 	About.cpp
 	About.hpp
-	Home.cpp
-	Home.hpp
-	Configuration.cpp
-	Configuration.hpp
 	PinConfiguration.cpp
 	PinConfiguration.hpp
 	Control.cpp

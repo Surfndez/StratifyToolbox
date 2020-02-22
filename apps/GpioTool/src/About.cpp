@@ -4,25 +4,40 @@
 #include <sapi/var.hpp>
 #include <sapi/sys.hpp>
 #include <sapi/ux.hpp>
+#include <ToolboxAPI/components.hpp>
 
 About::About(Application & application)
-	: ApplicationLayout<Application>(application){
-
-	event_loop()->set_update_period(chrono::Milliseconds(10));
+	: ApplicationLayout<Application>("About", application){
 
 	add_component(
-				"BackButton",
-				(* new ux::Button())
-				.set_border_size(1)
-				.set_icon_name("chevron-left")
-				.set_theme_style(Theme::style_danger)
-				.set_drawing_point(DrawingPoint(0, 0))
-				.set_drawing_area(DrawingArea(200, 200))
+				Component::create<TopNavigation>(
+					top_navigation_name(),
+					TopNavigationAttributes()
+					.set_title("About"),
+					event_loop())
+				.set_drawing_area(DrawingArea(1000,175))
+				);
+
+	set_event_handler(
+				About::event_handler
 				);
 
 
-
 }
+
+void About::local_event_handler(const Event & event){
+	if( (event.type() == ButtonEvent::event_type()) &&
+			(event.id() == ButtonEvent::id_released)
+			){
+		const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
+		if( button_event.name() ==
+				find<TopNavigation>(top_navigation_name())->left_button_name()
+				){
+			event_loop()->layout()->transition("Control");
+		}
+	}
+}
+
 
 
 
