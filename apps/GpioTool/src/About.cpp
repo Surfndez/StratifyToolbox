@@ -18,6 +18,15 @@ About::About(Application & application)
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
+	add_component(
+				Component::create<ApplicationDetails>(
+					"GpioTool",
+					event_loop()
+					)
+				.set_drawing_point(DrawingPoint(25, 175))
+				.set_drawing_area(DrawingArea(950,1000-175))
+				);
+
 	set_event_handler(
 				About::event_handler
 				);

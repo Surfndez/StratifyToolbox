@@ -35,6 +35,8 @@ int kernel_io_is_direction_assigned(
       u32 io_flags
       );
 
+int kernel_io_enable_uart_debug_tx();
+
 int kernel_io_request(
       void * args
       );

@@ -38,6 +38,14 @@ int kernel_service_init(){
 		return -1;
 	}
 
+//#if ___debug
+#if 1
+	//makes the UART TX available to the outside pin
+	kernel_io_enable_uart_debug_tx();
+	mcu_debug_log_info(MCU_DEBUG_USER0, "enabled UART out");
+#endif
+	mcu_debug_printf("here\n");
+
 	//start a new thread that manages the kernel services
 	if( kernel_service_start_thread(
 				kernel_service_thread_function,
@@ -48,6 +56,9 @@ int kernel_service_init(){
 				) < 0 ){
 
 	}
+
+
+
 
 
 	//start the WIFI
