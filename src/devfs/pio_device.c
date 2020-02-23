@@ -75,6 +75,8 @@ int pio_device_ioctl(
                }
             }
          }
+
+
          //if it passes then this pin is operation is good to go
          //need to map the IO pin number with the MCU IO pin
          return setattr(attributes->o_pinmask, attributes->o_flags);
@@ -122,7 +124,7 @@ int setattr(u32 o_pinmask, u32 o_flags){
       if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
          handle.port = pin.port;
          attributes.o_pinmask = (1<<pin.pin);
-         mcu_pio_setattr(&handle, &attributes);
+				 mcu_pio_setattr(&handle, &attributes);
       }
    }
    return 0;
@@ -138,7 +140,7 @@ int setmask(u32 o_pinmask){
       if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
          handle.port = pin.port;
          u32 pin_mask = 1<<pin.pin;
-         mcu_pio_setmask(&handle, &pin_mask);
+				 mcu_pio_setmask(&handle, (void*)pin_mask);
       }
    }
    return 0;
@@ -154,7 +156,7 @@ int clrmask(u32 o_pinmask){
       if( (o_pinmask & (1<<i)) && (pin.port != 0xff) ){
          handle.port = pin.port;
          u32 pin_mask = 1<<pin.pin;
-         mcu_pio_clrmask(&handle, &pin_mask);
+				 mcu_pio_clrmask(&handle, (void*)pin_mask);
       }
    }
    return 0;

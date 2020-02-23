@@ -112,6 +112,7 @@ static int acquire_pin(
 		);
 
 static int get_pin_direction_mask();
+static int get_io_info(toolbox_io_info_t * info);
 
 int kernel_io_init(){
 	if( pcal6416a_init() < 0 ){
@@ -160,6 +161,8 @@ int kernel_io_request(
 
 	} else if( attributes->o_flags & TOOLBOX_IO_FLAG_GET_DIRECTION ){
 		return get_pin_direction_mask();
+	} else if( attributes->o_flags & TOOLBOX_IO_FLAG_GET_INFO ){
+		return get_io_info(args);
 	}
 
 	if( attributes->o_flags & TOOLBOX_IO_FLAG_ENABLE_DIV10_OUT ){
@@ -406,6 +409,25 @@ int get_pin_direction_mask(){
 		if( kernel_shared_get_direction_state(i)->io_flags & OUT ){
 			result |= (1<<i);
 		}
+	}
+	return result;
+}
+
+int get_io_info(toolbox_io_info_t * info){
+	int result = 0;
+	memset(info, 0xff, sizeof(*info));
+	info->o_output_pinmask = 0;
+	for(int i=first_kernel_shared_direction_channel;
+			i <= last_kernel_shared_direction_channel;
+			i++){
+		const kernel_shared_direction_state_t * const state =
+				kernel_shared_get_direction_state(i);
+		if( state->io_flags & OUT ){
+			info->o_output_pinmask |= (1<<i);
+		}
+
+		info->peripheral_port[i] = state->peripheral_port;
+		info->peripheral_function[i] = state->peripheral_function;
 	}
 	return result;
 }
