@@ -139,6 +139,24 @@ int kernel_io_init(){
 		return -1;
 	}
 
+	for(u32 i=kernel_shared_direction_channel1;
+			i <= kernel_shared_direction_channel13;
+			i++){
+#if ___debug
+		if(i != kernel_shared_direction_channel2 )
+#endif
+		{
+			acquire_pin(
+						i,
+						CORE_PERIPH_PIO,
+						0,
+						external_pin_table[i].init_flags,
+						"gpio"
+						);
+			set_pin_direction(i, external_pin_table[i].init_flags);
+		}
+	}
+
 	acquire_pin(kernel_shared_direction_channel0, CORE_PERIPH_RESERVED, 0, IN, "nc");
 	acquire_pin(kernel_shared_direction_channel7, CORE_PERIPH_RESERVED, 0, IN, "gnd");
 	acquire_pin(kernel_shared_direction_channel14, CORE_PERIPH_RESERVED, 0, IN, "ref");
@@ -593,13 +611,13 @@ int init_external_pins(){
 				acquire_pin(kernel_shared_direction_channel2, CORE_PERIPH_UART, 3, OUT, "uart3:tx");
 			} else
 #endif
-			acquire_pin(
-						i,
-						CORE_PERIPH_PIO,
-						0,
-						io_pin->init_flags,
-						"gpio"
-						);
+				acquire_pin(
+							i,
+							CORE_PERIPH_PIO,
+							0,
+							io_pin->init_flags,
+							"gpio"
+							);
 
 			if( result < 0 ){
 				mcu_debug_log_error(

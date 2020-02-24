@@ -215,7 +215,6 @@ void PinConfiguration::update_display_values(){
 			.redraw();
 
 
-
 }
 
 void PinConfiguration::toggle_direction(){
