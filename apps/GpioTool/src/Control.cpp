@@ -10,13 +10,13 @@
 #include <ToolboxAPI/components.hpp>
 
 const var::String Control::pin_button_name(
-		const IoInformation & information
+		const IoInfo & information
 		){
 	return information.name();
 }
 
 const var::String Control::pin_marker_name(
-		const IoInformation & information){
+		const IoInfo & information){
 	return PinMarkerBar::pin_marker_name(information.io_pin());
 }
 
@@ -42,9 +42,9 @@ Control::Control(Application & app)
 
 	const u32 columns = 4;
 
-	var::Vector<IoInformation> io_information_list =
+	var::Vector<IoInfo> io_information_list =
 			Io::io_information_list(
-				IoInformation::type_io
+				IoInfo::type_io
 				);
 
 	u32 row = 1;
@@ -57,7 +57,7 @@ Control::Control(Application & app)
 				Component::create<PinMarkerBar>(
 					pin_marker_bar_name(),
 					event_loop(),
-					IoInformation::type_io
+					IoInfo::type_io
 					)
 				//bottom 10% of screen (full width)
 				.set_drawing_point(DrawingPoint(0,900))
@@ -145,7 +145,7 @@ void Control::local_event_handler(
 					->layout()
 					->find<PinConfiguration>("PinConfiguration")
 					->set_io_pin(
-						IoInformation(button_event.name()).io_pin()
+						IoInfo(button_event.name()).io_pin()
 						);
 			event_loop()->layout()->transition("PinConfiguration");
 		}
@@ -153,7 +153,7 @@ void Control::local_event_handler(
 }
 
 bool Control::handle_io_button_press(const ux::ButtonEvent& button_event){
-	IoInformation information(button_event.name());
+	IoInfo information(button_event.name());
 	if( information.is_valid() ){
 		Io io(information);
 		if( io.is_output() ){
@@ -166,9 +166,9 @@ bool Control::handle_io_button_press(const ux::ButtonEvent& button_event){
 
 
 void Control::update_pin_markers(){
-	var::Vector<IoInformation> io_information_list =
+	var::Vector<IoInfo> io_information_list =
 			Io::io_information_list(
-				IoInformation::type_io
+				IoInfo::type_io
 				);
 
 	//check the value of the pins and update accordingly

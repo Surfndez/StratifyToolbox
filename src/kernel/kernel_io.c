@@ -91,6 +91,13 @@ static const kernel_io_external_pin_t external_pin_table[last_kernel_shared_dire
 	{ PCAL6116A_PORTA, 1+8, 0, IN, PA(7), PE(5) }, //IO11
 	{ PCAL6116A_PORTA, 2+8, 0, IN, PA(15), PE(6) }, //IO12
 	{ PCAL6116A_PORTA, 3+8, 0, IN, PA(10), PX(0) }, //IO13
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PX(0), PX(0) }, //IO14
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PX(0), PX(0) }, //IO15
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PC(4), PX(0) }, //IO16
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PC(5), PX(0) }, //IO17
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PA(4), PX(0) }, //IO18
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PA(5), PX(0) }, //IO19
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PX(0), PX(0) }, //IO20
 	{ PCAL6116A_PORTB, 5, 0, IN, PA(9), PX(0) }, //SWDIO_TMS --SWDIO
 	{ PCAL6116A_PORTB, 0, 0, IN, PB(13), PX(0) }, //SWDIO_TCK
 	{ PCAL6116A_PORTB, 1, 0, IN, PD(2), PX(0)  }, //SWDIO_TDO (UART5-RX)
@@ -108,11 +115,15 @@ static int acquire_pin(
 		enum kernel_shared_direction_channels channel,
 		u8 peripheral_function,
 		u8 peripheral_port,
-		u8 io_flags
+		u8 io_flags,
+		const char * description
 		);
 
 static int get_pin_direction_mask();
 static int get_io_info(toolbox_io_info_t * info);
+static int get_io_pin_description(
+		toolbox_io_pin_description_t * pin_description
+		);
 
 int kernel_io_init(){
 	if( pcal6416a_init() < 0 ){
@@ -127,6 +138,16 @@ int kernel_io_init(){
 	if( init_external_pins() < 0 ){
 		return -1;
 	}
+
+	acquire_pin(kernel_shared_direction_channel0, CORE_PERIPH_RESERVED, 0, IN, "nc");
+	acquire_pin(kernel_shared_direction_channel7, CORE_PERIPH_RESERVED, 0, IN, "gnd");
+	acquire_pin(kernel_shared_direction_channel14, CORE_PERIPH_RESERVED, 0, IN, "ref");
+	acquire_pin(kernel_shared_direction_channel15, CORE_PERIPH_RESERVED, 0, IN, "gnd");
+	acquire_pin(kernel_shared_direction_channel16, CORE_PERIPH_RESERVED, 0, IN, "adc0");
+	acquire_pin(kernel_shared_direction_channel17, CORE_PERIPH_RESERVED, 0, IN, "adc1");
+	acquire_pin(kernel_shared_direction_channel18, CORE_PERIPH_RESERVED, 0, IN, "dac0");
+	acquire_pin(kernel_shared_direction_channel19, CORE_PERIPH_RESERVED, 0, IN, "dac1");
+	acquire_pin(kernel_shared_direction_channel20, CORE_PERIPH_RESERVED, 0, IN, "gnd");
 
 	mcu_debug_log_info(MCU_DEBUG_USER0, "kernel IO init complete");
 	return 0;
@@ -163,6 +184,8 @@ int kernel_io_request(
 		return get_pin_direction_mask();
 	} else if( attributes->o_flags & TOOLBOX_IO_FLAG_GET_INFO ){
 		return get_io_info(args);
+	} else if( attributes->o_flags & TOOLBOX_IO_FLAG_GET_PIN_DESCRIPTION ){
+		return get_io_pin_description(args);
 	}
 
 	if( attributes->o_flags & TOOLBOX_IO_FLAG_ENABLE_DIV10_OUT ){
@@ -220,6 +243,7 @@ typedef struct {
 	u8 peripheral_port;
 	u8 io_flags;
 	enum kernel_shared_direction_channels direction_channel;
+	const char * description;
 	int result;
 } svcall_acquire_pin_t;
 
@@ -236,7 +260,8 @@ void svcall_aquire_pin(void * args){
 					p->direction_channel,
 					p->peripheral_function,
 					p->peripheral_port,
-					p->io_flags
+					p->io_flags,
+					p->description
 					);
 
 	} else if( (p->peripheral_function != direction_state->peripheral_function) ||
@@ -250,16 +275,52 @@ int acquire_pin(
 		enum kernel_shared_direction_channels channel,
 		u8 peripheral_function,
 		u8 peripheral_port,
-		u8 io_flags
+		u8 io_flags,
+		const char * description
 		){
 	svcall_acquire_pin_t args;
 	args.direction_channel = channel;
 	args.io_flags = io_flags;
 	args.peripheral_function = peripheral_function;
 	args.peripheral_port = peripheral_port;
+	args.description = description;
 	args.result = 0;
 	cortexm_svcall(svcall_aquire_pin, &args);
 	return args.result;
+}
+
+int get_io_pin_description(
+		toolbox_io_pin_description_t * pin_description
+		){
+
+
+	if( pin_description->pin_number ==
+			kernel_shared_direction_channel0 ){
+		return -1 * __LINE__;
+	}
+
+	if( pin_description->pin_number >
+			last_kernel_shared_direction_channel ){
+		return -1 * __LINE__;
+	}
+
+	//check kernel if pins are busy on a different peripheral
+	u32 pin_number =  pin_description->pin_number;
+	const kernel_shared_direction_state_t * state =
+			kernel_shared_get_direction_state(pin_number);
+
+	pin_description->peripheral_port = state->peripheral_port;
+	pin_description->peripheral_function = state->peripheral_function;
+	pin_description->is_slave = 0;
+	if( state->description != 0 ){
+		strncpy(pin_description->description, state->description, TOOLBOX_IO_PIN_NAME_MAX_LENGTH);
+	} else {
+		strncpy(pin_description->description, "na", TOOLBOX_IO_PIN_NAME_MAX_LENGTH);
+	}
+
+
+
+	return 0;
 }
 
 int set_io_function(const toolbox_io_attr_t * attributes){
@@ -270,8 +331,8 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 	if( attributes->peripheral_function == CORE_PERIPH_I2C ){
 		switch(attributes->peripheral_port){
 			case 0:
-				result |= acquire_pin(kernel_shared_direction_channel1, CORE_PERIPH_I2C, 0, IN);
-				result |= acquire_pin(kernel_shared_direction_channel2, CORE_PERIPH_I2C, 0, IN);
+				result |= acquire_pin(kernel_shared_direction_channel1, CORE_PERIPH_I2C, 0, IN, "i2c0:scl");
+				result |= acquire_pin(kernel_shared_direction_channel2, CORE_PERIPH_I2C, 0, IN, "i2c0:sda");
 				if( result == 0 ){
 					set_pin_direction(kernel_shared_direction_channel1, IN);
 					set_pin_direction(kernel_shared_direction_channel2, IN);
@@ -279,8 +340,8 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 				break;
 
 			case 1:
-				result |= acquire_pin(kernel_shared_direction_channel3, CORE_PERIPH_I2C, 0, IN);
-				result |= acquire_pin(kernel_shared_direction_channel4, CORE_PERIPH_I2C, 0, IN);
+				result |= acquire_pin(kernel_shared_direction_channel3, CORE_PERIPH_I2C, 0, IN, "i2c1:scl");
+				result |= acquire_pin(kernel_shared_direction_channel4, CORE_PERIPH_I2C, 0, IN, "i2c1:sda");
 				if( result == 0 ){
 					set_pin_direction(kernel_shared_direction_channel3, IN);
 					set_pin_direction(kernel_shared_direction_channel4, IN);
@@ -291,10 +352,10 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 	} else if( attributes->peripheral_function == CORE_PERIPH_SPI ){
 		if( attributes->o_flags & TOOLBOX_IO_FLAG_IS_INVERT_DIRECTION ){
 			//slave
-			result |= acquire_pin(kernel_shared_direction_channel3, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, IN);
-			result |= acquire_pin(kernel_shared_direction_channel4, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, IN);
-			result |= acquire_pin(kernel_shared_direction_channel5, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, OUT);
-			result |= acquire_pin(kernel_shared_direction_channel6, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, IN);
+			result |= acquire_pin(kernel_shared_direction_channel3, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, IN, "spi:cs");
+			result |= acquire_pin(kernel_shared_direction_channel4, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, IN, "spi:sck");
+			result |= acquire_pin(kernel_shared_direction_channel5, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, OUT, "spi:miso");
+			result |= acquire_pin(kernel_shared_direction_channel6, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, IN, "spi:mosi");
 			if( result == 0 ){
 				set_pin_direction(kernel_shared_direction_channel3, IN);
 				set_pin_direction(kernel_shared_direction_channel4, IN);
@@ -303,10 +364,10 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 			}
 		} else {
 			//master
-			result |= acquire_pin(kernel_shared_direction_channel3, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, OUT);
-			result |= acquire_pin(kernel_shared_direction_channel4, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, OUT);
-			result |= acquire_pin(kernel_shared_direction_channel5, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, IN);
-			result |= acquire_pin(kernel_shared_direction_channel6, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, OUT);
+			result |= acquire_pin(kernel_shared_direction_channel3, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, OUT, "spi:cs");
+			result |= acquire_pin(kernel_shared_direction_channel4, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, OUT, "spi:sck");
+			result |= acquire_pin(kernel_shared_direction_channel5, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, IN, "spi:miso");
+			result |= acquire_pin(kernel_shared_direction_channel6, CORE_PERIPH_SPI, TOOLBOX_IO_SPI_PORT, OUT, "spi:mosi");
 			if( result == 0 ){
 				set_pin_direction(kernel_shared_direction_channel3, OUT);
 				set_pin_direction(kernel_shared_direction_channel4, OUT);
@@ -317,10 +378,10 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 	} else if( attributes->peripheral_function == CORE_PERIPH_I2S ){
 		if( attributes->o_flags & TOOLBOX_IO_FLAG_IS_INVERT_DIRECTION ){
 			//slave
-			result |= acquire_pin(kernel_shared_direction_channel9, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, IN);
-			result |= acquire_pin(kernel_shared_direction_channel10, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, IN);
-			result |= acquire_pin(kernel_shared_direction_channel11, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, IN);
-			result |= acquire_pin(kernel_shared_direction_channel12, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, OUT);
+			result |= acquire_pin(kernel_shared_direction_channel9, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, IN, "i2s:din");
+			result |= acquire_pin(kernel_shared_direction_channel10, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, IN, "i2s:ws");
+			result |= acquire_pin(kernel_shared_direction_channel11, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, IN, "i2s:bclk");
+			result |= acquire_pin(kernel_shared_direction_channel12, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, OUT, "i2s:dout");
 			if( result == 0 ){
 				set_pin_direction(kernel_shared_direction_channel9, IN);
 				set_pin_direction(kernel_shared_direction_channel10, IN);
@@ -329,10 +390,10 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 			}
 		} else {
 			//master
-			result |= acquire_pin(kernel_shared_direction_channel9, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, IN);
-			result |= acquire_pin(kernel_shared_direction_channel10, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, OUT);
-			result |= acquire_pin(kernel_shared_direction_channel11, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, OUT);
-			result |= acquire_pin(kernel_shared_direction_channel12, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, OUT);
+			result |= acquire_pin(kernel_shared_direction_channel9, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, IN, "i2s:din");
+			result |= acquire_pin(kernel_shared_direction_channel10, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, OUT, "i2s:ws");
+			result |= acquire_pin(kernel_shared_direction_channel11, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, OUT, "i2s:bclk");
+			result |= acquire_pin(kernel_shared_direction_channel12, CORE_PERIPH_I2S, TOOLBOX_IO_I2S_PORT, OUT, "i2s:dout");
 			if( result == 0 ){
 				set_pin_direction(kernel_shared_direction_channel9, IN);
 				set_pin_direction(kernel_shared_direction_channel10, OUT);
@@ -343,15 +404,15 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 	} else if( attributes->peripheral_function == CORE_PERIPH_UART ){
 		switch(attributes->peripheral_port){
 			case 0:
-				result |= acquire_pin(kernel_shared_direction_channel12, CORE_PERIPH_UART, 0, OUT);
+				result |= acquire_pin(kernel_shared_direction_channel12, CORE_PERIPH_UART, 0, OUT, "uart0:rx");
 				if( result == 0 ){
 					set_pin_direction(kernel_shared_direction_channel13, IN); //sole pin
 				}
 				break;
 
 			case 1:
-				result |= acquire_pin(kernel_shared_direction_channel8, CORE_PERIPH_UART, 1, OUT);
-				result |= acquire_pin(kernel_shared_direction_channel3, CORE_PERIPH_UART, 1, OUT);
+				result |= acquire_pin(kernel_shared_direction_channel8, CORE_PERIPH_UART, 1, OUT, "uart1:tx");
+				result |= acquire_pin(kernel_shared_direction_channel3, CORE_PERIPH_UART, 1, IN, "uart1:rx");
 				if( result == 0 ){
 					set_pin_direction(kernel_shared_direction_channel8, OUT);
 					set_pin_direction(kernel_shared_direction_channel3, IN);
@@ -359,8 +420,8 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 				break;
 
 			case 3:
-				result |= acquire_pin(kernel_shared_direction_channel1, CORE_PERIPH_UART, 3, IN);
-				result |= acquire_pin(kernel_shared_direction_channel2, CORE_PERIPH_UART, 3, OUT);
+				result |= acquire_pin(kernel_shared_direction_channel1, CORE_PERIPH_UART, 3, IN, "uart3:rx");
+				result |= acquire_pin(kernel_shared_direction_channel2, CORE_PERIPH_UART, 3, OUT, "uart3:tx");
 				if( result == 0 ){
 					set_pin_direction(kernel_shared_direction_channel1, IN);
 					set_pin_direction(kernel_shared_direction_channel2, OUT);
@@ -368,8 +429,8 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 				break;
 
 			case 5:
-				result |= acquire_pin(kernel_shared_direction_channel5, CORE_PERIPH_UART, 5, OUT);
-				result |= acquire_pin(kernel_shared_direction_channel6, CORE_PERIPH_UART, 5, IN);
+				result |= acquire_pin(kernel_shared_direction_channel5, CORE_PERIPH_UART, 5, OUT, "uart5:tx");
+				result |= acquire_pin(kernel_shared_direction_channel6, CORE_PERIPH_UART, 5, IN, "uart5:rx");
 				if( result == 0 ){
 					set_pin_direction(kernel_shared_direction_channel5, OUT);
 					set_pin_direction(kernel_shared_direction_channel6, IN);
@@ -387,7 +448,7 @@ int set_io_function(const toolbox_io_attr_t * attributes){
 			} else {
 				io_flags = IN;
 			}
-			result |= acquire_pin(attributes->pin_number, CORE_PERIPH_PIO, 0, io_flags);
+			result |= acquire_pin(attributes->pin_number, CORE_PERIPH_PIO, 0, io_flags, "gpio");
 			if( result == 0 ){
 				set_pin_direction(attributes->pin_number, io_flags);
 			} else {
@@ -525,6 +586,19 @@ int init_external_pins(){
 			result = pcal6416a_setattr(
 						io_pin->expansion_port,
 						&attributes
+						);
+
+#if ___debug
+			if( i == kernel_shared_direction_channel2 ){
+				acquire_pin(kernel_shared_direction_channel2, CORE_PERIPH_UART, 3, OUT, "uart3:tx");
+			} else
+#endif
+			acquire_pin(
+						i,
+						CORE_PERIPH_PIO,
+						0,
+						io_pin->init_flags,
+						"gpio"
 						);
 
 			if( result < 0 ){

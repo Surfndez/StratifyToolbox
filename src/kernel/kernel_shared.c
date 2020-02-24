@@ -44,13 +44,15 @@ void kernel_shared_root_set_direction_state(
 		enum kernel_shared_direction_channels pin_number,
 		u8 peripheral_function,
 		u8 peripheral_port,
-		u8 io_flags
+		u8 io_flags,
+		const char * description
 		){
 	kernel_shared_direction_state_t * direction_state =
 			m_kernel_shared_root.direction_state + pin_number;
 	direction_state->peripheral_function = peripheral_function;
 	direction_state->io_flags = io_flags;
 	direction_state->peripheral_port = peripheral_port;
+	direction_state->description = description;
 }
 
 const kernel_shared_direction_state_t * kernel_shared_get_direction_state(

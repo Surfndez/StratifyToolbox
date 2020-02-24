@@ -136,7 +136,7 @@ PinConfiguration::PinConfiguration(Application & application)
 	set_event_handler([&application, this](Component * object, const Event & event){
 
 		if( event.type() == SystemEvent::event_type() ){
-			if( event.id() == SystemEvent::id_update ){
+			if( event.id() == SystemEvent::id_enter ){
 				update_display_values();
 			}
 		}
@@ -165,7 +165,7 @@ PinConfiguration::PinConfiguration(Application & application)
 
 
 void PinConfiguration::update_display_values(){
-	IoInformation info(m_io_pin);
+	IoInfo info(m_io_pin);
 	Io io(info.io_pin());
 
 	if( io.is_output() ){
@@ -201,8 +201,21 @@ void PinConfiguration::update_display_values(){
 	this->find<Label>(
 				"FunctionValue"
 				)->set_label(
-				"Uart::Tx"
+				io.function_description()
 				).redraw();
+
+	enum Theme::state next_state;
+	if( io.function_description() != "gpio" ){
+		next_state = Theme::state_disabled;
+	} else {
+		next_state = Theme::state_default;
+	}
+	this->find<Button>(direction_button_name())
+			->set_theme_state(next_state)
+			.redraw();
+
+
+
 }
 
 void PinConfiguration::toggle_direction(){
@@ -214,7 +227,7 @@ void PinConfiguration::toggle_direction(){
 		return;
 	}
 
-	IoInformation information(pin_value_label->label());
+	IoInfo information(pin_value_label->label());
 	if( information.is_valid() ){
 		Io io(information.io_pin());
 
