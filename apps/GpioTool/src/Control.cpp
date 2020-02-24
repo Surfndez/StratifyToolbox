@@ -9,19 +9,19 @@
 #include <ToolboxAPI/toolbox.hpp>
 #include <ToolboxAPI/components.hpp>
 
-const var::String Control::pin_button_name(
+const var::String Keyboard::pin_button_name(
 		const IoInfo & information
 		){
 	return information.name();
 }
 
-const var::String Control::pin_marker_name(
+const var::String Keyboard::pin_marker_name(
 		const IoInfo & information){
 	return PinMarkerBar::pin_marker_name(information.io_pin());
 }
 
 
-Control::Control(Application & app)
+Keyboard::Keyboard(Application & app)
 	: ApplicationLayout<Application>("Control", app){
 
 	for(auto & value: m_pin_states){
@@ -108,11 +108,11 @@ Control::Control(Application & app)
 		}
 	}
 
-	set_event_handler(Control::event_handler);
+	set_event_handler(Keyboard::event_handler);
 
 }
 
-void Control::local_event_handler(
+void Keyboard::local_event_handler(
 		const ux::Event & event
 		){
 
@@ -152,7 +152,7 @@ void Control::local_event_handler(
 	}
 }
 
-bool Control::handle_io_button_press(const ux::ButtonEvent& button_event){
+bool Keyboard::handle_io_button_press(const ux::ButtonEvent& button_event){
 	IoInfo information(button_event.name());
 	if( information.is_valid() ){
 		Io io(information);
@@ -165,7 +165,7 @@ bool Control::handle_io_button_press(const ux::ButtonEvent& button_event){
 }
 
 
-void Control::update_pin_markers(){
+void Keyboard::update_pin_markers(){
 	var::Vector<IoInfo> io_information_list =
 			Io::io_information_list(
 				IoInfo::type_io

@@ -142,6 +142,8 @@ int kernel_io_init(){
 	for(u32 i=kernel_shared_direction_channel1;
 			i <= kernel_shared_direction_channel13;
 			i++){
+
+		//all pins (except debug TX) are GPIO input at startup by default
 #if ___debug
 		if(i != kernel_shared_direction_channel2 )
 #endif

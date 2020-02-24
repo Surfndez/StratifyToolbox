@@ -1,5 +1,5 @@
-#ifndef CONTROL_HPP
-#define CONTROL_HPP
+#ifndef KEYBOARD_HPP
+#define KEYBOARD_HPP
 
 #include <sapi/var/Vector.hpp>
 #include <sapi/ux.hpp>
@@ -12,21 +12,25 @@ class Keyboard : public ApplicationLayout<Application> {
 public:
 	 Keyboard(Application & app);
 
-	 static const var::String pin_button_name(const IoInfo & information);
-	 static const var::String pin_marker_name(const IoInfo & information);
-
-
-	 static const char * top_navigation_name(){
-		 return "ControlTopNavigation";
-	 }
-
-	 static const char * pin_marker_bar_name(){
-		 return "PinMarkerBar";
-	 }
 
 private:
 
-	 var::Array<s8, Io::last_io_pin> m_pin_states;
+	 var::String m_text;
+	 var::String m_display_text;
+	 u32 m_button_set;
+
+	 static constexpr u32 key_count(){ return 26; }
+
+	 static const var::String top_navigation_name(){
+		 return "TopNav";
+	 }
+
+	 var::Array<var::String, 4> m_button_options;
+
+
+	 const var::String & button_set() const {
+		 return m_button_options.at(m_button_set);
+	 }
 	 static void event_handler(
 			 ux::Layout * object,
 			 const ux::Event & event
@@ -35,8 +39,8 @@ private:
 		 control_object->local_event_handler(event);
 	 }
 	 void local_event_handler(const ux::Event & event);
-	 bool handle_io_button_press(const ux::ButtonEvent & button_event);
-	 void update_pin_markers();
+	 void update_symbols();
+	 void update_text();
 };
 
 #endif // CONTROL_HPP

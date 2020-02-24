@@ -237,12 +237,12 @@ void PinConfiguration::toggle_direction(){
 
 		Button * control_button =
 				event_loop()->layout()->find<Button>(
-					Control::pin_button_name(information)
+					Keyboard::pin_button_name(information)
 					);
 
 		PinMarkerBar * pin_marker_bar =
 				event_loop()->layout()->find<PinMarkerBar>(
-					Control::pin_marker_bar_name()
+					Keyboard::pin_marker_bar_name()
 					);
 
 
