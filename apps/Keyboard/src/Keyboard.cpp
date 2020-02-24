@@ -17,7 +17,7 @@ Keyboard::Keyboard(Application & app)
 	m_button_options.at(1) = "QWERTYUIOPASDFGHJKLZXCVBNM";
 	m_button_options.at(2) = "1234567890!@#$%&*()^-=+`~_";
 	m_button_options.at(3) = "1234567890{}[]|;:'\"<>,./?\\";
-
+	m_text = "|";
 
 	constexpr drawing_size_t navigation_bar_size = 175;
 
@@ -180,10 +180,13 @@ void Keyboard::local_event_handler(
 }
 
 void Keyboard::update_text(){
+	m_display_text = m_text + "|";
+
 	find<Label>(
 				find<TopNavigation>(top_navigation_name())->title_name()
-				)->set_label(m_text).redraw();
+				)->set_label(m_display_text).redraw();
 }
+
 
 void Keyboard::update_symbols(){
 
