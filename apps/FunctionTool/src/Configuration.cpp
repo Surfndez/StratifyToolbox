@@ -147,6 +147,14 @@ Configuration::Configuration(Application & application)
 			}
 		}
 
+		if( event.type() == SliderEvent::event_type() ){
+			const SliderEvent & slider_event = event.reinterpret<SliderEvent>();
+			find<Label>("FrequencyValue")
+					->set_label(String::number(
+												slider_event.value()
+												) + "hz").redraw();
+		}
+
 		if( event.type() == ButtonEvent::event_type() ){
 			if( event.id() == ButtonEvent::id_released ){
 				const ButtonEvent	& button_event= event.reinterpret<ButtonEvent>();
