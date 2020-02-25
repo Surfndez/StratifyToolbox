@@ -8,13 +8,9 @@
 class Application;
 
 
-class Keyboard : public ApplicationLayout<Application> {
+class Control : public ApplicationLayout<Application> {
 public:
-	 Keyboard(Application & app);
-
-	 static const var::String pin_button_name(const IoInfo & information);
-	 static const var::String pin_marker_name(const IoInfo & information);
-
+	 Control(Application & app);
 
 	 static const char * top_navigation_name(){
 		 return "ControlTopNavigation";
@@ -31,7 +27,7 @@ private:
 			 ux::Layout * object,
 			 const ux::Event & event
 			 ){
-		 Keyboard * control_object = object->reinterpret<Keyboard>();
+		 Control * control_object = object->reinterpret<Control>();
 		 control_object->local_event_handler(event);
 	 }
 	 void local_event_handler(const ux::Event & event);

@@ -18,7 +18,7 @@ ux::Layout & Application::create_layout(){
 
 	return (Layout&)(*(new Layout("Application", event_loop())))
 			.add_component(
-				(*(new Keyboard(*this)))
+				(*(new Control(*this)))
 				//Component::create<Control>(*this)
 				.set_drawing_point(
 					DrawingPoint(0,0)
@@ -28,7 +28,7 @@ ux::Layout & Application::create_layout(){
 					)
 				)
 			.add_component(
-				(*(new PinConfiguration(*this)))
+				(*(new Configuration(*this)))
 				//Component::create<PinConfiguration>(*this)
 				.set_drawing_point(
 					DrawingPoint(0,0)

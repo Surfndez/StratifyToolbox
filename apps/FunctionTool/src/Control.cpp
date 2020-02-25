@@ -9,24 +9,9 @@
 #include <ToolboxAPI/toolbox.hpp>
 #include <ToolboxAPI/components.hpp>
 
-const var::String Keyboard::pin_button_name(
-		const IoInfo & information
-		){
-	return information.name();
-}
 
-const var::String Keyboard::pin_marker_name(
-		const IoInfo & information){
-	return PinMarkerBar::pin_marker_name(information.io_pin());
-}
-
-
-Keyboard::Keyboard(Application & app)
+Control::Control(Application & app)
 	: ApplicationLayout<Application>("Control", app){
-
-	for(auto & value: m_pin_states){
-		value = -1;
-	}
 
 	add_component(
 				Component::create<TopNavigation>(
@@ -34,85 +19,96 @@ Keyboard::Keyboard(Application & app)
 					TopNavigationAttributes()
 					.set_left_icon_name("times")
 					.set_right_icon_name("info")
-					.set_title("GPIO Tool"),
+					.set_title("Function Tool"),
 					event_loop())
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
+	const DrawingArea button_area(400, 250);
+	const DrawingArea label_area(400, 150);
+	constexpr drawing_int_t button_y = 300;
+	constexpr u8 button_vertical_padding = 25;
+	constexpr enum Theme::style output0_theme_style = Theme::style_brand_secondary;
+	constexpr enum Theme::style output1_theme_style = Theme::style_info;
 
-	const u32 columns = 4;
-
-	var::Vector<IoInfo> io_information_list =
-			Io::io_information_list(
-				IoInfo::type_io
+	add_component(
+				Component::create<Button>(
+					"output0"
+					)
+				.set_label("Output 0")
+				.set_theme_style(output0_theme_style)
+				.set_vertical_padding(button_vertical_padding)
+				.set_drawing_point(
+					DrawingPoint(500/2 - button_area.width()/2, button_y)
+					)
+				.set_drawing_area(button_area)
 				);
 
-	u32 row = 1;
-	u32 column = 0;
+	add_component(
+				Component::create<Label>(
+					"status0"
+					)
+				.set_label("off")
+				.set_theme_style(Theme::style_outline_dark)
+				.set_vertical_padding(button_vertical_padding)
+				.set_border_size(0)
+				.set_drawing_point(
+					DrawingPoint(500/2 - button_area.width()/2, button_y + button_area.height() + 50)
+					)
+				.set_drawing_area(label_area)
+				);
 
-	const DrawingArea button_area(225,200);
-	const DrawingArea pin_area(45,40);
+	add_component(
+				Component::create<Button>(
+					"output1"
+					)
+				.set_theme_style(output1_theme_style)
+				.set_label("Output 1")
+				.set_vertical_padding(button_vertical_padding)
+				.set_drawing_point(
+					DrawingPoint(500 + 500/2 - button_area.width()/2, button_y)
+					)
+				.set_drawing_area(button_area)
+				);
+
+	add_component(
+				Component::create<Label>(
+					"status1"
+					)
+				.set_label("off")
+				.set_theme_style(Theme::style_outline_dark)
+				.set_vertical_padding(button_vertical_padding)
+				.set_border_size(0)
+				.set_drawing_point(
+					DrawingPoint(500+500/2 - button_area.width()/2, button_y + button_area.height() + 50)
+					)
+				.set_drawing_area(label_area)
+				);
 
 	add_component(
 				Component::create<PinMarkerBar>(
 					pin_marker_bar_name(),
 					event_loop(),
-					IoInfo::type_io
+					IoInfo::type_analog
 					)
+				//disable ADC pins
+				.set_pin_marker_enabled(Io::io_pin16, false)
+				.set_pin_marker_enabled(Io::io_pin17, false)
+				//match style of buttons
+				.set_pin_marker_style(Io::io_pin18, output0_theme_style)
+				.set_pin_marker_style(Io::io_pin19, output1_theme_style)
 				//bottom 10% of screen (full width)
 				.set_drawing_point(DrawingPoint(0,900))
 				.set_drawing_area(DrawingArea(1000,100))
 				);
 
-	PinMarkerBar * pin_marker_bar = find<PinMarkerBar>("PinMarkerBar");
-	if( pin_marker_bar == nullptr ){
-		application().printer().error("pin marker bar is null");
-		exit(1);
-	}
 
-	for(const auto & info: io_information_list){
-		enum Theme::style style;
 
-		Io io(info.io_pin());
-		if( io.is_output() ){
-			style = Theme::style_brand_secondary;
-		} else {
-			style = Theme::style_outline_brand_secondary;
-		}
-
-		add_component(
-					Component::create<ux::Button>(
-						pin_button_name(info)
-						)
-					.set_border_size(1)
-					.set_label(info.name())
-					.set_theme_style(style)
-					.set_drawing_point(
-						DrawingPoint(
-							column*(button_area.width()+25)+25/2,
-							row*(button_area.height()+25)
-							)
-						)
-					.set_drawing_area(button_area)
-					);
-
-		pin_marker_bar->set_pin_marker_style(
-					info.io_pin(),
-					style
-					);
-
-		column++;
-		if( column == columns ){
-			row++;
-			column = 0;
-		}
-	}
-
-	set_event_handler(Keyboard::event_handler);
+	set_event_handler(Control::event_handler);
 
 }
 
-void Keyboard::local_event_handler(
+void Control::local_event_handler(
 		const ux::Event & event
 		){
 
@@ -123,36 +119,32 @@ void Keyboard::local_event_handler(
 	} else if( event.type() == ButtonEvent::event_type() ){
 		const ButtonEvent & button_event =
 				event.reinterpret<ButtonEvent>();
-		if( event.id() == ButtonEvent::id_released ){
 
-			application().printer().info("Handle button "	+ button_event.name());
-			if( handle_io_button_press(button_event) == false ){
-				if( button_event.name() ==
-						find<TopNavigation>(top_navigation_name())->left_button_name()
-						){
-					//exit the application and launch the home screen
-					application().go_home();
-				} else if( button_event.name() ==
-									 find<TopNavigation>(top_navigation_name())->right_button_name()
-									 ){
-					event_loop()->layout()->transition("About");
-				}
+		if( event.id() == ButtonEvent::id_held ){
+			if( button_event.name() == "output0" ){
+				event_loop()->layout()->find<Configuration>("Configuration")
+						->set_io_pin(
+							Io::io_pin18
+							);
+				event_loop()->layout()->transition("Configuration");
+			} else if( button_event.name() == "output1" ){
+				event_loop()->layout()->find<Configuration>("Configuration")
+						->set_io_pin(
+							Io::io_pin19
+							);
+				event_loop()->layout()->transition("Configuration");
 			}
 
 
-		} else if( event.id() == ButtonEvent::id_held ){
-			event_loop()
-					->layout()
-					->find<PinConfiguration>("PinConfiguration")
-					->set_io_pin(
-						IoInfo(button_event.name()).io_pin()
-						);
-			event_loop()->layout()->transition("PinConfiguration");
+
+		} else if( event.id() == ButtonEvent::id_released ){
+
+
 		}
 	}
 }
 
-bool Keyboard::handle_io_button_press(const ux::ButtonEvent& button_event){
+bool Control::handle_io_button_press(const ux::ButtonEvent& button_event){
 	IoInfo information(button_event.name());
 	if( information.is_valid() ){
 		Io io(information);
@@ -165,39 +157,8 @@ bool Keyboard::handle_io_button_press(const ux::ButtonEvent& button_event){
 }
 
 
-void Keyboard::update_pin_markers(){
-	var::Vector<IoInfo> io_information_list =
-			Io::io_information_list(
-				IoInfo::type_io
-				);
+void Control::update_pin_markers(){
 
-	//check the value of the pins and update accordingly
-	for(const auto & info: io_information_list){
-
-		PinMarkerBar * pin_marker_bar =
-				find<PinMarkerBar>(pin_marker_bar_name());
-
-		if( pin_marker_bar != nullptr ){
-			Io io(info.io_pin());
-			pin_marker_bar->set_pin_marker_elevated(
-						info.io_pin(),
-						io.value()
-						);
-
-			Button * button = find<Button>(
-						pin_button_name(info)
-						);
-
-			if( button != nullptr ){
-				pin_marker_bar->set_pin_marker_state(
-							info.io_pin(), button->theme_state()
-							);
-			}
-
-		} else {
-			//assert
-		}
-	}
 
 }
 

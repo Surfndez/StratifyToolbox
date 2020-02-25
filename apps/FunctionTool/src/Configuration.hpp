@@ -17,15 +17,23 @@ public:
 	 }
 
 	 static const char * whatis_name(){
-		 return "PinConfiguration";
+		 return "Configuration";
 	 }
 
 	 static const char * top_navigation_name(){
-		 return "PinConfigurationTopNavigation";
+		 return "ConfigurationTopNavigation";
 	 }
 
-	 static const char * direction_button_name(){
-		 return "DirectionButton";
+	 static const char * triangle_button_name(){
+		 return "TriangleBtn";
+	 }
+
+	 static const char * square_button_name(){
+		 return "SquareBtn";
+	 }
+
+	 static const char * wave_button_name(){
+		 return "WaveBtn";
 	 }
 
 	 static const char * direction_value_name(){

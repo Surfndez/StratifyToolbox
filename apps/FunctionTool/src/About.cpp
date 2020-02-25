@@ -20,7 +20,7 @@ About::About(Application & application)
 
 	add_component(
 				Component::create<ApplicationDetails>(
-					"GpioTool",
+					"FunctionTool",
 					event_loop()
 					)
 				.set_drawing_point(DrawingPoint(25, 175))
