@@ -139,6 +139,15 @@ void Control::local_event_handler(
 
 		} else if( event.id() == ButtonEvent::id_released ){
 
+			if( button_event.name() ==
+					find<TopNavigation>(top_navigation_name())->right_button_name()
+					){
+				event_loop()->layout()->transition("About");
+			} else if( button_event.name() ==
+											find<TopNavigation>(top_navigation_name())->left_button_name()
+											){
+				application().go_home();
+			}
 
 		}
 	}
