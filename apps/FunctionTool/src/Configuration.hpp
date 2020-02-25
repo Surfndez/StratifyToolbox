@@ -1,5 +1,5 @@
-#ifndef PINCONFIGURATION_HPP
-#define PINCONFIGURATION_HPP
+#ifndef CONFIGURATION_HPP
+#define CONFIGURATION_HPP
 
 #include <sapi/var/Vector.hpp>
 #include <sapi/ux/Scene.hpp>

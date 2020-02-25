@@ -4,7 +4,7 @@
 #include <ToolboxAPI/components.hpp>
 
 #include "Application.hpp"
-#include "PinConfiguration.hpp"
+#include "Configuration.hpp"
 #include "About.hpp"
 #include "Control.hpp"
 
@@ -18,7 +18,7 @@ ux::Layout & Application::create_layout(){
 
 	return (Layout&)(*(new Layout("Application", event_loop())))
 			.add_component(
-				(*(new Control(*this)))
+				(*(new Keyboard(*this)))
 				//Component::create<Control>(*this)
 				.set_drawing_point(
 					DrawingPoint(0,0)
@@ -28,7 +28,7 @@ ux::Layout & Application::create_layout(){
 					)
 				)
 			.add_component(
-				(*(new Configuration(*this)))
+				(*(new PinConfiguration(*this)))
 				//Component::create<PinConfiguration>(*this)
 				.set_drawing_point(
 					DrawingPoint(0,0)

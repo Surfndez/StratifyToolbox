@@ -1,4 +1,4 @@
-#include "PinConfiguration.hpp"
+#include "Configuration.hpp"
 #include "Application.hpp"
 #include "Control.hpp"
 
@@ -30,7 +30,7 @@ Configuration::Configuration(Application & application)
 
 	add_component(
 				(* new ux::Layout(
-					 "PinConfigurationVerticalLayout",
+					 "ConfigurationVerticalLayout",
 					 event_loop()))
 				.set_flow(ux::Layout::flow_vertical)
 				.set_vertical_scroll_enabled()
@@ -237,12 +237,12 @@ void Configuration::toggle_direction(){
 
 		Button * control_button =
 				event_loop()->layout()->find<Button>(
-					Control::pin_button_name(information)
+					Keyboard::pin_button_name(information)
 					);
 
 		PinMarkerBar * pin_marker_bar =
 				event_loop()->layout()->find<PinMarkerBar>(
-					Control::pin_marker_bar_name()
+					Keyboard::pin_marker_bar_name()
 					);
 
 

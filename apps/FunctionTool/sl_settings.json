@@ -1,0 +1,15 @@
+{
+   "description": "FunctionTool is a function generator application for the Stratify Toolbox.",
+   "github": "https://github.com/StratifyLabs/FunctionTool",
+   "name": "FunctionTool",
+   "permissions": "public",
+   "publisher": "Stratify Labs, Inc",
+   "tags": "Toolbox",
+   "type": "app",
+   "uid": "9cQyOTk3fZXOuMtPyf5j9X4H4b83",
+   "version": "0.1",
+   "ramSize": 0,
+   "timestamp": 1552198313,
+   "documentId": "",
+   "hardwareId": ""
+}
