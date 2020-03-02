@@ -9,7 +9,7 @@
 #include "kernel_shared.h"
 #include "i2c_internal.h"
 
-#define RUN_KERNEL_APP 0
+#define RUN_KERNEL_APP 1
 
 static void * kernel_service_thread_function(void * args);
 

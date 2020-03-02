@@ -2,7 +2,7 @@
 #define HOME_HPP
 
 #include <sapi/var/Vector.hpp>
-#include <sapi/ux/Scene.hpp>
+#include <sapi/ux.hpp>
 #include <ToolboxAPI/ToolboxApplication.hpp>
 
 class Application;

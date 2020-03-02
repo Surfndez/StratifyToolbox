@@ -55,7 +55,20 @@ Home::Home(Application & application)
 }
 
 
-void Home::local_event_handler(const Event & event);
+void Home::local_event_handler(const Event & event){
+
+	if( ButtonEvent::is_event(event, ButtonEvent::id_released) ){
+		const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
+
+		if( button_event.name() == "SettingsButton" ){
+			application().launch("/home/Settings");
+		} else if( button_event.name() == "LaunchButton" ){
+			application().launch("/home/Launcher");
+		}
+
+	}
+
+}
 
 
 
