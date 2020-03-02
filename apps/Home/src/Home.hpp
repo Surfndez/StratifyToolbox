@@ -3,7 +3,7 @@
 
 #include <sapi/var/Vector.hpp>
 #include <sapi/ux/Scene.hpp>
-#include <ToolboxAPI/Application.hpp>
+#include <ToolboxAPI/ToolboxApplication.hpp>
 
 class Application;
 

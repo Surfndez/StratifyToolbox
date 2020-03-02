@@ -1,13 +1,14 @@
-#include "Control.hpp"
-#include "Application.hpp"
-#include "Configuration.hpp"
-
+#include <cmath>
 #include <sapi/var.hpp>
 #include <sapi/hal.hpp>
 #include <sapi/sys.hpp>
 #include <sapi/ux.hpp>
 #include <ToolboxAPI/toolbox.hpp>
 #include <ToolboxAPI/components.hpp>
+
+#include "Control.hpp"
+#include "Application.hpp"
+#include "Configuration.hpp"
 
 
 Control::Control(Application & app)
@@ -26,7 +27,11 @@ Control::Control(Application & app)
 
 	const DrawingArea button_area(400, 250);
 	const DrawingArea label_area(400, 150);
-	constexpr drawing_int_t button_y = 300;
+	constexpr drawing_int_t button_y = 200;
+	const drawing_int_t left_x = 500/2 - button_area.width()/2;
+	const drawing_int_t right_x = 500/2 - button_area.width()/2 + 500;
+	const drawing_int_t label_y = button_y + button_area.height() + 25;
+	const drawing_int_t graph_y = label_y + label_area.height() + 25;
 	constexpr u8 button_vertical_padding = 25;
 	constexpr enum Theme::style output0_theme_style = Theme::style_brand_secondary;
 	constexpr enum Theme::style output1_theme_style = Theme::style_info;
@@ -39,7 +44,7 @@ Control::Control(Application & app)
 				.set_theme_style(output0_theme_style)
 				.set_vertical_padding(button_vertical_padding)
 				.set_drawing_point(
-					DrawingPoint(500/2 - button_area.width()/2, button_y)
+					DrawingPoint(left_x, button_y)
 					)
 				.set_drawing_area(button_area)
 				);
@@ -53,9 +58,21 @@ Control::Control(Application & app)
 				.set_vertical_padding(button_vertical_padding)
 				.set_border_size(0)
 				.set_drawing_point(
-					DrawingPoint(500/2 - button_area.width()/2, button_y + button_area.height() + 50)
+					DrawingPoint(left_x, label_y)
 					)
 				.set_drawing_area(label_area)
+				);
+
+	add_component(
+				Component::create<LineGraph>(
+					line_graph1_name()
+					)
+				.set_drawing_point(
+					DrawingPoint(left_x,graph_y)
+					)
+				.set_drawing_area(button_area)
+				.set_data_set( create_sine_wave_data(output_zero) )
+				.fit_axes_to_data()
 				);
 
 	add_component(
@@ -66,7 +83,7 @@ Control::Control(Application & app)
 				.set_label("Output 1")
 				.set_vertical_padding(button_vertical_padding)
 				.set_drawing_point(
-					DrawingPoint(500 + 500/2 - button_area.width()/2, button_y)
+					DrawingPoint(right_x, button_y)
 					)
 				.set_drawing_area(button_area)
 				);
@@ -80,9 +97,21 @@ Control::Control(Application & app)
 				.set_vertical_padding(button_vertical_padding)
 				.set_border_size(0)
 				.set_drawing_point(
-					DrawingPoint(500+500/2 - button_area.width()/2, button_y + button_area.height() + 50)
+					DrawingPoint(right_x, label_y)
 					)
 				.set_drawing_area(label_area)
+				);
+
+	add_component(
+				Component::create<LineGraph>(
+					line_graph1_name()
+					)
+				.set_drawing_point(
+					DrawingPoint(right_x,graph_y)
+					)
+				.set_drawing_area(button_area)
+				.set_data_set( create_flat_wave_data(output_one) )
+				.fit_axes_to_data()
 				);
 
 	add_component(
@@ -115,7 +144,14 @@ void Control::local_event_handler(
 	if( event.type() == SystemEvent::event_type() ){
 		if( event.id() == SystemEvent::id_update ){
 			update_pin_markers();
+		} else if( event.id() == SystemEvent::id_enter ){
+
+			//update status labels and line graphs
+
+
+
 		}
+
 	} else if( event.type() == ButtonEvent::event_type() ){
 		const ButtonEvent & button_event =
 				event.reinterpret<ButtonEvent>();
@@ -135,8 +171,6 @@ void Control::local_event_handler(
 				event_loop()->layout()->transition("Configuration");
 			}
 
-
-
 		} else if( event.id() == ButtonEvent::id_released ){
 
 			if( button_event.name() ==
@@ -144,8 +178,8 @@ void Control::local_event_handler(
 					){
 				event_loop()->layout()->transition("About");
 			} else if( button_event.name() ==
-											find<TopNavigation>(top_navigation_name())->left_button_name()
-											){
+								 find<TopNavigation>(top_navigation_name())->left_button_name()
+								 ){
 				application().go_home();
 			}
 
@@ -171,6 +205,62 @@ void Control::update_pin_markers(){
 
 }
 
+const LineGraphDataSet * Control::create_triangle_wave_data(
+		enum output output_value
+		){
+	LineGraphData data(11);
+	for(u32 i = 0; i < data.count(); i++){
+		float x = i * 1.0f;
+		float y = (i % 2) ? 1.0f : -1.0f;
+		data.at(i) = LineGraphPoint(x,y);
+	}
+	return &wave(output_value).data_set();
+}
+
+const LineGraphDataSet * Control::create_square_wave_data(
+		enum output output_value
+		){
+	LineGraphData data(22);
+	for(u32 i = 0; i < data.count(); i++){
+		float x = i/2 * 1.0f;
+		float y = (((i+1) >> 1) & 1) ? 0.1f : 0.9f;
+		data.at(i) = LineGraphPoint(x,y);
+	}
+
+	wave(output_value).data_set() = LineGraphDataSet();
+	wave(output_value).data_set().push_back(data);
+
+	return &wave(output_value).data_set();
+}
+
+const LineGraphDataSet * Control::create_sine_wave_data(
+		enum output output_value
+		){
+
+	LineGraphData data(64);
+	for(u32 i = 0; i < data.count(); i++){
+		float x = i * 0.08f;
+		float y = 1.0f * sinf(2.0f * MCU_PI_FLOAT * x);
+		data.at(i) = LineGraphPoint(x,y);
+	}
+
+	wave(output_value).data_set() = LineGraphDataSet();
+	wave(output_value).data_set().push_back(data);
+
+	return &wave(output_value).data_set();
+}
+
+
+const LineGraphDataSet * Control::create_flat_wave_data(
+		enum output output_value
+		){
+	LineGraphData data(2);
+	data.at(0) = LineGraphPoint(0.0f, 0.0f);
+	data.at(1) = LineGraphPoint(1.0f, 0.0f);
+	wave(output_value).data_set() = LineGraphDataSet();
+	wave(output_value).data_set().push_back(data);
+	return &wave(output_value).data_set();
+}
 
 
 

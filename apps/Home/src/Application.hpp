@@ -1,13 +1,13 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
-#include <ToolboxAPI/Application.hpp>
+#include <ToolboxAPI/ToolboxApplication.hpp>
 #include <sapi/sys/Cli.hpp>
 #include <sapi/ux/Layout.hpp>
 
 #include "Home.hpp"
 
-class Application : public toolbox::Application {
+class Application : public toolbox::ToolboxApplication {
 
 public:
    Application(const sys::Cli & cli);

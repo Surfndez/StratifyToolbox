@@ -5,9 +5,8 @@
 #include "Application.hpp"
 
 Launcher::Launcher(Application & application)
-	: toolbox::ApplicationLayout<Application>(application){
+	: toolbox::ApplicationLayout<Application>("Launcher", application){
 
-	update_period() = chrono::Milliseconds(10);
 
 	List * list = new List();
 

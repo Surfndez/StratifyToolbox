@@ -5,17 +5,12 @@
 #include "Application.hpp"
 
 Application::Application(const sys::Cli & cli)
-	: toolbox::Application(cli)
-{
-
-}
+	: toolbox::ToolboxApplication(cli){}
 
 
 ux::Layout & Application::create_layout(){
-
-	return (Layout&)(*(new Layout(event_loop())))
+	return (Layout&)(*(new Layout("Application", event_loop())))
 			.add_component(
-				"Home",
 				(* new Home(*this))
 				.set_drawing_point(
 					DrawingPoint(0,0)
