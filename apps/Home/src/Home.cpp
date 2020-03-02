@@ -31,62 +31,31 @@ Home::Home(Application & application)
 					.set_icon_name("rocket")
 					.set_theme_style(control_icon_style)
 					.set_drawing_area(control_icon_area)
-				#if 0
-					.set_event_handler([&](Component * object, const Event & event){
+					)
+				.add_component(
+					Component::create<Button>("EjectButton")
+					.set_border_size(control_border_size)
+					.set_icon_name("eject")
+					.set_theme_style(control_icon_style)
+					.set_drawing_area(control_icon_area)
+					)
+				.add_component(
+					Component::create<Button>("SettingsButton")
+					.set_border_size(control_border_size)
+					.set_icon_name("wrench")
+					.set_theme_style(control_icon_style)
+					.set_drawing_area(control_icon_area)
+					)
+				);
 
-						if( event.type() == ButtonEvent::event_type() ){
-							const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-
-							if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "SettingsButton" ){
-								printer().info("launch settings");
-								Application::launch("/home/Settings", String() );
-							}
-
-							if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "LaunchButton" ){
-								printer().info("launch Launcher");
-								Application::launch("/home/Launcher", String() );
-							}
-
-						}
-
-					})
-			#endif
-				)
-			.add_component(
-				Component::create<Button>("EjectButton")
-				.set_border_size(control_border_size)
-				.set_icon_name("eject")
-				.set_theme_style(control_icon_style)
-				.set_drawing_area(control_icon_area)
-				)
-			.add_component(
-				Component::create<Button>("SettingsButton")
-				.set_border_size(control_border_size)
-				.set_icon_name("wrench")
-				.set_theme_style(control_icon_style)
-				.set_drawing_area(control_icon_area)
-			#if 0
-				.set_event_handler([&](Component * object, const Event & event){
-
-					if( event.type() == ButtonEvent::event_type() ){
-						const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-
-						if( (button_event.id() == ButtonEvent::id_released) && button_event.name() == "SettingsButton" ){
-							printer().info("launch settings");
-							Application::launch("/home/Settings", String() );
-						}
-
-					}
-
-
-				})
-		#endif
-			)
-			);
+	set_event_handler(event_handler);
 
 
 
 }
+
+
+void Home::local_event_handler(const Event & event);
 
 
 

@@ -1,5 +1,6 @@
 #include <sapi/ux.hpp>
 #include <sapi/var.hpp>
+#include <ToolboxAPI/components.hpp>
 
 #include "Launcher.hpp"
 #include "Application.hpp"
@@ -7,8 +8,31 @@
 Launcher::Launcher(Application & application)
 	: toolbox::ApplicationLayout<Application>("Launcher", application){
 
+	add_component(
+				Component::create<TopNavigation>(
+					"TopNavigation",
+					TopNavigationAttributes()
+					.set_left_icon_name("times")
+					.set_title("Launcher"),
+					event_loop())
+				.set_drawing_area(DrawingArea(1000,175))
+				);
 
-	List * list = new List();
+	add_component(
+				Component::create<TopNavigation>(
+					"TopNavigation",
+					TopNavigationAttributes()
+					.set_left_icon_name("times")
+					.set_title("Launcher"),
+					event_loop())
+				.set_drawing_area(DrawingArea(1000,175))
+				);
+
+	List * list = new List("List", event_loop());
+	list->set_item_height(250)
+			.set_vertical_scroll_enabled();
+
+
 
 	JsonObject launcher_object =
 			JsonDocument().load(
@@ -16,102 +40,27 @@ Launcher::Launcher(Application & application)
 				).to_object();
 
 	if( launcher_object.is_valid() ){
-
-		int count = 0;
 		var::Vector<String> keys = launcher_object.keys();
 		for(const auto & key: keys){
 			JsonObject item_object = launcher_object.at(key).to_object();
-			list->append(ListItem()
-									 .set_key(item_object.at("name").to_string())
-									 .set_icon("chevron-right")
-									 );
-			count++;
-			if( count == 4 ){
-				break;
-			}
+			String name = item_object.at("name").to_string();
+			list->add_component(
+						Component::create<ListItem>(name)
+						.set_key(name)
+						.set_icon("chevron-right")
+						.set_vertical_padding(40)
+						.set_theme_style(Theme::style_outline_dark)
+						);
 		}
-
-		list->append(ListItem()
-								 .set_key("Exit")
-								 .set_icon("ellipsis-v")
-								 );
-
-		list->set_item_height(200)
-				.set_drawing_point(DrawingPoint(0,0))
-				.set_drawing_area(DrawingArea(1000,1000))
-				.set_event_handler(
-					[&](Component * object, const Event & event){
-
-			if( event.type() == ListEvent::event_type() ){
-				const ListItem & item = event.reinterpret<ListEvent>().item();
-
-				if( item.key() == "Exit" ){
-					Application::go_home();
-				}
-
-				printer().info("Launch %s", item.key().cstring());
-			}
-		});
-
-
-		add_component(
-					"List",
-					*list
-					);
-
 	}
 
+	list->set_drawing_point(DrawingPoint(0,175))
+			.set_drawing_area(DrawingArea(1000,1000-175));
 
+	add_component(*list);
 
-#if 0
-	add_component(
-				"List",
-				(* new List())
-				.append(ListItem()
-								.set_key("Account")
-								.set_value("tgil")
-								.set_icon("chevron-right")
-								)
-				.append(ListItem()
-								.set_key("Display")
-								.set_icon("chevron-right")
-								)
-				.append(ListItem()
-								.set_key("About")
-								.set_icon("chevron-right")
-								)
-				.append(ListItem()
-								.set_key("Exit")
-								.set_icon("ellipsis-v")
-								)
-				.set_item_height(250)
-				.set_drawing_point(DrawingPoint(0,0))
-				.set_drawing_area(DrawingArea(1000,1000))
-				.set_theme_style(Theme::style_brand_primary)
-				.set_event_handler(
-					[&](Component * object, const Event & event){
+}
 
-					if( event.type() == ListEvent::event_type() ){
-						const ListItem & item = event.reinterpret<ListEvent>().item();
-
-						if( item.key() == "Display" ){
-							application.printer().info("set scene collection to Display");
-							scene_collection()->set_current_scene("Display");
-						} else if( item.key() == "About" ){
-							application.printer().info("set scene collection to About");
-							scene_collection()->set_current_scene("About");
-						} else if( item.key() == "Exit" ){
-							Application::launch("/home/Home");
-						}
-
-
-					}
-
-				})
-
-			);
-
-
-#endif
-
+void Launcher::local_event_handler(const Event & event){
+	printf("handle event\n");
 }
