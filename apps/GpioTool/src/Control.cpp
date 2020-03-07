@@ -120,40 +120,39 @@ void Control::local_event_handler(
 		if( event.id() == SystemEvent::id_update ){
 			update_pin_markers();
 		}
-	} else if( event.type() == ButtonEvent::event_type() ){
-		const ButtonEvent & button_event =
-				event.reinterpret<ButtonEvent>();
-		if( event.id() == ButtonEvent::id_released ){
+		return;
+	}
 
-			application().printer().info("Handle button "	+ button_event.name());
-			if( handle_io_button_press(button_event) == false ){
-				if( button_event.name() ==
+	Button * button = ButtonEvent::component(event);
+	if( button ){
+		if( event.id() == ButtonEvent::id_released ){
+			application().printer().info("Handle button "	+ button->name());
+			if( handle_io_button_press(button) == false ){
+				if( button->name() ==
 						find<TopNavigation>(top_navigation_name())->left_button_name()
 						){
 					//exit the application and launch the home screen
 					application().go_home();
-				} else if( button_event.name() ==
+				} else if( button->name() ==
 									 find<TopNavigation>(top_navigation_name())->right_button_name()
 									 ){
 					event_loop()->layout()->transition("About");
 				}
 			}
-
-
 		} else if( event.id() == ButtonEvent::id_held ){
 			event_loop()
 					->layout()
 					->find<Configuration>("PinConfiguration")
 					->set_io_pin(
-						IoInfo(button_event.name()).io_pin()
+						IoInfo(button->name()).io_pin()
 						);
 			event_loop()->layout()->transition("PinConfiguration");
 		}
 	}
 }
 
-bool Control::handle_io_button_press(const ux::ButtonEvent& button_event){
-	IoInfo information(button_event.name());
+bool Control::handle_io_button_press(const ux::Button* button){
+	IoInfo information(button->name());
 	if( information.is_valid() ){
 		Io io(information);
 		if( io.is_output() ){

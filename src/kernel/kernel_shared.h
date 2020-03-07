@@ -3,6 +3,7 @@
 
 #include <ToolboxAPI/toolbox_touch.h>
 #include <ToolboxAPI/toolbox_app.h>
+#include <ToolboxAPI/toolbox_dac.h>
 #include <sos/fs/sysfs.h>
 #include <pthread.h>
 
@@ -39,9 +40,25 @@ enum kernel_shared_direction_channels {
 };
 
 typedef struct {
+	u32 o_flags;
+	toolbox_dac_attr_t attr;
+	float t;
+	sysfs_file_t file;
+	pthread_mutex_t mutex;
+	u32 data[TOOLBOX_DAC_SAMPLES_PER_PACKET];
+	u32 scale;
+} kernel_shared_dac_channel_t;
+
+typedef struct {
+	kernel_shared_dac_channel_t channel[2];
+	sysfs_file_t tmr_file; //tmr used to drive DAC
+} kernel_shared_dac_t;
+
+typedef struct {
 	sysfs_file_t i2c_file;
 	pthread_mutex_t i2c_mutex;
 	toolbox_touch_packet_t last_touch_packet;
+	kernel_shared_dac_t dac;
 } kernel_shared_t;
 
 typedef struct MCU_PACK {
@@ -94,6 +111,7 @@ const kernel_shared_direction_state_t * kernel_shared_get_direction_state(
 
 sysfs_file_t * kernel_shared_i2c_file();
 pthread_mutex_t * kernel_shared_i2c_mutex();
+kernel_shared_dac_t * kernel_shared_dac();
 toolbox_touch_packet_t * kernel_shared_last_touch_packet();
 const toolbox_app_request_t * kernel_shared_app_request();
 void kernel_shared_set_app_request(const toolbox_app_request_t * request);

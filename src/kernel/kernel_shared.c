@@ -69,6 +69,10 @@ toolbox_touch_packet_t * kernel_shared_last_touch_packet(){
 	return &m_kernel_shared.last_touch_packet;
 }
 
+kernel_shared_dac_t * kernel_shared_dac(){
+	return &m_kernel_shared.dac;
+}
+
 const toolbox_app_request_t * kernel_shared_app_request(){
 	return &m_kernel_shared_root.app_request;
 }

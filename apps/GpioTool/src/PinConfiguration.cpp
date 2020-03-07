@@ -133,34 +133,35 @@ Configuration::Configuration(Application & application)
 
 				);
 
-	set_event_handler([&application, this](Component * object, const Event & event){
+	set_event_handler(event_handler);
 
-		if( event.type() == SystemEvent::event_type() ){
-			if( event.id() == SystemEvent::id_enter ){
-				update_display_values();
-			}
+
+}
+
+void Configuration::local_event_handler(const Event & event){
+
+
+	if( event.type() == SystemEvent::event_type() ){
+		if( event.id() == SystemEvent::id_enter ){
+			update_display_values();
+		}
+		return;
+	}
+
+	Button * button = ButtonEvent::component(event, ButtonEvent::id_released);
+	if( button ){
+		if( button->name() ==
+				find<TopNavigation>(top_navigation_name())->left_button_name()
+				){
+			event_loop()->layout()->transition("Control");
 		}
 
-		if( event.type() == ButtonEvent::event_type() ){
-			if( event.id() == ButtonEvent::id_released ){
-				if( event.reinterpret<ButtonEvent>().name() ==
-						find<TopNavigation>(top_navigation_name())->left_button_name()
-						){
-					event_loop()->layout()->transition("Control");
-				}
-
-				if( event.reinterpret<ButtonEvent>().name() ==
-						Configuration::direction_button_name()
-						){
-					toggle_direction();
-				}
-
-			}
+		if( button->name() == Configuration::direction_button_name()
+				){
+			toggle_direction();
 		}
 
-	});
-
-
+	}
 }
 
 

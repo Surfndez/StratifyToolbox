@@ -2,7 +2,7 @@
 #define PINCONFIGURATION_HPP
 
 #include <sapi/var/Vector.hpp>
-#include <sapi/ux/Scene.hpp>
+#include <sapi/ux.hpp>
 #include <ToolboxAPI/toolbox.hpp>
 
 class Application;
@@ -35,7 +35,13 @@ public:
 private:
 	 enum Io::io_pins m_io_pin;
 
+	 static void event_handler(
+			 Component * object,
+			 const Event & event){
+		 object->reinterpret<Configuration>()->local_event_handler(event);
+	 }
 
+	 void local_event_handler(const Event & event);
 
 	 void update_display_values();
 	 void toggle_direction();

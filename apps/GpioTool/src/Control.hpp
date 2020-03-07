@@ -35,7 +35,7 @@ private:
 		 control_object->local_event_handler(event);
 	 }
 	 void local_event_handler(const ux::Event & event);
-	 bool handle_io_button_press(const ux::ButtonEvent & button_event);
+	 bool handle_io_button_press(const ux::Button * button);
 	 void update_pin_markers();
 };
 

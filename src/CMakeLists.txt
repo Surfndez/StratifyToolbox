@@ -9,6 +9,8 @@ set(SOURCES
 	kernel/kernel_touch.h
 	kernel/kernel_app.c
 	kernel/kernel_app.h
+	kernel/kernel_dac.c
+	kernel/kernel_dac.h
 	kernel/kernel_service.c
 	kernel/kernel_service.h
 	kernel/kernel_shared.c

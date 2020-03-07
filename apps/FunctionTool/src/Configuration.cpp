@@ -103,7 +103,7 @@ Configuration::Configuration(Application & application)
 
 				.add_component(
 					Component::create<ux::Label>("FrequencyLabel")
-					.set_label("Frequency")
+					.set_label("Frequency: 500hz")
 					.set_align_left()
 					.set_border_size(0)
 					.set_theme_style(Theme::style_light)
@@ -119,11 +119,19 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("FrequencyValue")
-					.set_label("500Hz")
-					.set_align_center()
+					Component::create<ux::Label>("AmplitudeLabel")
+					.set_label("Amplitude: 0.0")
+					.set_align_left()
 					.set_border_size(0)
-					.set_theme_style(Theme::style_outline_brand_secondary)
+					.set_theme_style(Theme::style_light)
+					.set_drawing_area(label_area)
+					)
+
+				.add_component(
+					Component::create<ux::Slider>("AmplitudeSlider")
+					.set_maximum(1000)
+					.set_value(500)
+					.set_theme_style(Theme::style_brand_secondary)
 					.set_drawing_area(value_area)
 					)
 
@@ -139,82 +147,88 @@ Configuration::Configuration(Application & application)
 
 				);
 
-	set_event_handler([&application, this](Component * object, const Event & event){
+	set_event_handler(event_handler);
 
-		if( event.type() == SystemEvent::event_type() ){
-			if( event.id() == SystemEvent::id_enter ){
-				update_display_values();
-			}
+
+}
+
+void Configuration::local_event_handler(const Event & event){
+	if( event.type() == SystemEvent::event_type() ){
+		if( event.id() == SystemEvent::id_enter ){
+			update_display_values();
 		}
+		return;
+	}
 
-		if( event.type() == SliderEvent::event_type() ){
-			const SliderEvent & slider_event = event.reinterpret<SliderEvent>();
-			find<Label>("FrequencyValue")
-					->set_label(String::number(
-												slider_event.value()
+	Slider * slider = SliderEvent::component(event);
+	if( slider ){
+		if( slider->name() == "FrequencySlider" ){
+			find<Label>("FrequencyLabel")
+					->set_label("Frequency: " + String::number(
+												slider->value()
 												) + "hz").redraw();
+		} else if( slider->name() == "AmplitudeSlider" ){
+			find<Label>("AmplitudeLabel")
+					->set_label("Amplitude: " + String::number(
+												slider->value() * 2.0f / slider->maximum() -1.0f
+												) + " ").redraw();
 		}
+		return;
+	}
 
-		if( event.type() == ButtonEvent::event_type() ){
-			if( event.id() == ButtonEvent::id_released ){
-				const ButtonEvent	& button_event= event.reinterpret<ButtonEvent>();
-				if( button_event.name() ==
-						find<TopNavigation>(top_navigation_name())->left_button_name()
-						){
-					event_loop()->layout()->transition("Control");
-				} else if( button_event.name() == triangle_button_name() ){
-					find<Button>(triangle_button_name())
-							->set_theme_style(
-								Theme::style_brand_secondary
-								).redraw();
+	Button * button = ButtonEvent::component(event, ButtonEvent::id_released);
+	if( button ){
+		if( button->name() ==
+				find<TopNavigation>(top_navigation_name())->left_button_name()
+				){
+			event_loop()->layout()->transition("Control");
+		} else if( button->name() == triangle_button_name() ){
+			find<Button>(triangle_button_name())
+					->set_theme_style(
+						Theme::style_brand_secondary
+						).redraw();
 
-					find<Button>(square_button_name())
-							->set_theme_style(
-								Theme::style_outline_brand_secondary
-								).redraw();
+			find<Button>(square_button_name())
+					->set_theme_style(
+						Theme::style_outline_brand_secondary
+						).redraw();
 
-					find<Button>(wave_button_name())
-							->set_theme_style(
-								Theme::style_outline_brand_secondary
-								).redraw();
-				} else if( button_event.name() == square_button_name() ){
-					find<Button>(square_button_name())
-							->set_theme_style(
-								Theme::style_brand_secondary
-								).redraw();
+			find<Button>(wave_button_name())
+					->set_theme_style(
+						Theme::style_outline_brand_secondary
+						).redraw();
+		} else if( button->name() == square_button_name() ){
+			find<Button>(square_button_name())
+					->set_theme_style(
+						Theme::style_brand_secondary
+						).redraw();
 
-					find<Button>(triangle_button_name())
-							->set_theme_style(
-								Theme::style_outline_brand_secondary
-								).redraw();
+			find<Button>(triangle_button_name())
+					->set_theme_style(
+						Theme::style_outline_brand_secondary
+						).redraw();
 
-					find<Button>(wave_button_name())
-							->set_theme_style(
-								Theme::style_outline_brand_secondary
-								).redraw();
-				} else if( button_event.name() == wave_button_name() ){
-					find<Button>(wave_button_name())
-							->set_theme_style(
-								Theme::style_brand_secondary
-								).redraw();
+			find<Button>(wave_button_name())
+					->set_theme_style(
+						Theme::style_outline_brand_secondary
+						).redraw();
+		} else if( button->name() == wave_button_name() ){
+			find<Button>(wave_button_name())
+					->set_theme_style(
+						Theme::style_brand_secondary
+						).redraw();
 
-					find<Button>(triangle_button_name())
-							->set_theme_style(
-								Theme::style_outline_brand_secondary
-								).redraw();
+			find<Button>(triangle_button_name())
+					->set_theme_style(
+						Theme::style_outline_brand_secondary
+						).redraw();
 
-					find<Button>(square_button_name())
-							->set_theme_style(
-								Theme::style_outline_brand_secondary
-								).redraw();
-				}
-
-			}
+			find<Button>(square_button_name())
+					->set_theme_style(
+						Theme::style_outline_brand_secondary
+						).redraw();
 		}
-
-	});
-
-
+	}
 }
 
 

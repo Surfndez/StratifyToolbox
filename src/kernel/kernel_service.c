@@ -6,10 +6,13 @@
 #include "kernel_service.h"
 #include "kernel_io.h"
 #include "kernel_app.h"
+#include "kernel_dac.h"
 #include "kernel_shared.h"
 #include "i2c_internal.h"
 
-#define RUN_KERNEL_APP 1
+#define RUN_APP_SERVICE 0
+#define RUN_DAC_SERVICE 1
+#define RUN_WIFI_SERVICE 0
 
 static void * kernel_service_thread_function(void * args);
 
@@ -56,23 +59,35 @@ int kernel_service_init(){
 	}
 
 
-
-
-
 	//start the WIFI
-#if 0
+#if RUN_WIFI_SERVICE
 	if( sos_board_config.socket_api ){
-		sos_board_config.socket_api->startup(
+		if( sos_board_config.socket_api->startup(
 					sos_board_config.socket_api->config
-					);
+					) < 0 ){
+			mcu_debug_log_fatal(
+						MCU_DEBUG_USER0,
+						"failed to init dac service"
+						);
+		}
 	}
 #endif
 
-#if RUN_KERNEL_APP
+#if RUN_DAC_SERVICE
+	if( kernel_dac_init() < 0 ){
+		mcu_debug_log_fatal(
+					MCU_DEBUG_USER0,
+					"failed to init dac service"
+					);
+		return -1;
+	}
+#endif
+
+#if RUN_APP_SERVICE
 	if( kernel_app_init() < 0 ){
 		mcu_debug_log_fatal(
 					MCU_DEBUG_USER0,
-					"failed to init kernel app"
+					"failed to init app service"
 					);
 		return -1;
 	}

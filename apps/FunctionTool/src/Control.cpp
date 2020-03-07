@@ -145,25 +145,23 @@ void Control::local_event_handler(
 		if( event.id() == SystemEvent::id_update ){
 			update_pin_markers();
 		} else if( event.id() == SystemEvent::id_enter ){
-
 			//update status labels and line graphs
 
-
-
 		}
+		return;
+	}
 
-	} else if( event.type() == ButtonEvent::event_type() ){
-		const ButtonEvent & button_event =
-				event.reinterpret<ButtonEvent>();
+	Button * button = ButtonEvent::component(event);
+	if( button ){
 
 		if( event.id() == ButtonEvent::id_held ){
-			if( button_event.name() == "output0" ){
+			if( button->name() == "output0" ){
 				event_loop()->layout()->find<Configuration>("Configuration")
 						->set_io_pin(
 							Io::io_pin18
 							);
 				event_loop()->layout()->transition("Configuration");
-			} else if( button_event.name() == "output1" ){
+			} else if( button->name() == "output1" ){
 				event_loop()->layout()->find<Configuration>("Configuration")
 						->set_io_pin(
 							Io::io_pin19
@@ -173,11 +171,11 @@ void Control::local_event_handler(
 
 		} else if( event.id() == ButtonEvent::id_released ){
 
-			if( button_event.name() ==
+			if( button->name() ==
 					find<TopNavigation>(top_navigation_name())->right_button_name()
 					){
 				event_loop()->layout()->transition("About");
-			} else if( button_event.name() ==
+			} else if( button->name() ==
 								 find<TopNavigation>(top_navigation_name())->left_button_name()
 								 ){
 				application().go_home();
@@ -187,8 +185,8 @@ void Control::local_event_handler(
 	}
 }
 
-bool Control::handle_io_button_press(const ux::ButtonEvent& button_event){
-	IoInfo information(button_event.name());
+bool Control::handle_io_button_press(const ux::Button * button){
+	IoInfo information(button->name());
 	if( information.is_valid() ){
 		Io io(information);
 		if( io.is_output() ){

@@ -594,15 +594,6 @@ int init_external_pins(){
 			attributes.o_flags = OUT;
 			attributes.o_pinmask = 1 << (io_pin->expansion_pin);
 
-#if 1
-			mcu_debug_printf(
-						"set attributes for 0x%X:%d:0x%X\n",
-						io_pin->expansion_port,
-						io_pin->expansion_pin,
-						io_pin->init_flags
-						);
-#endif
-
 			result = pcal6416a_setattr(
 						io_pin->expansion_port,
 						&attributes
