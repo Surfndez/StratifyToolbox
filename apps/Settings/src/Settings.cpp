@@ -80,20 +80,23 @@ Settings::Settings(Application & application)
 
 void Settings::local_event_handler(const Event & event){
 
-	if( event.type() == ListEvent::event_type() ){
-		const ListEvent & list_event = event.reinterpret<ListEvent>();
-		if( list_event.item().name() == "Display" ){
+
+	ListItem * list_item = ListEvent::component(event);
+	if( list_item ){
+		if( list_item->name() == "Display" ){
 			event_loop()->layout()->transition("Display");
 		}
+		return;
 	}
 
-	if( ButtonEvent::is_event(event, ButtonEvent::id_released) ){
-		const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-		if( button_event.name() ==
+	Button * button = ButtonEvent::component(event, ButtonEvent::id_released);
+	if( button ){
+		if( button->name() ==
 				find<TopNavigation>(top_navigation_name())->left_button_name() ){
 			application().go_home();
-		} else if( button_event.name() ==
-							 find<TopNavigation>(top_navigation_name())->right_button_name() ){
+		} else if( button->name() ==
+							 find<TopNavigation>(top_navigation_name())->right_button_name()
+							 ){
 			event_loop()->layout()->transition("About");
 		}
 	}

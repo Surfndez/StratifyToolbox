@@ -64,17 +64,15 @@ Launcher::Launcher(Application & application)
 
 void Launcher::local_event_handler(const Event & event){
 
-	if( event.type() == ListEvent::event_type() ){
-
-		const ListEvent & list_event = event.reinterpret<ListEvent>();
+	ListItem * list_item = ListEvent::component(event);
+	if( list_item ){
 		JsonObject launcher_object =
 				JsonDocument().load(
 					fs::File::Path("/home/Launcher.json")
 					).to_object();
 
-		printf("Check for object %s\n", list_event.item().name().cstring());
 		JsonObject item_object =
-				launcher_object.at(list_event.item().name()).to_object();
+				launcher_object.at(list_item->name()).to_object();
 
 		if( item_object.is_valid() ){
 			String path = item_object.at("path").to_string();
@@ -82,14 +80,13 @@ void Launcher::local_event_handler(const Event & event){
 						path
 						);
 		}
-	} else if( ButtonEvent::is_event(event, ButtonEvent::id_released) ){
-		const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-		if( button_event.name() ==
-				find<TopNavigation>("TopNavigation")->left_button_name()
-				){
-			application().go_home();
-		}
+		return;
 	}
 
-
+	Button * button = ButtonEvent::component(event,  ButtonEvent::id_released);
+	if( button && button->name() ==
+			find<TopNavigation>("TopNavigation")->left_button_name()
+			){
+		application().go_home();
+	}
 }

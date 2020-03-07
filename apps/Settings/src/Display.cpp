@@ -37,21 +37,21 @@ Display::Display(Application & application)
 				.set_theme_style(Theme::style_brand_primary)
 				.set_drawing_point(ux::DrawingPoint(100,750))
 				.set_drawing_area(ux::DrawingArea(800,100))
-			);
+				);
 
 	set_event_handler(event_handler);
 }
 
 void Display::local_event_handler(const Event & event){
-	if( (event.type() == ButtonEvent::event_type()) &&
-			(event.id() == ButtonEvent::id_released) ){
-		const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-		if( button_event.name() ==
-				find<TopNavigation>(top_navigation_name()
-					)->left_button_name() ){
-			event_loop()->layout()->transition("Settings");
-		}
+
+	Button * button = ButtonEvent::component(event, ButtonEvent::id_released);
+	if( button && button->name() ==
+			find<TopNavigation>(
+				top_navigation_name()
+				)->left_button_name() ){
+		event_loop()->layout()->transition("Settings");
 	}
+
 }
 
 

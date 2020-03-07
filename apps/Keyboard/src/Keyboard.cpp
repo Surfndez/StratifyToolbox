@@ -133,47 +133,41 @@ Keyboard::Keyboard(Application & app)
 						)
 					)
 				);
-
-
 	set_event_handler(Keyboard::event_handler);
-
 }
 
 void Keyboard::local_event_handler(
 		const ux::Event & event
 		){
 
-	if( event.type() == ButtonEvent::event_type() ){
-		const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
+	Button * button = ButtonEvent::component(event, ButtonEvent::id_released);
 
-
-		if( button_event.id() == ButtonEvent::id_released ){
-			if( button_event.name() == "shift" ){
-				m_button_set++;
-				if( m_button_set == m_button_options.count() ){
-					m_button_set = 0;
-				}
-				update_symbols();
-			} else if( button_event.name() == "space" ){
-				m_text << " ";
+	if( button ){
+		if( button->name() == "shift" ){
+			m_button_set++;
+			if( m_button_set == m_button_options.count() ){
+				m_button_set = 0;
+			}
+			update_symbols();
+		} else if( button->name() == "space" ){
+			m_text << " ";
+			update_text();
+		} else if( button->name() == find<TopNavigation>(top_navigation_name())->left_button_name() ){
+			application().go_home();
+		} else if( button->name() == find<TopNavigation>(top_navigation_name())->right_button_name() ){
+			if( m_text.length() > 0 ){
+				m_text.erase(
+							String::Position(m_text.length()-1)
+							);
 				update_text();
-			} else if( button_event.name() == find<TopNavigation>(top_navigation_name())->left_button_name() ){
-				application().go_home();
-			} else if( button_event.name() == find<TopNavigation>(top_navigation_name())->right_button_name() ){
-				if( m_text.length() > 0 ){
-					m_text.erase(
-								String::Position(m_text.length()-1)
-								);
-					update_text();
-				}
-			} else {
-				if( button_event.name().find("key:") == 0 ){
-					var::Vector<String> values = button_event.name().split(":");
-					u32 key_index = values.at(1).to_integer();
-					char c = button_set().at(key_index);
-					m_text << c;
-					update_text();
-				}
+			}
+		} else {
+			if( button->name().find("key:") == 0 ){
+				var::Vector<String> values = button->name().split(":");
+				u32 key_index = values.at(1).to_integer();
+				char c = button_set().at(key_index);
+				m_text << c;
+				update_text();
 			}
 		}
 	}

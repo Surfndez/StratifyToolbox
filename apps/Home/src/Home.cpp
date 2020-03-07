@@ -49,26 +49,15 @@ Home::Home(Application & application)
 				);
 
 	set_event_handler(event_handler);
-
-
-
 }
-
 
 void Home::local_event_handler(const Event & event){
-
-	if( ButtonEvent::is_event(event, ButtonEvent::id_released) ){
-		const ButtonEvent & button_event = event.reinterpret<ButtonEvent>();
-
-		if( button_event.name() == "SettingsButton" ){
+	Button * button = ButtonEvent::component(event, ButtonEvent::id_released);
+	if( button ){
+		if( button->name() == "SettingsButton" ){
 			application().launch("/home/Settings");
-		} else if( button_event.name() == "LaunchButton" ){
+		} else if( button->name() == "LaunchButton" ){
 			application().launch("/home/Launcher");
 		}
-
 	}
-
 }
-
-
-
