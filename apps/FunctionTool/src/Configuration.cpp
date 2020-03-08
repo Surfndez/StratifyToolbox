@@ -98,8 +98,6 @@ Configuration::Configuration(Application* application)
 
 					)
 
-
-
 				.add_component(
 					Label::create("FrequencyLabel")
 					.set_label("Frequency: 500hz")
@@ -128,6 +126,23 @@ Configuration::Configuration(Application* application)
 
 				.add_component(
 					Slider::create("AmplitudeSlider")
+					.set_maximum(1000)
+					.set_value(500)
+					.set_theme_style(Theme::style_brand_secondary)
+					.set_drawing_area(value_area)
+					)
+
+				.add_component(
+					Label::create("OffsetLabel")
+					.set_label("Offset: 0.0")
+					.set_align_left()
+					.set_border_size(0)
+					.set_theme_style(Theme::style_light)
+					.set_drawing_area(label_area)
+					)
+
+				.add_component(
+					Slider::create("OffsetSlider")
 					.set_maximum(1000)
 					.set_value(500)
 					.set_theme_style(Theme::style_brand_secondary)
@@ -163,14 +178,22 @@ void Configuration::local_event_handler(const Event & event){
 	if( slider ){
 		if( slider->name() == "FrequencySlider" ){
 			find<Label>("FrequencyLabel")
-					->set_label("Frequency: " + String::number(
-												slider->value()
-												) + "hz").redraw();
+					->set_label(
+						"Frequency: " + String::number(
+							slider->value()
+							) + "hz").redraw();
 		} else if( slider->name() == "AmplitudeSlider" ){
 			find<Label>("AmplitudeLabel")
-					->set_label("Amplitude: " + String::number(
-												slider->value() * 2.0f / slider->maximum() -1.0f
-												) + " ").redraw();
+					->set_label(
+						"Amplitude: " + String::number(
+							slider->value() * 2.0f / slider->maximum() -1.0f
+							) + " ").redraw();
+		} else if( slider->name() == "OffsetSlider" ){
+			find<Label>("OffsetLabel")
+					->set_label(
+						"Offset: " + String::number(
+							slider->value() * 2.0f / slider->maximum() -1.0f
+							) + " ").redraw();
 		}
 		return;
 	}
@@ -196,6 +219,7 @@ void Configuration::local_event_handler(const Event & event){
 					->set_theme_style(
 						Theme::style_outline_brand_secondary
 						).redraw();
+
 		} else if( button->name() == square_button_name() ){
 			find<Button>(square_button_name())
 					->set_theme_style(

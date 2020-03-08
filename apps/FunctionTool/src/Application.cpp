@@ -28,26 +28,15 @@ ux::Layout & Application::create_layout(){
 				)
 			.add_component(
 				Configuration::create(this)
-				.set_drawing_point(
-					DrawingPoint(0,0)
-					)
-				.set_drawing_area(
-					DrawingArea(1000,1000)
-					)
 				.set_enabled(false)
 				)
 			.add_component(
 				About::create(this)
-				.set_drawing_point(
-					DrawingPoint(0,0)
-					)
-				.set_drawing_area(
-					DrawingArea(1000,1000)
-					)
 				.set_enabled(false)
 				)
-			.set_drawing_area(
-				DrawingArea(1000,1000)
+			.add_component(
+				Keyboard::create("Keyboard", event_loop())
+				.set_enabled(false)
 				);
 
 }

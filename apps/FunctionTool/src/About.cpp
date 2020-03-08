@@ -19,9 +19,10 @@ About::About(Application * application)
 				);
 
 	add_component(
-				(*(new ApplicationDetails(
-						 "FunctionTool",
-						 event_loop())))
+				ApplicationDetails::create(
+					"FunctionTool",
+					event_loop()
+					)
 				.set_drawing_point(DrawingPoint(25, 175))
 				.set_drawing_area(DrawingArea(950,1000-175))
 				);
