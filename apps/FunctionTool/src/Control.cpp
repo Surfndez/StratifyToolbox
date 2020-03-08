@@ -11,11 +11,11 @@
 #include "Configuration.hpp"
 
 
-Control::Control(Application & app)
-	: ApplicationLayout<Application>("Control", app){
+Control::Control(Application* app)
+	: ApplicationLayout("Control", app){
 
 	add_component(
-				Component::create<TopNavigation>(
+				TopNavigation::create(
 					top_navigation_name(),
 					TopNavigationAttributes()
 					.set_left_icon_name("times")
@@ -37,7 +37,7 @@ Control::Control(Application & app)
 	constexpr enum Theme::style output1_theme_style = Theme::style_info;
 
 	add_component(
-				Component::create<Button>(
+				Button::create(
 					"output0"
 					)
 				.set_label("Output 0")
@@ -50,7 +50,7 @@ Control::Control(Application & app)
 				);
 
 	add_component(
-				Component::create<Label>(
+				Label::create(
 					"status0"
 					)
 				.set_label("off")
@@ -64,7 +64,7 @@ Control::Control(Application & app)
 				);
 
 	add_component(
-				Component::create<LineGraph>(
+				LineGraph::create(
 					line_graph1_name()
 					)
 				.set_drawing_point(
@@ -76,7 +76,7 @@ Control::Control(Application & app)
 				);
 
 	add_component(
-				Component::create<Button>(
+				Button::create(
 					"output1"
 					)
 				.set_theme_style(output1_theme_style)
@@ -89,7 +89,7 @@ Control::Control(Application & app)
 				);
 
 	add_component(
-				Component::create<Label>(
+				Label::create(
 					"status1"
 					)
 				.set_label("off")
@@ -103,7 +103,7 @@ Control::Control(Application & app)
 				);
 
 	add_component(
-				Component::create<LineGraph>(
+				LineGraph::create(
 					line_graph1_name()
 					)
 				.set_drawing_point(
@@ -115,8 +115,8 @@ Control::Control(Application & app)
 				);
 
 	add_component(
-				Component::create<PinMarkerBar>(
-					pin_marker_bar_name(),
+				PinMarkerBar::create(
+					String(pin_marker_bar_name()),
 					event_loop(),
 					IoInfo::type_analog
 					)
@@ -178,7 +178,7 @@ void Control::local_event_handler(
 			} else if( button->name() ==
 								 find<TopNavigation>(top_navigation_name())->left_button_name()
 								 ){
-				application().go_home();
+				application()->go_home();
 			}
 
 		}

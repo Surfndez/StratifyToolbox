@@ -8,9 +8,9 @@
 class Application;
 
 
-class Keyboard : public ApplicationLayout<Application> {
+class Keyboard : public ApplicationLayout<Keyboard> {
 public:
-	 Keyboard(Application & app);
+	 Keyboard(Application * app);
 
 
 private:

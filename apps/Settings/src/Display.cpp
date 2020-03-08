@@ -4,12 +4,12 @@
 #include <ToolboxAPI/components.hpp>
 #include <sapi/ux.hpp>
 
-Display::Display(Application & application)
-	: toolbox::ApplicationLayout<Application>("Display", application){
+Display::Display(Application* application)
+	: toolbox::ApplicationLayout<Display>("Display", application){
 
 
 	add_component(
-				Component::create<TopNavigation>(
+				TopNavigation::create(
 					top_navigation_name(),
 					TopNavigationAttributes()
 					.set_title("Display"),
@@ -19,7 +19,7 @@ Display::Display(Application & application)
 
 	const drawing_size_t icon_size = 500;
 	add_component(
-				Component::create<Button>("SunButton")
+				Button::create("SunButton")
 				.set_icon_name("sun")
 				.set_border_size(0)
 				.set_horizontal_padding(0)
@@ -31,7 +31,7 @@ Display::Display(Application & application)
 
 
 	add_component(
-				Component::create<Slider>("BrightnessSlider")
+				Slider::create("BrightnessSlider")
 				.set_value(25)
 				.set_maximum(100)
 				.set_theme_style(Theme::style_brand_primary)

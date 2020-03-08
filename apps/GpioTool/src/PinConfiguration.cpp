@@ -8,20 +8,19 @@
 #include <ToolboxAPI/Io.hpp>
 #include <ToolboxAPI/components.hpp>
 
-Configuration::Configuration(Application & application)
-	: ApplicationLayout<Application>(whatis_name(), application){
+Configuration::Configuration(Application * application)
+	: ApplicationLayout(whatis_name(), application){
 
 
 	const drawing_size_t navigation_bar_height = 175;
 	add_component(
-				(* new TopNavigation(
-					 top_navigation_name(),
-					 TopNavigationAttributes()
-					 .set_left_icon_name("chevron-left")
-					 .set_title("Pin Settings"),
-					 event_loop()
-					 )
-				 )
+				TopNavigation::create(
+					top_navigation_name(),
+					TopNavigationAttributes()
+					.set_left_icon_name("chevron-left")
+					.set_title("Pin Settings"),
+					event_loop()
+					)
 				.set_drawing_area(DrawingArea(1000,navigation_bar_height))
 				);
 
@@ -29,14 +28,14 @@ Configuration::Configuration(Application & application)
 	DrawingArea value_area(1000,200);
 
 	add_component(
-				(* new ux::Layout(
-					 "PinConfigurationVerticalLayout",
-					 event_loop()))
+				Layout::create(
+					"PinConfigurationVerticalLayout",
+					event_loop())
 				.set_flow(ux::Layout::flow_vertical)
 				.set_vertical_scroll_enabled()
 
 				.add_component(
-					Component::create<ux::Label>("PinLabel")
+					Label::create("PinLabel")
 					.set_label("Pin")
 					.set_align_left()
 					.set_border_size(0)
@@ -45,7 +44,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("PinValue")
+					Label::create("PinValue")
 					.set_label("?")
 					.set_align_left()
 					.set_border_size(0)
@@ -54,7 +53,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("ValueLabel")
+					Label::create("ValueLabel")
 					.set_label("Value")
 					.set_align_left()
 					.set_border_size(0)
@@ -63,7 +62,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("ValueValue")
+					Label::create("ValueValue")
 					.set_label("---")
 					.set_align_left()
 					.set_border_size(0)
@@ -72,7 +71,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("DirectionLabel")
+					Label::create("DirectionLabel")
 					.set_label("Direction")
 					.set_align_left()
 					.set_border_size(0)
@@ -81,11 +80,11 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					(* new ux::Layout("DirectionLayout", event_loop()))
+					Layout::create("DirectionLayout", event_loop())
 					.set_flow(Layout::flow_horizontal)
 
 					.add_component(
-						Component::create<ux::Label>(direction_value_name())
+						Label::create(direction_value_name())
 						.set_label("Output")
 						.set_align_left()
 						.set_border_size(0)
@@ -94,7 +93,7 @@ Configuration::Configuration(Application & application)
 						)
 
 					.add_component(
-						Component::create<ux::Button>(direction_button_name())
+						Button::create(direction_button_name())
 						.set_label("Toggle")
 						.set_border_size(1)
 						.set_theme_style(Theme::style_outline_brand_secondary)
@@ -104,7 +103,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("FunctionLabel")
+					Label::create("FunctionLabel")
 					.set_label("Function")
 					.set_align_left()
 					.set_border_size(0)
@@ -113,7 +112,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("FunctionValue")
+					Label::create("FunctionValue")
 					.set_label("GPIO")
 					.set_align_left()
 					.set_border_size(0)

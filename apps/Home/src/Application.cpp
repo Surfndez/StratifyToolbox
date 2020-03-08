@@ -9,9 +9,9 @@ Application::Application(const sys::Cli & cli)
 
 
 ux::Layout & Application::create_layout(){
-	return (Layout&)(*(new Layout("Application", event_loop())))
+	return Layout::create("Application", event_loop())
 			.add_component(
-				(* new Home(*this))
+				Home::create(this)
 				.set_drawing_point(
 					DrawingPoint(0,0)
 					)

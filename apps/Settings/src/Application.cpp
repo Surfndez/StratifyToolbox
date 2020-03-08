@@ -16,9 +16,9 @@ Application::Application(const sys::Cli & cli)
 
 ux::Layout & Application::create_layout(){
 
-	return (Layout&)(*(new Layout("Application", event_loop())))
+	return Layout::create("Application", event_loop())
 			.add_component(
-				(* new Settings(*this))
+				Settings::create(this)
 				.set_drawing_point(
 					DrawingPoint(0,0)
 					)
@@ -27,7 +27,7 @@ ux::Layout & Application::create_layout(){
 					)
 				)
 			.add_component(
-				(* new Display(*this))
+				Display::create(this)
 				.set_drawing_point(
 					DrawingPoint(0,0)
 					)
@@ -37,7 +37,7 @@ ux::Layout & Application::create_layout(){
 				.set_enabled(false)
 				)
 			.add_component(
-				(* new About(*this))
+				About::create(this)
 				.set_drawing_point(
 					DrawingPoint(0,0)
 					)

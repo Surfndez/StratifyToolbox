@@ -21,15 +21,15 @@ const var::String Control::pin_marker_name(
 }
 
 
-Control::Control(Application & app)
-	: ApplicationLayout<Application>("Control", app){
+Control::Control(Application * app)
+	: ApplicationLayout("Control", app){
 
 	for(auto & value: m_pin_states){
 		value = -1;
 	}
 
 	add_component(
-				Component::create<TopNavigation>(
+				TopNavigation::create(
 					top_navigation_name(),
 					TopNavigationAttributes()
 					.set_left_icon_name("times")
@@ -54,7 +54,7 @@ Control::Control(Application & app)
 	const DrawingArea pin_area(45,40);
 
 	add_component(
-				Component::create<PinMarkerBar>(
+				PinMarkerBar::create(
 					pin_marker_bar_name(),
 					event_loop(),
 					IoInfo::type_io
@@ -66,7 +66,7 @@ Control::Control(Application & app)
 
 	PinMarkerBar * pin_marker_bar = find<PinMarkerBar>("PinMarkerBar");
 	if( pin_marker_bar == nullptr ){
-		application().printer().error("pin marker bar is null");
+		printer().error("pin marker bar is null");
 		exit(1);
 	}
 
@@ -81,7 +81,7 @@ Control::Control(Application & app)
 		}
 
 		add_component(
-					Component::create<ux::Button>(
+					Button::create(
 						pin_button_name(info)
 						)
 					.set_border_size(1)
@@ -126,13 +126,13 @@ void Control::local_event_handler(
 	Button * button = ButtonEvent::component(event);
 	if( button ){
 		if( event.id() == ButtonEvent::id_released ){
-			application().printer().info("Handle button "	+ button->name());
+			printer().info("Handle button "	+ button->name());
 			if( handle_io_button_press(button) == false ){
 				if( button->name() ==
 						find<TopNavigation>(top_navigation_name())->left_button_name()
 						){
 					//exit the application and launch the home screen
-					application().go_home();
+					application()->go_home();
 				} else if( button->name() ==
 									 find<TopNavigation>(top_navigation_name())->right_button_name()
 									 ){

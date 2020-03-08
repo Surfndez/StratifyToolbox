@@ -79,7 +79,6 @@ const toolbox_app_request_t * kernel_shared_app_request(){
 
 void svcall_shared_set_app(void * args){
 	CORTEXM_SVCALL_ENTER();
-	mcu_debug_printf("Copy memory %p %d\n", &m_kernel_shared_root.app_request, sizeof(toolbox_app_request_t));
 	memcpy(
 				&m_kernel_shared_root.app_request,
 				args,

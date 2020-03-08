@@ -6,11 +6,11 @@
 #include <sapi/ux.hpp>
 #include <ToolboxAPI/components.hpp>
 
-About::About(Application & application)
-	: ApplicationLayout<Application>("About", application){
+About::About(Application * application)
+	: ApplicationLayout("About", application){
 
 	add_component(
-				Component::create<TopNavigation>(
+				TopNavigation::create(
 					top_navigation_name(),
 					TopNavigationAttributes()
 					.set_title("About"),
@@ -19,7 +19,7 @@ About::About(Application & application)
 				);
 
 	add_component(
-				Component::create<ApplicationDetails>(
+				ApplicationDetails::create(
 					"GpioTool",
 					event_loop()
 					)

@@ -38,9 +38,9 @@ private:
 	LineGraphDataSet m_data_set;
 };
 
-class Control : public ApplicationLayout<Application> {
+class Control : public ApplicationLayout<Control> {
 public:
-	Control(Application & app);
+	Control(Application * app);
 
 	enum output {
 		output_zero,

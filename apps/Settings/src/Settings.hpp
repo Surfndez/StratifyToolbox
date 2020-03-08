@@ -8,9 +8,9 @@
 class Application;
 
 
-class Settings : public toolbox::ApplicationLayout<Application> {
+class Settings : public toolbox::ApplicationLayout<Settings> {
 public:
-   Settings(Application & application);
+	 Settings(Application * application);
 
 
 	 static const char * top_navigation_name(){

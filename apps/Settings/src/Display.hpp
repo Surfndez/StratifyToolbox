@@ -8,9 +8,9 @@
 class Application;
 
 
-class Display : public toolbox::ApplicationLayout<Application> {
+class Display : public toolbox::ApplicationLayout<Display> {
 public:
-   Display(Application & application);
+	 Display(Application * application);
 
 	 static const char * top_navigation_name(){
 		 return "DisplayTopNavigation";

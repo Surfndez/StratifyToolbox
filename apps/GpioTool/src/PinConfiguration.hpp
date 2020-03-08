@@ -8,9 +8,9 @@
 class Application;
 
 
-class Configuration : public ApplicationLayout<Application> {
+class Configuration : public ApplicationLayout<Configuration> {
 public:
-	 Configuration(Application & application);
+	 Configuration(Application* application);
 
 	 void set_io_pin(enum Io::io_pins pin){
 		 m_io_pin = pin;

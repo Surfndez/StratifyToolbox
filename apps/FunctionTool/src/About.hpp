@@ -6,9 +6,10 @@
 #include <ToolboxAPI/toolbox.hpp>
 
 class Application;
-class About : public ApplicationLayout<Application> {
+
+class About : public ApplicationLayout<About> {
 public:
-	About(Application & application);
+	About(Application * application);
 
 
 	static const char * top_navigation_name(){

@@ -8,20 +8,19 @@
 #include <ToolboxAPI/Io.hpp>
 #include <ToolboxAPI/components.hpp>
 
-Configuration::Configuration(Application & application)
-	: ApplicationLayout<Application>(whatis_name(), application){
+Configuration::Configuration(Application* application)
+	: ApplicationLayout(whatis_name(), application){
 
 
 	const drawing_size_t navigation_bar_height = 175;
 	add_component(
-				(* new TopNavigation(
-					 top_navigation_name(),
-					 TopNavigationAttributes()
-					 .set_left_icon_name("chevron-left")
-					 .set_title("Settings"),
-					 event_loop()
-					 )
-				 )
+				TopNavigation::create(
+					top_navigation_name(),
+					TopNavigationAttributes()
+					.set_left_icon_name("chevron-left")
+					.set_title("Settings"),
+					event_loop()
+					)
 				.set_drawing_area(DrawingArea(1000,navigation_bar_height))
 				);
 
@@ -30,14 +29,15 @@ Configuration::Configuration(Application & application)
 	DrawingArea button_area(1000,300);
 
 	add_component(
-				(* new ux::Layout(
-					 "ConfigurationVerticalLayout",
-					 event_loop()))
+				Layout::create(
+					"ConfigurationVerticalLayout",
+					event_loop()
+					)
 				.set_flow(ux::Layout::flow_vertical)
 				.set_vertical_scroll_enabled()
 
 				.add_component(
-					Component::create<ux::Label>("PinLabel")
+					Label::create("PinLabel")
 					.set_label("Pin")
 					.set_align_left()
 					.set_border_size(0)
@@ -46,7 +46,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("PinValue")
+					Label::create("PinValue")
 					.set_label("?")
 					.set_align_left()
 					.set_border_size(0)
@@ -55,7 +55,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("Function")
+					Label::create("Function")
 					.set_label("Function")
 					.set_align_left()
 					.set_border_size(0)
@@ -64,10 +64,9 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					(* new ux::Layout("FunctionLayout", event_loop()))
-
+					Layout::create("FunctionLayout", event_loop())
 					.add_component(
-						Component::create<ux::Button>(triangle_button_name())
+						Button::create(triangle_button_name())
 						.set_label("Tri")
 						.set_border_size(1)
 						.set_vertical_padding(30)
@@ -77,7 +76,7 @@ Configuration::Configuration(Application & application)
 						)
 
 					.add_component(
-						Component::create<ux::Button>(wave_button_name())
+						Button::create(wave_button_name())
 						.set_label("Sin")
 						.set_border_size(1)
 						.set_vertical_padding(30)
@@ -87,7 +86,7 @@ Configuration::Configuration(Application & application)
 						)
 
 					.add_component(
-						Component::create<ux::Button>(square_button_name())
+						Button::create(square_button_name())
 						.set_label("Sq")
 						.set_border_size(1)
 						.set_vertical_padding(30)
@@ -102,7 +101,7 @@ Configuration::Configuration(Application & application)
 
 
 				.add_component(
-					Component::create<ux::Label>("FrequencyLabel")
+					Label::create("FrequencyLabel")
 					.set_label("Frequency: 500hz")
 					.set_align_left()
 					.set_border_size(0)
@@ -111,7 +110,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Slider>("FrequencySlider")
+					Slider::create("FrequencySlider")
 					.set_maximum(1000)
 					.set_value(500)
 					.set_theme_style(Theme::style_brand_secondary)
@@ -119,7 +118,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Label>("AmplitudeLabel")
+					Label::create("AmplitudeLabel")
 					.set_label("Amplitude: 0.0")
 					.set_align_left()
 					.set_border_size(0)
@@ -128,7 +127,7 @@ Configuration::Configuration(Application & application)
 					)
 
 				.add_component(
-					Component::create<ux::Slider>("AmplitudeSlider")
+					Slider::create("AmplitudeSlider")
 					.set_maximum(1000)
 					.set_value(500)
 					.set_theme_style(Theme::style_brand_secondary)

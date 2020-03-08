@@ -8,9 +8,9 @@
 class Application;
 
 
-class Control : public ApplicationLayout<Application> {
+class Control : public ApplicationLayout<Control> {
 public:
-	 Control(Application & app);
+	 Control(Application * app);
 
 	 static const var::String pin_button_name(const IoInfo & information);
 	 static const var::String pin_marker_name(const IoInfo & information);

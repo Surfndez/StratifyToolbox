@@ -9,8 +9,8 @@
 #include <ToolboxAPI/components.hpp>
 
 
-Keyboard::Keyboard(Application & app)
-	: ApplicationLayout<Application>("Keyboard", app){
+Keyboard::Keyboard(Application* app)
+	: ApplicationLayout("Keyboard", app){
 
 	m_button_set = 0;
 	m_button_options.at(0) = "qwertyuiopasdfghjklzxcvbnm";
@@ -22,7 +22,7 @@ Keyboard::Keyboard(Application & app)
 	constexpr drawing_size_t navigation_bar_size = 175;
 
 	add_component(
-				Component::create<TopNavigation>(
+				TopNavigation::create(
 					top_navigation_name(),
 					TopNavigationAttributes()
 					.set_left_icon_name("check")
@@ -61,7 +61,7 @@ Keyboard::Keyboard(Application & app)
 		}
 
 		add_component(
-					Component::create<Button>(
+					Button::create(
 						"key:" + String::number(i)
 						)
 					.set_label(String(button_set().at(i)))
@@ -91,7 +91,7 @@ Keyboard::Keyboard(Application & app)
 	}
 
 	add_component(
-				Component::create<Button>(
+				Button::create(
 					"space"
 					)
 				.set_label("")
@@ -114,7 +114,7 @@ Keyboard::Keyboard(Application & app)
 	column_bump_spacing = 0;
 
 	add_component(
-				Component::create<Button>(
+				Button::create(
 					"shift"
 					)
 				.set_icon_name("arrow-up")
@@ -153,7 +153,7 @@ void Keyboard::local_event_handler(
 			m_text << " ";
 			update_text();
 		} else if( button->name() == find<TopNavigation>(top_navigation_name())->left_button_name() ){
-			application().go_home();
+			application()->go_home();
 		} else if( button->name() == find<TopNavigation>(top_navigation_name())->right_button_name() ){
 			if( m_text.length() > 0 ){
 				m_text.erase(
@@ -204,7 +204,6 @@ void Keyboard::update_symbols(){
 						String(button_set().at(i))
 						).redraw();
 		}
-
 	}
 }
 

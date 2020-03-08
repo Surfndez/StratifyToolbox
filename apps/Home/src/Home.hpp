@@ -7,10 +7,9 @@
 
 class Application;
 
-
-class Home : public toolbox::ApplicationLayout<Application> {
+class Home : public toolbox::ApplicationLayout<Home> {
 public:
-   Home(Application & application);
+	 Home(Application * application);
    //~Home();
 
 

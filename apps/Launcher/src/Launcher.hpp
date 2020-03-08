@@ -7,9 +7,9 @@
 
 class Application;
 
-class Launcher : public toolbox::ApplicationLayout<Application> {
+class Launcher : public toolbox::ApplicationLayout<Launcher> {
 public:
-	Launcher(Application & application);
+	Launcher(Application * application);
 
 private:
 

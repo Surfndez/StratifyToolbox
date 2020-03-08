@@ -5,12 +5,12 @@
 #include "About.hpp"
 #include "Application.hpp"
 
-About::About(Application & application)
-	: toolbox::ApplicationLayout<Application>("About", application){
+About::About(Application* application)
+	: toolbox::ApplicationLayout<About>("About", application){
 
 	SysInfo info = Sys::get_info();
 	add_component(
-				Component::create<TopNavigation>(
+				TopNavigation::create(
 					top_navigation_name(),
 					TopNavigationAttributes()
 					.set_title("About"),
@@ -19,7 +19,7 @@ About::About(Application & application)
 				);
 
 	add_component(
-				Component::create<Label>("VersionLabel")
+				Label::create("VersionLabel")
 				.set_label("Version")
 				.set_border_size(0)
 				.set_align_left()
@@ -29,7 +29,7 @@ About::About(Application & application)
 				);
 
 	add_component(
-				Component::create<Label>("Version")
+				Label::create("Version")
 				.set_label(info.bsp_version() + "." + info.kernel_version())
 				.set_border_size(0)
 				.set_align_left()

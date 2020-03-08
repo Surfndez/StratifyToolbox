@@ -5,11 +5,11 @@
 #include "Launcher.hpp"
 #include "Application.hpp"
 
-Launcher::Launcher(Application & application)
-	: toolbox::ApplicationLayout<Application>("Launcher", application){
+Launcher::Launcher(Application* application)
+	: toolbox::ApplicationLayout<Launcher>("Launcher", application){
 
 	add_component(
-				Component::create<TopNavigation>(
+				TopNavigation::create(
 					"TopNavigation",
 					TopNavigationAttributes()
 					.set_left_icon_name("times")
@@ -18,17 +18,7 @@ Launcher::Launcher(Application & application)
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
-	add_component(
-				Component::create<TopNavigation>(
-					"TopNavigation",
-					TopNavigationAttributes()
-					.set_left_icon_name("times")
-					.set_title("Launcher"),
-					event_loop())
-				.set_drawing_area(DrawingArea(1000,175))
-				);
-
-	List * list = new List("List", event_loop());
+	List * list = &List::create("List", event_loop());
 	list->set_item_height(250)
 			.set_vertical_scroll_enabled();
 
@@ -45,7 +35,7 @@ Launcher::Launcher(Application & application)
 			JsonObject item_object = launcher_object.at(key).to_object();
 			String name = item_object.at("name").to_string();
 			list->add_component(
-						Component::create<ListItem>(key)
+						ListItem::create(key)
 						.set_key(name)
 						.set_icon("chevron-right")
 						.set_vertical_padding(40)
@@ -76,9 +66,7 @@ void Launcher::local_event_handler(const Event & event){
 
 		if( item_object.is_valid() ){
 			String path = item_object.at("path").to_string();
-			application().launch(
-						path
-						);
+			application()->launch(path);
 		}
 		return;
 	}
@@ -87,6 +75,6 @@ void Launcher::local_event_handler(const Event & event){
 	if( button && button->name() ==
 			find<TopNavigation>("TopNavigation")->left_button_name()
 			){
-		application().go_home();
+		application()->go_home();
 	}
 }

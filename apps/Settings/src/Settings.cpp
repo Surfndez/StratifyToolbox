@@ -8,11 +8,11 @@
 
 
 
-Settings::Settings(Application & application)
-	: toolbox::ApplicationLayout<Application>("Settings", application){
+Settings::Settings(Application* application)
+	: toolbox::ApplicationLayout<Settings>("Settings", application){
 
 	add_component(
-				Component::create<TopNavigation>(
+				TopNavigation::create(
 					top_navigation_name(),
 					TopNavigationAttributes()
 					.set_right_icon_name("info")
@@ -23,12 +23,11 @@ Settings::Settings(Application & application)
 				);
 
 	add_component(
-				(* new List("List",event_loop()))
+				List::create("List", event_loop())
 				.set_item_height(250)
 				.set_vertical_scroll_enabled()
 				.add_component(
-
-					(* new ListItem("Account"))
+					ListItem::create("Account")
 					.set_key("Account")
 					.set_value("tgil")
 					.set_icon("chevron-right")
@@ -36,35 +35,35 @@ Settings::Settings(Application & application)
 					.set_theme_style(Theme::style_outline_dark)
 					)
 				.add_component(
-					(* new ListItem("Display"))
+					ListItem::create("Display")
 					.set_key("Display")
 					.set_icon("chevron-right")
 					.set_vertical_padding(40)
 					.set_theme_style(Theme::style_outline_dark)
 					)
 				.add_component(
-					(* new ListItem("Apps"))
+					ListItem::create("Apps")
 					.set_key("Apps")
 					.set_icon("chevron-right")
 					.set_vertical_padding(40)
 					.set_theme_style(Theme::style_outline_dark)
 					)
 				.add_component(
-					(* new ListItem("Network"))
+					ListItem::create("Network")
 					.set_key("Network")
 					.set_icon("chevron-right")
 					.set_vertical_padding(40)
 					.set_theme_style(Theme::style_outline_dark)
 					)
 				.add_component(
-					(* new ListItem("Files"))
+					ListItem::create("Files")
 					.set_key("Files")
 					.set_icon("chevron-right")
 					.set_vertical_padding(40)
 					.set_theme_style(Theme::style_outline_dark)
 					)
 				.add_component(
-					(* new ListItem("Battery"))
+					ListItem::create("Battery")
 					.set_key("Battery")
 					.set_icon("chevron-right")
 					.set_vertical_padding(40)
@@ -93,7 +92,7 @@ void Settings::local_event_handler(const Event & event){
 	if( button ){
 		if( button->name() ==
 				find<TopNavigation>(top_navigation_name())->left_button_name() ){
-			application().go_home();
+			application()->go_home();
 		} else if( button->name() ==
 							 find<TopNavigation>(top_navigation_name())->right_button_name()
 							 ){
