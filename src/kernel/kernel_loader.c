@@ -26,7 +26,7 @@ limitations under the License.
 #include <mcu/pio.h>
 #include <cortexm/mpu.h>
 #include <mcu/tmr.h>
-#include <sos/crypt_api.h>
+#include <sos/api/crypt_api.h>
 #include <sos/dev/drive.h>
 
 #include "kernel_loader.h"
@@ -63,7 +63,6 @@ static void svcall_is_bootloader_requested(void * args);
 static int load_kernel_image(u32 offset, u32 is_load);
 static void write_row_svcall(void * args);
 static void set_cursor_svcall(void * args);
-static void clear_display_svcall(void * args);
 
 const bootloader_board_config_t boot_board_config = {
 	.sw_req_loc = 0x20002000, //needs to reside in RAM that is preserved through reset and available to both bootloader and OS
@@ -82,9 +81,6 @@ int kernel_loader_startup(){
 		bmp_header_t hdr;
 		bmp_dib_t dib;
 
-		struct timespec start, stop;
-
-		clock_gettime(CLOCK_REALTIME, &start);
 		if( read(fd, &hdr, sizeof(hdr) == sizeof(hdr)) ){
 			if( read(fd, &dib, sizeof(dib) == sizeof(dib)) ){
 				lseek(fd, 138, SEEK_SET);
@@ -94,33 +90,9 @@ int kernel_loader_startup(){
 					cortexm_svcall(set_cursor_svcall, (void*)j);
 					cortexm_svcall(write_row_svcall, row_buffer);
 				}
-			} else {
-				mcu_debug_printf("failed to read dib\n");
 			}
-		} else {
-			mcu_debug_printf("failed to read hdr\n");
-
 		}
 		close(fd);
-		clock_gettime(CLOCK_REALTIME, &stop);
-
-		mcu_debug_log_info(
-					MCU_DEBUG_USER0,
-					"refresh time %ld",
-					(stop.tv_nsec - start.tv_nsec)/1000
-					);
-
-#if 0
-		clock_gettime(CLOCK_REALTIME, &start);
-		cortexm_svcall(clear_display_svcall, 0);
-		clock_gettime(CLOCK_REALTIME, &stop);
-
-		mcu_debug_log_info(
-					MCU_DEBUG_USER0,
-					"clear time %ld",
-					(stop.tv_nsec - start.tv_nsec)/1000
-					);
-#endif
 
 	} else {
 		mcu_debug_log_warning(
@@ -182,8 +154,6 @@ void erase_flash_image(int signo){
 		if( (address % (128*1024)) == 0 ){
 			cortexm_svcall(sos_led_svcall_enable, 0);
 		}
-
-		mcu_debug_printf("Erase block at address %ld\n", address);
 
 		while( ioctl(fd, I_DRIVE_ISBUSY) > 0 ){
 			usleep(info.erase_block_time);
@@ -306,12 +276,6 @@ void set_cursor_svcall(void * args){
 	ST7789H2_WriteReg(ST7789H2_WRITE_RAM, 0, 0);
 }
 
-void clear_display_svcall(void * args){
-	CORTEXM_SVCALL_ENTER();
-	for(u32 i=0; i < DISPLAY_HEIGHT; i++){
-		ST7789H2_DrawHLine(0, 0, i, ST7789H2_LCD_PIXEL_WIDTH);
-	}
-}
 
 #if _IS_BOOT
 typedef struct {

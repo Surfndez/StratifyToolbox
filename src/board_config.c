@@ -26,7 +26,7 @@ limitations under the License.
 #include <mcu/pio.h>
 #include <cortexm/mpu.h>
 #include <mcu/tmr.h>
-#include <sos/crypt_api.h>
+#include <sos/api/crypt_api.h>
 #include <sos/dev/drive.h>
 
 #include "board_config.h"

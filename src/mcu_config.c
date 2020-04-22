@@ -34,7 +34,6 @@ const stm32_config_t stm32_config = {
 
 MCU_DECLARE_SECRET_KEY_32(secret_key)
 
-
 #define CONFIG_CACHE MCU_BOARD_CONFIG_FLAG_ENABLE_CACHE
 //#define CONFIG_CACHE 0
 
@@ -64,10 +63,10 @@ const mcu_board_config_t mcu_board_config = {
 		MCU_DEBUG_SYS |
 		MCU_DEBUG_USER0 |
 		MCU_DEBUG_USER1 |
-		MCU_DEBUG_DEVICE |
-		MCU_DEBUG_APPFS |
+		//MCU_DEBUG_DEVICE |
+		//MCU_DEBUG_APPFS |
 		//MCU_DEBUG_FILESYSTEM |
-		MCU_DEBUG_SOCKET |
+		//MCU_DEBUG_SOCKET |
 		//MCU_DEBUG_MALLOC |
 		//MCU_DEBUG_LINK |
 		0

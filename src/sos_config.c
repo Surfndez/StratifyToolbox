@@ -126,6 +126,13 @@ SOS_DECLARE_TASK_TABLE(SOS_BOARD_TASK_TOTAL);
 #define TCM_RAM_PAGE_COUNT 64
 #define APPFS_RAM_PAGES (TCM_RAM_PAGE_COUNT + INTERNAL_RAM_PAGE_COUNT0 + INTERNAL_RAM_PAGE_COUNT1)
 
+
+#if _IS_BOOT
+#define DEVFS_OFFSET 0
+#else
+#define DEVFS_OFFSET 1
+#endif
+
 /*
  * Memory
  *
@@ -183,10 +190,11 @@ const devfs_device_t mem0 =
 			);
 #endif
 
+
 sffs_state_t sffs_state;
 const sffs_config_t sffs_configuration = {
 	.drive = {
-		.devfs = &(sysfs_list[1]),
+		.devfs = &(sysfs_list[DEVFS_OFFSET]),
 		.name = "drive0",
 		.state = (sysfs_shared_state_t*)&sffs_state
 	}
@@ -200,7 +208,7 @@ fatfs_state_t fatfs_state;
 sysfs_file_t fatfs_open_file; // Cannot be in MCU_SYS_MEM because it is accessed in unpriv mode
 const fatfs_config_t fatfs_configuration = {
 	.drive = {
-		.devfs = &(sysfs_list[1]),
+		.devfs = &(sysfs_list[DEVFS_OFFSET]),
 		.name = "drive2",
 		.state = &fatfs_state.drive
 	},
@@ -212,7 +220,11 @@ const fatfs_config_t fatfs_configuration = {
 
 
 const sysfs_t sysfs_list[] = {
+	#if !_IS_BOOT
 	APPFS_MOUNT("/app", &mem0, 0777, SYSFS_ROOT), //the folder for ram/flash applications
+	#endif
+	//DEVFS_MOUNT("/dev0", devfs_list, 0555, SYSFS_ROOT), //the list of devices
+	//#endif
 	DEVFS_MOUNT("/dev", devfs_list, 0555, SYSFS_ROOT), //the list of devices
 	SFFS_MOUNT("/home", &sffs_configuration, 0777, SYSFS_ROOT), //stratify flash filesystem
 	#if !_IS_BOOT

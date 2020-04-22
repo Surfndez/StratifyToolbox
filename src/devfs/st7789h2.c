@@ -168,7 +168,7 @@ void ST7789H2_Init(void)
 #endif
 
 	LCD_IO_Assert_CS();
-	parameter[0] = 0x0f;
+	parameter[0] = 0x05; //was 0x0f - 60Hz
 	parameter[1] = 0x00;
 	ST7789H2_WriteReg(ST7789H2_FR_CTRL, parameter, 2);
 	LCD_IO_Deassert_CS();
