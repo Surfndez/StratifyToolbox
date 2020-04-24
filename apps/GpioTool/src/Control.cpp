@@ -50,8 +50,6 @@ Control::Control(Application * app)
 	u32 row = 1;
 	u32 column = 0;
 
-	const DrawingArea button_area(225,200);
-	const DrawingArea pin_area(45,40);
 
 	add_component(
 				PinMarkerBar::create(
@@ -61,7 +59,7 @@ Control::Control(Application * app)
 					)
 				//bottom 10% of screen (full width)
 				.set_drawing_point(DrawingPoint(0,900))
-				.set_drawing_area(DrawingArea(1000,100))
+				.set_drawing_area(DrawingArea(1000,1000-175-750))
 				);
 
 	PinMarkerBar * pin_marker_bar = find<PinMarkerBar>("PinMarkerBar");
@@ -69,6 +67,9 @@ Control::Control(Application * app)
 		printer().error("pin marker bar is null");
 		exit(1);
 	}
+
+
+	const DrawingArea button_area(1000/4,250);
 
 	for(const auto & info: io_information_list){
 		enum Theme::style style;
@@ -87,10 +88,12 @@ Control::Control(Application * app)
 					.set_border_size(1)
 					.set_label(info.name())
 					.set_theme_style(style)
+					.set_horizontal_margin(10)
+					.set_vertical_margin(20)
 					.set_drawing_point(
 						DrawingPoint(
-							column*(button_area.width()+25)+25/2,
-							row*(button_area.height()+25)
+							column*(button_area.width()),
+							175 + (row-1)*(button_area.height())
 							)
 						)
 					.set_drawing_area(button_area)

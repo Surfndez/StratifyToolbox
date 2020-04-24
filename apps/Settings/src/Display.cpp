@@ -7,6 +7,7 @@
 Display::Display(Application* application)
 	: toolbox::ApplicationLayout<Display>("Display", application){
 
+	set_flow(flow_vertical);
 
 	add_component(
 				TopNavigation::create(
@@ -17,26 +18,26 @@ Display::Display(Application* application)
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
-	const drawing_size_t icon_size = 500;
 	add_component(
-				Button::create("SunButton")
+				Label::create("SunLabel")
 				.set_icon_name("sun")
 				.set_border_size(0)
-				.set_horizontal_padding(0)
-				.set_vertical_padding(0)
+				.set_horizontal_margin(20)
+				.set_vertical_margin(20)
 				.set_theme_style(Theme::style_outline_warning)
-				.set_drawing_point(DrawingPoint(500-icon_size/2,500-icon_size/2))
-				.set_drawing_area(DrawingArea(icon_size,icon_size))
+				//.set_drawing_point(0,175)
+				.set_drawing_area(1000,500)
 				);
-
 
 	add_component(
 				Slider::create("BrightnessSlider")
+				.set_horizontal_margin(10)
+				.set_vertical_margin(40)
 				.set_value(25)
 				.set_maximum(100)
 				.set_theme_style(Theme::style_brand_primary)
-				.set_drawing_point(ux::DrawingPoint(100,750))
-				.set_drawing_area(ux::DrawingArea(800,100))
+				//.set_drawing_point(0,175+500)
+				.set_drawing_area(1000,1000-(175+500))
 				);
 
 	set_event_handler(event_handler);

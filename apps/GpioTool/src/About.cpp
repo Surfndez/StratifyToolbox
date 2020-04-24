@@ -9,6 +9,7 @@
 About::About(Application * application)
 	: ApplicationLayout("About", application){
 
+	set_flow(flow_vertical);
 	add_component(
 				TopNavigation::create(
 					top_navigation_name(),
@@ -23,8 +24,7 @@ About::About(Application * application)
 					"GpioTool",
 					event_loop()
 					)
-				.set_drawing_point(DrawingPoint(25, 175))
-				.set_drawing_area(DrawingArea(950,1000-175))
+				.set_drawing_area(DrawingArea(1000,1000-175))
 				);
 
 	set_event_handler(
