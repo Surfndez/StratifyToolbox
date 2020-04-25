@@ -25,13 +25,13 @@ Control::Control(Application* app)
 				.set_drawing_area(DrawingArea(1000,175))
 				);
 
-	const DrawingArea button_area(400, 250);
-	const DrawingArea label_area(400, 150);
-	constexpr drawing_int_t button_y = 200;
-	const drawing_int_t left_x = 500/2 - button_area.width()/2;
-	const drawing_int_t right_x = 500/2 - button_area.width()/2 + 500;
-	const drawing_int_t label_y = button_y + button_area.height() + 25;
-	const drawing_int_t graph_y = label_y + label_area.height() + 25;
+	const DrawingArea button_area(500, 300);
+	const DrawingArea label_area(500, 175);
+	constexpr drawing_int_t button_y = 175;
+	const drawing_int_t left_x = 0;
+	const drawing_int_t right_x = 500;
+	const drawing_int_t label_y = button_y + button_area.height();
+	const drawing_int_t graph_y = label_y + label_area.height();
 	constexpr u8 button_vertical_padding = 25;
 	constexpr enum Theme::style output0_theme_style = Theme::style_brand_secondary;
 	constexpr enum Theme::style output1_theme_style = Theme::style_info;
@@ -43,6 +43,8 @@ Control::Control(Application* app)
 				.set_label("Output 0")
 				.set_theme_style(output0_theme_style)
 				.set_vertical_padding(button_vertical_padding)
+				.set_horizontal_margin(20)
+				.set_vertical_margin(20)
 				.set_drawing_point(
 					DrawingPoint(left_x, button_y)
 					)
@@ -70,6 +72,7 @@ Control::Control(Application* app)
 				.set_drawing_point(
 					DrawingPoint(left_x,graph_y)
 					)
+				.set_horizontal_margin(10)
 				.set_drawing_area(button_area)
 				.set_data_set( create_sine_wave_data(output_zero) )
 				.fit_axes_to_data()
@@ -81,6 +84,8 @@ Control::Control(Application* app)
 					)
 				.set_theme_style(output1_theme_style)
 				.set_label("Output 1")
+				.set_horizontal_margin(20)
+				.set_vertical_margin(20)
 				.set_vertical_padding(button_vertical_padding)
 				.set_drawing_point(
 					DrawingPoint(right_x, button_y)
@@ -109,6 +114,7 @@ Control::Control(Application* app)
 				.set_drawing_point(
 					DrawingPoint(right_x,graph_y)
 					)
+				.set_horizontal_margin(10)
 				.set_drawing_area(button_area)
 				.set_data_set( create_flat_wave_data(output_one) )
 				.fit_axes_to_data()
