@@ -19,6 +19,7 @@ Launcher::Launcher(Application* application)
 				);
 
 	List * list = &List::create("List", event_loop());
+
 	list->set_item_height(250)
 			.set_vertical_scroll_enabled();
 
