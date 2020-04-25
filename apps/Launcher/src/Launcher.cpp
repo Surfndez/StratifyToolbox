@@ -1,5 +1,6 @@
 #include <sapi/ux.hpp>
 #include <sapi/var.hpp>
+#include <sapi/fs.hpp>
 #include <ToolboxAPI/components.hpp>
 
 #include "Launcher.hpp"
@@ -7,6 +8,13 @@
 
 Launcher::Launcher(Application* application)
 	: toolbox::ApplicationLayout<Launcher>("Launcher", application){
+
+	const String launcher_file_path = "/home/Launcher.json";
+
+	JsonObject launcher_object =
+			JsonDocument().load(
+				JsonDocument::FilePath(launcher_file_path)
+				);
 
 	add_component(
 				TopNavigation::create(
@@ -22,13 +30,6 @@ Launcher::Launcher(Application* application)
 
 	list->set_item_height(250)
 			.set_vertical_scroll_enabled();
-
-
-
-	JsonObject launcher_object =
-			JsonDocument().load(
-				fs::File::Path("/home/Launcher.json")
-				).to_object();
 
 	if( launcher_object.is_valid() ){
 		var::Vector<String> keys = launcher_object.keys();

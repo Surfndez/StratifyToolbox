@@ -1,0 +1,30 @@
+{
+    "id0": {
+        "name": "Gpio Tool",
+        "path": "/home/GpioTool"
+    },
+    "id1": {
+        "name": "Uart Tool",
+        "path": "/home/UartTool"
+    },
+    "id2": {
+        "name": "Logic Tool",
+        "path": "/home/LogicTool"
+    },
+    "id3": {
+        "name": "Scope Tool",
+        "path": "/home/ScopeTool"
+    },
+    "id4": {
+        "name": "I2C Tool",
+        "path": "/home/I2CTool"
+    },
+    "id5": {
+        "name": "SPI Tool",
+        "path": "/home/SpiTool"
+    },
+    "id6": {
+        "name": "Function Tool",
+        "path": "/home/FunctionTool"
+    }
+}
