@@ -6,7 +6,7 @@
 #include <sapi/sys.hpp>
 #include <sapi/ux.hpp>
 #include <ToolboxAPI/toolbox.hpp>
-#include <ToolboxAPI/components.hpp>
+#include <ToolboxAPI/components/TopNavigation.hpp>
 
 
 Keyboard::Keyboard(Application* app)

@@ -1,7 +1,6 @@
 
 #include <sapi/ux.hpp>
 #include <sapi/var.hpp>
-#include <ToolboxAPI/components.hpp>
 
 #include "Application.hpp"
 #include "Keyboard.hpp"
