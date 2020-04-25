@@ -58,7 +58,7 @@ Control::Control(Application * app)
 					IoInfo::type_io
 					)
 				//bottom 10% of screen (full width)
-				.set_drawing_point(DrawingPoint(0,900))
+				.set_drawing_point(DrawingPoint(0,175+750))
 				.set_drawing_area(DrawingArea(1000,1000-175-750))
 				);
 
@@ -89,7 +89,7 @@ Control::Control(Application * app)
 					.set_label(info.name())
 					.set_theme_style(style)
 					.set_horizontal_margin(10)
-					.set_vertical_margin(20)
+					.set_vertical_margin(25)
 					.set_drawing_point(
 						DrawingPoint(
 							column*(button_area.width()),
