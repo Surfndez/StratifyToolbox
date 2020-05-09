@@ -4,5 +4,10 @@
    "interactive": "false",
    "silent": "false",
    "json": "false",
-   "version": "0.51"
+   "version": "0.51",
+   "sdkDirectory": "StratifySDK",
+   "shortcuts": {
+      "launchRam": "os.invokebootloader fs.write:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/dev/ramdrive,pagesize=2048 task.signal:id=1,signal=CONT ",
+      "flashBootloader": "fs.execute:command=openocd' '-f' 'stlink-fixed.cfg' '-f' 'target/stm32h7x.cfg' '-c' '\"program' './StratifyToolbox/build_boot_debug/StratifyToolbox.bin' '0x08000000;' 'reset' 'run;' 'exit;\" "
+   }
 }
