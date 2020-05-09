@@ -64,7 +64,8 @@ set(SOURCES
 	board_symbols.c
 	sl_config.h
 
-
+	usb/toolbox_usb_class.c
+	usb/toolbox_usb_class.h
 
 	atwinc1500/driver/include/ecc_types.h
 	atwinc1500/driver/include/m2m_ssl.h

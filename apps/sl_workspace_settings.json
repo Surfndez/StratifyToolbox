@@ -4,5 +4,6 @@
    "interactive": "false",
    "silent": "false",
    "json": "false",
-   "version": "0.51"
+   "version": "0.51",
+   "sdkDirectory": "StratifySDK"
 }

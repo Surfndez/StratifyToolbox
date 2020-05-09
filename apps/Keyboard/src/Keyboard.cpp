@@ -64,7 +64,7 @@ Keyboard::Keyboard(Application* app)
 					Button::create(
 						"key:" + String::number(i)
 						)
-					.set_label(String(button_set().at(i)))
+					.set_label(String(String::Length(1), button_set().at(i)))
 					.set_vertical_padding(30)
 					.set_drawing_point(
 						DrawingPoint(
@@ -201,11 +201,9 @@ void Keyboard::update_symbols(){
 			printer().error("failed to find key " + key);
 		} else {
 			button->set_label(
-						String(button_set().at(i))
+						String(String::Length(1), button_set().at(i))
 						).redraw();
 		}
 	}
 }
-
-
 

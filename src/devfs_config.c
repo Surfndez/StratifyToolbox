@@ -51,6 +51,7 @@ limitations under the License.
 #include "devfs/i2c_device.h"
 #include "devfs/i2s_device.h"
 #include "devfs/spi_device.h"
+#include "usb/toolbox_usb_class.h"
 
 #include "config.h"
 #include "link_config.h"
@@ -388,10 +389,10 @@ const drive_ram_config_t drive_ram_config = {
 
 #define USB_FIFO_BUFFER_SIZE (LINK2_MAX_PACKET_SIZE)
 static char usb_fifo_buffer[USB_FIFO_BUFFER_SIZE] MCU_SYS_MEM;
-static char usb_read_buffer[SOS_LINK_TRANSPORT_USB_BULK_ENDPOINT_SIZE] MCU_SYS_MEM;
+static char usb_read_buffer[TOOLBOX_USB_SOS_LINK_ENDPOINT_SIZE] MCU_SYS_MEM;
 const usbfifo_config_t link2_transport_usb_fifo_cfg = {
-	.endpoint = SOS_LINK_TRANSPORT_USB_BULK_ENDPOINT,
-	.endpoint_size = SOS_LINK_TRANSPORT_USB_BULK_ENDPOINT_SIZE,
+	.endpoint = TOOLBOX_USB_SOS_LINK_ENDPOINT_NUMBER,
+	.endpoint_size = TOOLBOX_USB_SOS_LINK_ENDPOINT_SIZE,
 	.read_buffer = usb_read_buffer,
 	.fifo = {
 		.buffer = usb_fifo_buffer,

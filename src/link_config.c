@@ -22,43 +22,10 @@ limitations under the License.
 #include <mcu/debug.h>
 #include <sos/dev/pio.h>
 #include "link_config.h"
+#include "usb/toolbox_usb_class.h"
 
-#if !defined SOS_BOARD_RX_FIFO_WORDS
-#define SOS_BOARD_RX_FIFO_WORDS 128
-#endif
-
-#if !defined SOS_BOARD_TX0_FIFO_WORDS
-#define SOS_BOARD_TX0_FIFO_WORDS 32
-#endif
-
-#if !defined SOS_BOARD_TX1_FIFO_WORDS
-#define SOS_BOARD_TX1_FIFO_WORDS 32
-#endif
-
-#if !defined SOS_BOARD_TX2_FIFO_WORDS
-#define SOS_BOARD_TX2_FIFO_WORDS 32
-#endif
-
-#if !defined SOS_BOARD_TX3_FIFO_WORDS
-#define SOS_BOARD_TX3_FIFO_WORDS 32
-#endif
-
-#if !defined SOS_BOARD_TX4_FIFO_WORDS
-#define SOS_BOARD_TX4_FIFO_WORDS 32
-#endif
-
-#if !defined SOS_BOARD_TX5_FIFO_WORDS
-#define SOS_BOARD_TX5_FIFO_WORDS 32
-#endif
-
-#if !defined SOS_BOARD_USB_DP_PIN
 #define SOS_BOARD_USB_DP_PIN mcu_pin(0,12)
-#endif
-
-#if !defined SOS_BOARD_USB_DM_PIN
 #define SOS_BOARD_USB_DM_PIN mcu_pin(0,11)
-#endif
-
 
 static link_transport_phy_t link_transport_open(const char * name, const void * options);
 
@@ -79,16 +46,6 @@ link_transport_driver_t link_transport = {
 
 static usbd_control_t m_usb_control;
 
-const usbd_control_constants_t link_transport_usb_constants = {
-	.handle.port = SOS_BOARD_USB_PORT,
-	.handle.config = 0,
-	.handle.state = 0,
-	.device =  &sos_link_transport_usb_dev_desc,
-	.config = &sos_link_transport_usb_cfg_desc,
-	.string = &sos_link_transport_usb_string_desc,
-	.class_event_handler = sos_link_usbd_cdc_event_handler
-};
-
 link_transport_phy_t link_transport_open(const char * name, const void * options){
 	usb_attr_t usb_attr;
 	link_transport_phy_t fd;
@@ -102,25 +59,33 @@ link_transport_phy_t link_transport_open(const char * name, const void * options
 	//usb_attr.pin_assignment.vbus = mcu_pin(0,9); //not an alternate function (an additional function)
 	usb_attr.freq = mcu_board_config.core_osc_freq;
 	memset(usb_attr.tx_fifo_word_size, 0, USB_TX_FIFO_WORD_SIZE_COUNT);
-	usb_attr.rx_fifo_word_size = SOS_BOARD_RX_FIFO_WORDS; //RX fifo for all endpoints
-	usb_attr.tx_fifo_word_size[0] = SOS_BOARD_TX0_FIFO_WORDS; //TX endpoint 0
-	usb_attr.tx_fifo_word_size[1] = SOS_BOARD_TX1_FIFO_WORDS; //TX endpoint 1
-	usb_attr.tx_fifo_word_size[2] = SOS_BOARD_TX2_FIFO_WORDS; //TX endpoint 2
-	usb_attr.tx_fifo_word_size[3] = SOS_BOARD_TX3_FIFO_WORDS; //TX endpoint 3
-	usb_attr.tx_fifo_word_size[4] = SOS_BOARD_TX4_FIFO_WORDS; //TX endpoint 4
-	usb_attr.tx_fifo_word_size[5] = SOS_BOARD_TX5_FIFO_WORDS; //TX endpoint 5
+
+	/* Total 4KB dedicated SRAM for FIFOs
+	 *
+	 * 512*4 = 2KB
+	 * 32*4*6 = 768
+	 *
+	 */
+	usb_attr.rx_fifo_word_size = 512; //RX fifo for all endpoints
+	usb_attr.tx_fifo_word_size[0] = 64; //TX endpoint 0 -- Bulk IN
+	usb_attr.tx_fifo_word_size[1] = 64; //TX endpoint 0 -- Bulk IN
+	usb_attr.tx_fifo_word_size[2] = 32; //TX endpoint 1 -- Interrupt IN VCP0
+	usb_attr.tx_fifo_word_size[3] = 64; //TX endpoint 2 -- BULK IN VCP0
+	usb_attr.tx_fifo_word_size[4] = 32; //TX endpoint 3 -- Interrupt IN VCP1
+	usb_attr.tx_fifo_word_size[5] = 64; //TX endpoint 4 -- Bulk IN VCP1
 
 	mcu_debug_log_info(
 				MCU_DEBUG_LINK,
 				"Open USB"
 				);
 
-	fd = sos_link_transport_usb_open(name,
-												&m_usb_control,
-												&link_transport_usb_constants,
-												&usb_attr,
-												mcu_pin(0xff,0xff),
-												1); //USB pin is active high
+	fd = sos_link_transport_usb_open(
+				name,
+				&m_usb_control,
+				&toolbox_usb_constants,
+				&usb_attr,
+				mcu_pin(0xff,0xff),
+				1); //USB pin is active high
 
 	mcu_debug_log_info(
 				MCU_DEBUG_LINK,
