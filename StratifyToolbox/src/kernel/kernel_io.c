@@ -74,36 +74,39 @@ typedef struct MCU_PACK {
 	u8 init_flags;
 	mcu_pin_t primary;
 	mcu_pin_t secondary;
+	u8 primary_peripheral_function;
+	u8 secondary_peripheral_function;
 } kernel_io_external_pin_t;
 
+
 static const kernel_io_external_pin_t external_pin_table[last_kernel_shared_direction_channel+1] = {
-	{ PCAL6116A_PORTX, 0, 0, IN, PX(0), PX(0) }, //IO0 - doesn't exist
-	{ PCAL6116A_PORTA, 0, 0, IN, PB(8), PX(0) }, //IO1 RX
-	{ PCAL6116A_PORTA, 1, 0, DEBUG_UART_DIRECTION, PB(9), PX(0) }, //IO2 TX -- debugging output
-	{ PCAL6116A_PORTA, 2, 0, IN, PE(11), PX(0) }, //IO3 CS
-	{ PCAL6116A_PORTA, 3, 0, IN, PE(12), PX(0) }, //IO4 SCK
-	{ PCAL6116A_PORTA, 4, 0, IN, PE(13), PC(6) }, //IO5 MISO
-	{ PCAL6116A_PORTA, 5, 0, IN, PE(14), PC(7) }, //IO6 MOSI
-	{ PCAL6116A_PORTX, 0, 0, 0, PX(0), PX(0) }, //IO7
-	{ PCAL6116A_PORTA, 6, 0, IN, PA(2), PB(5) }, //IO8 TX
-	{ PCAL6116A_PORTA, 7, 0, IN, PA(3), PE(3) }, //IO9
-	{ PCAL6116A_PORTA, 8, 0, IN, PA(6), PE(4) }, //IO10
-	{ PCAL6116A_PORTA, 1+8, 0, IN, PA(7), PE(5) }, //IO11
-	{ PCAL6116A_PORTA, 2+8, 0, IN, PA(15), PE(6) }, //IO12
-	{ PCAL6116A_PORTA, 3+8, 0, IN, PA(10), PX(0) }, //IO13
-	{ PCAL6116A_PORTX, 3+8, 0, IN, PX(0), PX(0) }, //IO14
-	{ PCAL6116A_PORTX, 3+8, 0, IN, PX(0), PX(0) }, //IO15
-	{ PCAL6116A_PORTX, 3+8, 0, IN, PC(4), PX(0) }, //IO16
-	{ PCAL6116A_PORTX, 3+8, 0, IN, PC(5), PX(0) }, //IO17
-	{ PCAL6116A_PORTX, 3+8, 0, IN, PA(4), PX(0) }, //IO18
-	{ PCAL6116A_PORTX, 3+8, 0, IN, PA(5), PX(0) }, //IO19
-	{ PCAL6116A_PORTX, 3+8, 0, IN, PX(0), PX(0) }, //IO20
-	{ PCAL6116A_PORTB, 5, 0, IN, PA(9), PX(0) }, //SWDIO_TMS --SWDIO
-	{ PCAL6116A_PORTB, 0, 0, IN, PB(13), PX(0) }, //SWDIO_TCK
-	{ PCAL6116A_PORTB, 1, 0, IN, PD(2), PX(0)  }, //SWDIO_TDO (UART5-RX)
-	{ PCAL6116A_PORTB, 2, 0, IN, PD(3), PX(0) }, //SWDIO_TDI
-	{ PCAL6116A_PORTB, 3, 0, IN, PD(6), PX(0) }, //SWDIO_RESET
-	{ PCAL6116A_PORTB, 4, 0, IN, PE(0), PX(0) } //RTCK -- will probably not be available
+	{ PCAL6116A_PORTX, 0, 0, IN, PX(0), PX(0), CORE_PERIPH_RESERVED, CORE_PERIPH_RESERVED }, //IO0 - doesn't exist
+	{ PCAL6116A_PORTA, 0, 0, IN, PB(8), PX(0), CORE_PERIPH_I2C, CORE_PERIPH_UART }, //IO1 RX
+	{ PCAL6116A_PORTA, 1, 0, DEBUG_UART_DIRECTION, PB(9), PX(0), CORE_PERIPH_I2C, CORE_PERIPH_UART }, //IO2 TX -- debugging output
+	{ PCAL6116A_PORTA, 2, 0, IN, PE(11), PX(0), CORE_PERIPH_SPI, CORE_PERIPH_I2C }, //IO3 CS
+	{ PCAL6116A_PORTA, 3, 0, IN, PE(12), PX(0), CORE_PERIPH_SPI, CORE_PERIPH_I2C }, //IO4 SCK
+	{ PCAL6116A_PORTA, 4, 0, IN, PE(13), PC(6), CORE_PERIPH_SPI, CORE_PERIPH_UART }, //IO5 MISO
+	{ PCAL6116A_PORTA, 5, 0, IN, PE(14), PC(7), CORE_PERIPH_SPI, CORE_PERIPH_UART }, //IO6 MOSI
+	{ PCAL6116A_PORTX, 0, 0, 0, PX(0), PX(0), CORE_PERIPH_RESERVED, CORE_PERIPH_RESERVED }, //IO7
+	{ PCAL6116A_PORTA, 6, 0, IN, PA(2), PB(5), CORE_PERIPH_UART, CORE_PERIPH_PIO }, //IO8 TX
+	{ PCAL6116A_PORTA, 7, 0, IN, PA(3), PE(3), CORE_PERIPH_UART, CORE_PERIPH_I2S }, //IO9
+	{ PCAL6116A_PORTA, 8, 0, IN, PA(6), PE(4), CORE_PERIPH_PIO, CORE_PERIPH_I2S }, //IO10
+	{ PCAL6116A_PORTA, 1+8, 0, IN, PA(7), PE(5), CORE_PERIPH_PIO, CORE_PERIPH_I2S }, //IO11
+	{ PCAL6116A_PORTA, 2+8, 0, IN, PA(15), PE(6), CORE_PERIPH_PIO, CORE_PERIPH_I2S }, //IO12
+	{ PCAL6116A_PORTA, 3+8, 0, IN, PA(10), PX(0), CORE_PERIPH_PIO, CORE_PERIPH_UART }, //IO13
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PX(0), PX(0), CORE_PERIPH_RESERVED, CORE_PERIPH_RESERVED }, //IO14
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PX(0), PX(0), CORE_PERIPH_RESERVED, CORE_PERIPH_RESERVED }, //IO15
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PC(4), PX(0), CORE_PERIPH_ADC, CORE_PERIPH_RESERVED }, //IO16
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PC(5), PX(0), CORE_PERIPH_ADC, CORE_PERIPH_RESERVED }, //IO17
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PA(4), PX(0), CORE_PERIPH_DAC, CORE_PERIPH_RESERVED }, //IO18
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PA(5), PX(0), CORE_PERIPH_DAC, CORE_PERIPH_RESERVED }, //IO19
+	{ PCAL6116A_PORTX, 3+8, 0, IN, PX(0), PX(0), CORE_PERIPH_RESERVED, CORE_PERIPH_RESERVED }, //IO20
+	{ PCAL6116A_PORTB, 5, 0, IN, PA(9), PX(0), CORE_PERIPH_JTAG, CORE_PERIPH_PIO }, //SWDIO_TMS --SWDIO
+	{ PCAL6116A_PORTB, 0, 0, IN, PB(13), PX(0), CORE_PERIPH_JTAG, CORE_PERIPH_PIO }, //SWDIO_TCK
+	{ PCAL6116A_PORTB, 1, 0, IN, PD(2), PX(0), CORE_PERIPH_JTAG, CORE_PERIPH_PIO  }, //SWDIO_TDO (UART5-RX)
+	{ PCAL6116A_PORTB, 2, 0, IN, PD(3), PX(0), CORE_PERIPH_JTAG, CORE_PERIPH_PIO }, //SWDIO_TDI
+	{ PCAL6116A_PORTB, 3, 0, IN, PD(6), PX(0), CORE_PERIPH_JTAG, CORE_PERIPH_PIO }, //SWDIO_RESET
+	{ PCAL6116A_PORTB, 4, 0, IN, PE(0), PX(0), CORE_PERIPH_RESERVED, CORE_PERIPH_RESERVED } //RTCK -- will probably not be available
 };
 
 static int init_internal_pins();
@@ -338,7 +341,17 @@ int get_io_pin_description(
 		strncpy(pin_description->description, "na", TOOLBOX_IO_PIN_NAME_MAX_LENGTH);
 	}
 
+	pin_description->peripheral_function_list[0] =
+			external_pin_table[pin_number].primary_peripheral_function;
+	pin_description->peripheral_function_list[1] =
+			external_pin_table[pin_number].secondary_peripheral_function;
 
+	mcu_debug_printf(
+				"Pin:%d does %d and %d\n",
+				pin_number,
+				pin_description->peripheral_function_list[0],
+			pin_description->peripheral_function_list[1]
+			);
 
 	return 0;
 }

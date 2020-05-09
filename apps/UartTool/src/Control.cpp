@@ -1,6 +1,5 @@
 #include "Control.hpp"
 #include "Application.hpp"
-#include "PinConfiguration.hpp"
 
 #include <sapi/var.hpp>
 #include <sapi/hal.hpp>
@@ -34,7 +33,7 @@ Control::Control(Application * app)
 					TopNavigationAttributes()
 					.set_left_icon_name("times")
 					.set_right_icon_name("info")
-					.set_title("GPIO Tool"),
+					.set_title("Uart Tool"),
 					event_loop())
 				.set_drawing_area(DrawingArea(1000,175))
 				);
@@ -63,6 +62,14 @@ Control::Control(Application * app)
 				);
 
 	PinMarkerBar * pin_marker_bar = find<PinMarkerBar>("PinMarkerBar");
+	for(auto i: Io::all_io_pins){
+		IoPinDescription pin_description(i);
+		pin_marker_bar->set_pin_marker_enabled(
+					i,
+					pin_description
+					.is_peripheral_function_supported(Io::peripheral_function_uart)
+					);
+	}
 	if( pin_marker_bar == nullptr ){
 		printer().error("pin marker bar is null");
 		exit(1);
@@ -72,7 +79,7 @@ Control::Control(Application * app)
 	const DrawingArea button_area(1000/4,250);
 
 	for(const auto & info: io_information_list){
-		enum Theme::style style;
+		enum Theme::styles style;
 
 		Io io(info.io_pin());
 		if( io.is_output() ){
@@ -143,13 +150,7 @@ void Control::local_event_handler(
 				}
 			}
 		} else if( event.id() == ButtonEvent::id_held ){
-			event_loop()
-					->layout()
-					->find<Configuration>("PinConfiguration")
-					->set_io_pin(
-						IoInfo(button->name()).io_pin()
-						);
-			event_loop()->layout()->transition("PinConfiguration");
+
 		}
 	}
 }

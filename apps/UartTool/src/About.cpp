@@ -21,7 +21,7 @@ About::About(Application * application)
 
 	add_component(
 				ApplicationDetails::create(
-					"GpioTool",
+					"UartTool",
 					event_loop()
 					)
 				.set_drawing_area(DrawingArea(1000,1000-175))
