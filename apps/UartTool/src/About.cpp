@@ -27,11 +27,6 @@ About::About(Application * application)
 				.set_drawing_area(DrawingArea(1000,1000-175))
 				);
 
-	set_event_handler(
-				About::event_handler
-				);
-
-
 }
 
 void About::local_event_handler(const Event & event){

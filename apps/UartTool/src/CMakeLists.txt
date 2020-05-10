@@ -6,6 +6,10 @@ set(SOURCES
 	Application.hpp
 	About.cpp
 	About.hpp
+	Configuration.cpp
+	Configuration.hpp
 	Control.cpp
 	Control.hpp
+	Menu.cpp
+	Menu.hpp
 	PARENT_SCOPE)

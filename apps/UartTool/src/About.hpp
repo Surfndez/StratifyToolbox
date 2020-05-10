@@ -15,16 +15,9 @@ public:
 		return "AboutTopNavigation";
 	}
 
-private:
-
-	static void event_handler(
-			Component * object,
-			const Event & event){
-		object->reinterpret<About>()->local_event_handler(event);
-	}
-
 	void local_event_handler(const Event & event);
 
+private:
 
 };
 

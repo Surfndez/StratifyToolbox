@@ -72,7 +72,7 @@ Control::Control(Application * app)
 	const DrawingArea button_area(1000/4,250);
 
 	for(const auto & info: io_information_list){
-		enum Theme::style style;
+		enum Theme::styles style;
 
 		Io io(info.io_pin());
 		if( io.is_output() ){

@@ -27,6 +27,12 @@ Control::Control(Application * app)
 		value = -1;
 	}
 
+	constexpr drawing_size_t top_navigation_height = TopNavigation::height();
+	constexpr drawing_size_t button_height = 350;
+	constexpr drawing_size_t pin_marker_bar_height = 1000-175-button_height*2;
+	constexpr drawing_int_t button_y_offset = top_navigation_height;
+	constexpr drawing_size_t pin_marker_y_offset = button_y_offset + button_height*2;
+
 	add_component(
 				TopNavigation::create(
 					top_navigation_name(),
@@ -35,20 +41,7 @@ Control::Control(Application * app)
 					.set_right_icon_name("info")
 					.set_title("Uart Tool"),
 					event_loop())
-				.set_drawing_area(DrawingArea(1000,175))
 				);
-
-
-	const u32 columns = 4;
-
-	var::Vector<IoInfo> io_information_list =
-			Io::io_information_list(
-				IoInfo::type_io
-				);
-
-	u32 row = 1;
-	u32 column = 0;
-
 
 	add_component(
 				PinMarkerBar::create(
@@ -57,8 +50,8 @@ Control::Control(Application * app)
 					IoInfo::type_io
 					)
 				//bottom 10% of screen (full width)
-				.set_drawing_point(DrawingPoint(0,175+750))
-				.set_drawing_area(DrawingArea(1000,1000-175-750))
+				.set_drawing_point(DrawingPoint(0,pin_marker_y_offset))
+				.set_drawing_area(DrawingArea(1000,pin_marker_bar_height))
 				);
 
 	PinMarkerBar * pin_marker_bar = find<PinMarkerBar>("PinMarkerBar");
@@ -70,55 +63,61 @@ Control::Control(Application * app)
 					.is_peripheral_function_supported(Io::peripheral_function_uart)
 					);
 	}
+
 	if( pin_marker_bar == nullptr ){
 		printer().error("pin marker bar is null");
 		exit(1);
 	}
 
+	const DrawingArea button_area(1000/2,button_height);
 
-	const DrawingArea button_area(1000/4,250);
+	add_component(
+				Button::create("UartA")
+				.set_border_size(1)
+				.set_theme_style(Theme::style_outline_brand_primary)
+				.set_horizontal_margin(10)
+				.set_vertical_margin(25)
+				.set_drawing_point(0,button_y_offset)
+				.set_drawing_area(button_area)
+				);
 
-	for(const auto & info: io_information_list){
-		enum Theme::styles style;
+	add_component(
+				Button::create("UartB")
+				.set_border_size(1)
+				.set_theme_style(Theme::style_outline_brand_secondary)
+				.set_horizontal_margin(10)
+				.set_vertical_margin(25)
+				.set_drawing_point(button_area.width(),button_y_offset)
+				.set_drawing_area(button_area)
+				);
 
-		Io io(info.io_pin());
-		if( io.is_output() ){
-			style = Theme::style_brand_secondary;
-		} else {
-			style = Theme::style_outline_brand_secondary;
-		}
+	add_component(
+				Button::create("UartC")
+				.set_border_size(1)
+				.set_theme_style(Theme::style_outline_info)
+				.set_horizontal_margin(10)
+				.set_vertical_margin(25)
+				.set_drawing_point(0,button_y_offset+button_area.height())
+				.set_drawing_area(button_area)
+				);
 
-		add_component(
-					Button::create(
-						pin_button_name(info)
-						)
-					.set_border_size(1)
-					.set_label(info.name())
-					.set_theme_style(style)
-					.set_horizontal_margin(10)
-					.set_vertical_margin(25)
-					.set_drawing_point(
-						DrawingPoint(
-							column*(button_area.width()),
-							175 + (row-1)*(button_area.height())
-							)
-						)
-					.set_drawing_area(button_area)
-					);
+	add_component(
+				Button::create("UartD")
+				.set_border_size(1)
+				.set_theme_style(Theme::style_outline_warning)
+				.set_horizontal_margin(10)
+				.set_vertical_margin(25)
+				.set_drawing_point(button_area.width(),button_y_offset+button_area.height())
+				.set_drawing_area(button_area)
+				);
 
-		pin_marker_bar->set_pin_marker_style(
-					info.io_pin(),
-					style
-					);
+#if 0
+	pin_marker_bar->set_pin_marker_style(
+				info.io_pin(),
+				style
+				);
+#endif
 
-		column++;
-		if( column == columns ){
-			row++;
-			column = 0;
-		}
-	}
-
-	set_event_handler(Control::event_handler);
 
 }
 

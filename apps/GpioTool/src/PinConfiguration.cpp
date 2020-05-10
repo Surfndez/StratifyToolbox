@@ -206,11 +206,11 @@ void Configuration::update_display_values(){
 	this->find<Label>(
 				"FunctionValue"
 				)->set_label(
-				io.function_description()
+				io.get_pin_description().get_description()
 				).redraw();
 
-	enum Theme::state next_state;
-	if( io.function_description() != "gpio" ){
+	enum Theme::states next_state;
+	if( io.get_pin_description().get_description() != "gpio" ){
 		next_state = Theme::state_disabled;
 	} else {
 		next_state = Theme::state_default;
