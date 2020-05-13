@@ -18,7 +18,9 @@ public:
 		type_radio
 	};
 
-	MenuItem(const var::String& name) : ux::ListItemAccess<MenuItem>(name){}
+	MenuItem(const var::String& name) : ux::ListItemAccess<MenuItem>(name){
+		set_key(name);
+	}
 
 	MenuItem& set_type(enum types value){
 		m_type = value;
@@ -32,6 +34,12 @@ public:
 		return *this;
 	}
 
+	MenuItem& set_present_value(const var::String& value){
+		m_present_value = value;
+		update_value();
+		return *this;
+	}
+
 	bool is_checked() const {
 		return present_value() == "true";
 	}
@@ -40,7 +48,7 @@ public:
 private:
 	API_ACCESS_COMPOUND(MenuItem,var::String,target_name);
 	API_READ_ACCESS_FUNDAMENTAL(MenuItem,enum types,type,type_bool);
-	API_ACCESS_COMPOUND(MenuItem,var::String,present_value);
+	API_READ_ACCESS_COMPOUND(MenuItem,var::String,present_value);
 
 	void update_value(){
 		switch(type()){
@@ -51,8 +59,9 @@ private:
 							set_value("");
 				break;
 			case type_string:
-				break;
 			case type_string_list:
+				set_value(present_value());
+				break;
 			case type_menu:
 				set_value("icon@chevron-right");
 				break;
@@ -68,8 +77,8 @@ public:
 			ux::EventLoop* event_loop
 			);
 
-	static const char * top_navigation_name(){
-		return "MenuTopNavigation";
+	var::String get_top_navigation_name() const {
+		return name() + "TopNavigation";
 	}
 
 	Menu& add_item(MenuItem& item){
@@ -105,6 +114,8 @@ public:
 
 private:
 	API_READ_ACCESS_FUNDAMENTAL(Menu,ux::List*,list,nullptr);
+	API_ACCESS_COMPOUND(Menu,var::String,caller);
+	API_ACCESS_COMPOUND(Menu,var::String,menu_item);
 
 	static void event_handler(
 			ux::Layout * object,
@@ -114,6 +125,12 @@ private:
 	}
 
 	void local_event_handler(const ux::Event & event);
+
+	MenuItem * find_caller_menu_item(const var::String& name){
+			return parent()->find<Menu>(caller())
+			->find<ux::List>(caller() + "Menu")
+			->find<MenuItem>(name);
+	}
 
 };
 
