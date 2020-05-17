@@ -87,6 +87,7 @@ void board_event_handler(int event, void * args){
 		case MCU_BOARD_CONFIG_EVENT_ROOT_INITIALIZE_CLOCK:
 			SystemClock_Config();
 
+
 #if 0
 			//PE1 needs to be driven low for debugging to work
 			attr.o_flags = PIO_FLAG_SET_OUTPUT;
@@ -114,8 +115,13 @@ void board_event_handler(int event, void * args){
 			kernel_loader_startup();
 #else
 			kernel_service_init();
+			mcu_debug_printf("LED startup\n");
 			sos_led_startup();
+#if _IS_QSPI
+			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from Ext FLASH");
+#else
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from RAM");
+#endif
 #endif
 			break;
 

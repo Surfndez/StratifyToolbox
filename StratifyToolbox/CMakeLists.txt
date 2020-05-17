@@ -55,7 +55,7 @@ include(${SOS_TOOLCHAIN_CMAKE_PATH}/sos-bsp.cmake)
 set(SOS_CONFIG boot_debug)
 include(${SOS_TOOLCHAIN_CMAKE_PATH}/sos-bsp.cmake)
 
-set(SOS_KERNEL_START_ADDRESS 0x90100000)
+set(SOS_KERNEL_START_ADDRESS 0x90700000)
 
 
 set(SOS_LINKER_FILE ${CMAKE_SOURCE_DIR}/ldscript/stm32h750xb-external.ld)

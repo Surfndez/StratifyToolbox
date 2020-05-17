@@ -39,10 +39,10 @@ const void * kernel_request_api(u32 request){
 		case MBEDTLS_API_REQUEST:
 			return &mbedtls_api;
 #endif
+#endif
 			//switch this overt to the hardware crypt unit
 		case CRYPT_SHA256_API_REQUEST:
 			return &tinycrypt_sha256_hash_api;
-#endif
 	}
 	return 0;
 }

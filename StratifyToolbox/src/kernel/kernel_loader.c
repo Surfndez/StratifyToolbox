@@ -54,20 +54,21 @@ typedef struct MCU_PACK {
 
 #if _IS_BOOT
 
-#define KERNEL_IMAGE_SIZE (512*1024)
+#define KERNEL_IMAGE_SIZE SOS_BOARD_DRIVE1_SIZE
 #define KERNEL_HASH_SIZE (32)
 
-static void execute_ram_image(int signo);
+static void execute_flash_image(int signo);
 static void erase_flash_image(int signo);
 static void svcall_is_bootloader_requested(void * args);
 static int load_kernel_image(u32 offset, u32 is_load);
 static void write_row_svcall(void * args);
 static void set_cursor_svcall(void * args);
+static void set_flash_drive_memory_map();
 
 const bootloader_board_config_t boot_board_config = {
 	.sw_req_loc = 0x20002000, //needs to reside in RAM that is preserved through reset and available to both bootloader and OS
 	.sw_req_value = 0x55AA55AA, //this can be any value
-	.program_start_addr = 0x24000000, //RAM image starts here
+	.program_start_addr = 0x90700000, //Flash image starts here
 	.hw_req.port = 0xff, .hw_req.pin = 0xff,
 	.o_flags = 0,
 	.link_transport_driver = 0,
@@ -75,8 +76,8 @@ const bootloader_board_config_t boot_board_config = {
 };
 
 void read_memory_mapped(void * args){
-	const u8 * memory = (const u32*)(0x90000000 + SOS_BOARD_DRIVE0_SIZE);
-	mcu_debug_printf("about to read memory mapped\n");
+	const u8 * memory = (const u8*)(0x90000000 + SOS_BOARD_DRIVE0_SIZE);
+	mcu_debug_printf("about to read memory mapped at %p\n", memory);
 
 	for(u32 i=0; i < 1024; i+=16){
 		mcu_debug_printf("0x%08X ", i);
@@ -89,25 +90,17 @@ void read_memory_mapped(void * args){
 
 }
 
-
-int kernel_loader_startup(){
-
-#if 1
+void set_flash_drive_memory_map(){
 	int fd = open("/dev/qspi", O_RDWR);
-
 	mcu_debug_printf("opened qspi for memory mapping %d\n", fd);
-
 	if( ioctl(fd, I_QSPI_SETATTR, 0) < 0 ){
 		mcu_debug_printf("failed to ioctl QSPI with memory mapping enabled\n");
 	}
-
 	cortexm_svcall(read_memory_mapped, NULL);
 
-	while(1){
-		;
-	}
+}
 
-#else
+int kernel_loader_startup(){
 	int fd = open("/home/icon.bmp", O_RDONLY);
 	if( fd >= 0 ){
 		bmp_header_t hdr;
@@ -139,17 +132,19 @@ int kernel_loader_startup(){
 				&is_bootloader_requested
 				);
 
+	mcu_debug_printf("load kernel image\n");
 	if( is_bootloader_requested == 0 &&
 			( (load_kernel_image(0, 1) == 0)
 				//|| (load_kernel_image(KERNEL_IMAGE_SIZE, 1) == 0)
 				) ){
-		execute_ram_image(0);
+		set_flash_drive_memory_map();
+		execute_flash_image(0);
 	}
 
 
 	mcu_debug_log_info(MCU_DEBUG_USER0, "bootloader running");
 	signal(SIGALRM, erase_flash_image);
-	signal(SIGCONT, execute_ram_image);
+	signal(SIGCONT, execute_flash_image);
 
 	for(u32 i=0; i < 4; i++){
 		cortexm_svcall(sos_led_svcall_enable, 0);
@@ -157,7 +152,6 @@ int kernel_loader_startup(){
 		cortexm_svcall(sos_led_svcall_disable, 0);
 		usleep(50*1000);
 	}
-#endif
 	return 0;
 }
 
@@ -238,15 +232,13 @@ void erase_flash_image(int signo){
 				MCU_DEBUG_USER0,
 				"erase complete"
 				);
-
-
 }
 
-void execute_ram_image(int signo){
+void execute_flash_image(int signo){
 	MCU_UNUSED_ARGUMENT(signo);
 
 	if( signo == SIGCONT ){
-		mcu_debug_log_info(MCU_DEBUG_USER0, "RAM exec requested");
+		mcu_debug_log_info(MCU_DEBUG_USER0, "Flash exec requested");
 		sleep(1);
 	}
 
@@ -284,7 +276,6 @@ void execute_ram_image(int signo){
 	__set_CONTROL(control);
 
 	mcu_core_clean_data_cache();
-
 	/*
 	 * This will start executing the OS that is currently in RAM.
 	 *
@@ -375,7 +366,7 @@ int load_kernel_image(u32 offset, u32 is_load){
 						);
 			args.size = result;
 			if( is_load != 0 ){
-				cortexm_svcall(copy_block, &args);
+				//cortexm_svcall(copy_block, &args);
 			}
 			args.offset += result;
 		}
@@ -418,6 +409,8 @@ int load_kernel_image(u32 offset, u32 is_load){
 				mcu_debug_printf("%d = 0x%X == 0x%X\n", i, hash_digest[i], check_hash_digest[i]);
 			}
 			return -1;
+		} else {
+			mcu_debug_printf("hash is valid on flash OS\n");
 		}
 	}
 

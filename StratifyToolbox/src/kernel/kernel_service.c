@@ -11,8 +11,9 @@
 #include "i2c_internal.h"
 
 #define RUN_APP_SERVICE 0
-#define RUN_DAC_SERVICE 1
+#define RUN_DAC_SERVICE 0
 #define RUN_WIFI_SERVICE 0
+#define RUN_KERNEL_SERVICE 0
 
 static void * kernel_service_thread_function(void * args);
 
@@ -47,6 +48,7 @@ int kernel_service_init(){
 	mcu_debug_log_info(MCU_DEBUG_USER0, "enabled UART out");
 #endif
 
+#if RUN_KERNEL_SERVICE
 	//start a new thread that manages the kernel services
 	if( kernel_service_start_thread(
 				kernel_service_thread_function,
@@ -57,6 +59,7 @@ int kernel_service_init(){
 				) < 0 ){
 
 	}
+#endif
 
 
 	//start the WIFI
@@ -112,7 +115,8 @@ void * kernel_service_thread_function(void * args){
 		kernel_app_update();
 #endif
 
-		usleep(50000UL);
+		mcu_debug_printf("looping\n");
+		usleep(500000UL);
 
 	}
 
