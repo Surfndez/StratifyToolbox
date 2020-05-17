@@ -52,6 +52,11 @@ sl os.invokebootloader fs.write:source=host@StratifyToolbox/build_debug/Stratify
 ```
 
 
+```
+sl --eraseFlashOs && sl --buildProcessFlashOs && sl --writeFlashOs
+```
+
+
 Crash Analysis:
 
 ```

@@ -212,6 +212,10 @@ const fatfs_config_t fatfs_configuration = {
 		.name = "drive2",
 		.state = &fatfs_state.drive
 	},
+	.partition = {
+		.block_offset = 0,
+		.block_count = 0
+	},
 	.wait_busy_microseconds = 500,
 	.wait_busy_timeout_count = 5,
 	.vol_id = 0
@@ -226,7 +230,7 @@ const sysfs_t sysfs_list[] = {
 	DEVFS_MOUNT("/dev", devfs_list, 0555, SYSFS_ROOT), //the list of devices
 	//SFFS_MOUNT("/home", &sffs_configuration, 0777, SYSFS_ROOT), //stratify flash filesystem
 	#if !_IS_BOOT
-	//FATFS_MOUNT("/card", &fatfs_configuration, 0777, SYSFS_ROOT),
+	FATFS_MOUNT("/card", &fatfs_configuration, 0777, SYSFS_ROOT),
 	#endif
 	SYSFS_MOUNT("/", sysfs_list, 0666, SYSFS_ROOT), //the root filesystem (must be last)
 	SYSFS_TERMINATOR

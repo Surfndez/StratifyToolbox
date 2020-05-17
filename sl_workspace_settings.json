@@ -10,7 +10,7 @@
       "launchRam": "os.invokebootloader fs.write:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/dev/ramdrive,pagesize=2048 task.signal:id=1,signal=CONT ",
       "flashBootloader": "fs.execute:command=openocd' '-f' 'stlink-fixed.cfg' '-f' 'target/stm32h7x.cfg' '-c' '\"program' './StratifyToolbox/build_boot_debug/StratifyToolbox.bin' '0x08000000;' 'reset' 'run;' 'exit;\" ",
       "eraseFlashOs": "os.invokebootloader task.signal:id=1,signal=ALARM ",
-      "writeFlashOs": "fs.write:source=host@StratifyToolbox/build_flash_debug/StratifyToolbox.bin,dest=device@/dev/drive1,pagesize=256,blank=255 ",
+      "writeFlashOs": "fs.write:source=host@StratifyToolbox/build_flash_debug/StratifyToolbox.bin,dest=device@/dev/drive1,pagesize=256,blank=255 os.reset",
       "buildFlashBootloader": "os.build:path=StratifyToolbox,build=boot_debug,touch=src/sos_config.c fs.execute:command=openocd' '-f' 'stlink-fixed.cfg' '-f' 'target/stm32h7x.cfg' '-c' '\"program' './StratifyToolbox/build_boot_debug/StratifyToolbox.bin' '0x08000000;' 'reset' 'run;' 'exit;\" ",
       "buildProcessFlashOs": "os.build:path=StratifyToolbox,build=flash_debug os.process:path=StratifyToolbox,build=flash_debug,padding=1048544,hash "
    }

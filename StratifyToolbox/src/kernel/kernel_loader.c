@@ -57,6 +57,8 @@ typedef struct MCU_PACK {
 #define KERNEL_IMAGE_SIZE SOS_BOARD_DRIVE1_SIZE
 #define KERNEL_HASH_SIZE (32)
 
+static void execute_memory_image(int signo, u32 start_location);
+static void execute_ram_image(int signo);
 static void execute_flash_image(int signo);
 static void erase_flash_image(int signo);
 static void svcall_is_bootloader_requested(void * args);
@@ -66,7 +68,7 @@ static void set_cursor_svcall(void * args);
 static void set_flash_drive_memory_map();
 
 const bootloader_board_config_t boot_board_config = {
-	.sw_req_loc = 0x20002000, //needs to reside in RAM that is preserved through reset and available to both bootloader and OS
+	.sw_req_loc = 0x20010000, //needs to reside in RAM that is preserved through reset and available to both bootloader and OS
 	.sw_req_value = 0x55AA55AA, //this can be any value
 	.program_start_addr = 0x90700000, //Flash image starts here
 	.hw_req.port = 0xff, .hw_req.pin = 0xff,
@@ -144,7 +146,7 @@ int kernel_loader_startup(){
 
 	mcu_debug_log_info(MCU_DEBUG_USER0, "bootloader running");
 	signal(SIGALRM, erase_flash_image);
-	signal(SIGCONT, execute_flash_image);
+	signal(SIGCONT, execute_ram_image);
 
 	for(u32 i=0; i < 4; i++){
 		cortexm_svcall(sos_led_svcall_enable, 0);
@@ -234,11 +236,10 @@ void erase_flash_image(int signo){
 				);
 }
 
-void execute_flash_image(int signo){
-	MCU_UNUSED_ARGUMENT(signo);
+void execute_memory_image(int signo, u32 start_location){
 
 	if( signo == SIGCONT ){
-		mcu_debug_log_info(MCU_DEBUG_USER0, "Flash exec requested");
+		mcu_debug_log_info(MCU_DEBUG_USER0, "exec requested 0x%08lx", start_location);
 		sleep(1);
 	}
 
@@ -250,7 +251,7 @@ void execute_flash_image(int signo){
 	tmr_handle.port = SOS_BOARD_TMR;
 	mcu_tmr_close(&tmr_handle);
 
-	u32 * start_of_program = (u32*)(boot_board_config.program_start_addr);
+	u32 * start_of_program = (u32*)(start_location);
 	stack_ptr = (void*)start_of_program[0];
 	app_reset = (void (*)())( start_of_program[1] );
 
@@ -284,6 +285,14 @@ void execute_flash_image(int signo){
 
 	//should never get here
 	sos_led_root_error(0);
+}
+
+void execute_flash_image(int signo){
+	execute_memory_image(signo, boot_board_config.program_start_addr);
+}
+
+void execute_ram_image(int signo){
+	execute_memory_image(signo, 0x24000000);
 }
 
 #endif
@@ -444,7 +453,6 @@ void svcall_is_bootloader_requested(void * args){
 void boot_event(int event, void * args){
 	mcu_board_execute_event_handler(event, args);
 }
-
 
 const bootloader_api_t mcu_core_bootloader_api = {
 	.code_size = (u32)&_etext,

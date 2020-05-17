@@ -85,6 +85,7 @@ void board_event_handler(int event, void * args){
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_ROOT_INITIALIZE_CLOCK:
+
 			SystemClock_Config();
 
 
@@ -115,7 +116,6 @@ void board_event_handler(int event, void * args){
 			kernel_loader_startup();
 #else
 			kernel_service_init();
-			mcu_debug_printf("LED startup\n");
 			sos_led_startup();
 #if _IS_QSPI
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from Ext FLASH");

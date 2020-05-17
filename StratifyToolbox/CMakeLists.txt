@@ -26,7 +26,7 @@ set(SOS_LIBRARIES
 	jansson_kernel
 	mbedtls_kernel
 	sgfx_kernel
-	fatfs_kernel
+	fatfs_kernel_debug
 	)
 
 set(SOS_INCLUDE_DIRECTORIES
