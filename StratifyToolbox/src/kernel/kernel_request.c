@@ -35,9 +35,11 @@ const void * kernel_request_api(u32 request){
 			return &jansson_api;
 		case SGFX_API_REQUEST:
 			return &sg_api;
-		//case MBEDTLS_API_REQUEST:
-			//return &mbedtls_api;
-			//switchthis overt to the hardware crypt unit
+#if _IS_QSPI
+		case MBEDTLS_API_REQUEST:
+			return &mbedtls_api;
+#endif
+			//switch this overt to the hardware crypt unit
 		case CRYPT_SHA256_API_REQUEST:
 			return &tinycrypt_sha256_hash_api;
 #endif

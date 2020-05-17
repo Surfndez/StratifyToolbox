@@ -17,6 +17,7 @@ Configuration::Configuration(Application * app)
 	const StringList parity_options = {
 		"none", "odd", "even"
 	};
+	PRINTER_TRACE(printer(), "construct");
 
 	add_component(
 				Menu::create("Settings", event_loop())
@@ -34,8 +35,11 @@ Configuration::Configuration(Application * app)
 					.set_present_value("none")
 					.set_type(MenuItem::type_string_list)
 					)
+				.add_filler()
 				);
 
+	PRINTER_TRACE(printer(), "data");
+	printer().object("after settings", DataInfo());
 	add_component(
 				Menu::create("Serial Settings", event_loop())
 				.add_item(
@@ -43,17 +47,22 @@ Configuration::Configuration(Application * app)
 					.set_type(MenuItem::type_bool)
 					.set_checked()
 					)
+				.add_filler()
 				.set_caller("Settings")
 				.set_enabled(false)
 				);
+
+	printer().object("after serial settings", DataInfo());
 
 	add_component(
 				Menu::create_options_list(
 					"Parity", event_loop(), "none", parity_options
 					)
+				.add_filler()
 				.set_caller("Settings")
 				.set_enabled(false)
 				);
+	printer().object("after parity", DataInfo());
 }
 
 void Configuration::local_event_handler(

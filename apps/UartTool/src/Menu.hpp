@@ -93,6 +93,11 @@ public:
 		return *this;
 	}
 
+	Menu& add_filler(){
+		m_list->add_filler();
+		return *this;
+	}
+
 	static Menu& create_options_list(
 			const var::String& name,
 			ux::EventLoop * event_loop,

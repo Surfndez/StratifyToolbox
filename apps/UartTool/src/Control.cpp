@@ -27,6 +27,7 @@ Control::Control(Application * app)
 		value = -1;
 	}
 
+	PRINTER_TRACE(printer(), "construct");
 	constexpr drawing_size_t top_navigation_height = TopNavigation::height();
 	constexpr drawing_size_t button_height = 350;
 	constexpr drawing_size_t pin_marker_bar_height = 1000-175-button_height*2;

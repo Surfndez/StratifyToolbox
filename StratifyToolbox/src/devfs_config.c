@@ -232,10 +232,17 @@ const stm32_spi_dma_config_t spi3_dma_config = {
 	}
 };
 
-const stm32_qspi_dma_config_t qspi_dma_config = {
+const stm32_qspi_dma_config_t qspi_dma_config_mapped = {
 	.qspi_config = {
 		.attr = {
-			.o_flags = QSPI_FLAG_SET_MASTER,
+			.o_flags = QSPI_FLAG_SET_MASTER |
+			QSPI_FLAG_IS_MEMORY_MAPPED |
+			QSPI_FLAG_IS_OPCODE_WRITE |
+			QSPI_FLAG_IS_ADDRESS_WRITE |
+			QSPI_FLAG_IS_OPCODE_QUAD |
+			QSPI_FLAG_IS_DATA_QUAD |
+			QSPI_FLAG_IS_ADDRESS_QUAD |
+			QSPI_FLAG_IS_ADDRESS_24_BITS,
 			.freq = 40000000UL,
 			.pin_assignment = {
 				.data[0] = {3,11}, //PD11
@@ -244,7 +251,54 @@ const stm32_qspi_dma_config_t qspi_dma_config = {
 				.data[3] = {3,13}, //PD13
 				.sck = {1,2}, //PB2
 				.cs = {1,6} //PB6
-			}
+			},
+			.memory_mapped_read_instruction = 0xEB,
+			.memory_mapped_read_dummy_cycles = 4
+		}
+	},
+	.dma_config = {
+		.tx = {
+			.dma_number = STM32_DMA2,
+			.stream_number = 7,
+			.channel_number = 3,
+			.priority = STM32_DMA_PRIORITY_LOW,
+			.o_flags = STM32_DMA_FLAG_IS_NORMAL |
+			STM32_DMA_FLAG_IS_FIFO |
+			STM32_DMA_FLAG_IS_MEMORY_TO_PERIPH |
+			STM32_DMA_FLAG_IS_MEMORY_BYTE |
+			STM32_DMA_FLAG_IS_PERIPH_BYTE
+		},
+		.rx = {
+			.dma_number = STM32_DMA2,
+			.stream_number = 7,
+			.channel_number = 3,
+			.priority = STM32_DMA_PRIORITY_LOW,
+			.o_flags = STM32_DMA_FLAG_IS_NORMAL |
+			STM32_DMA_FLAG_IS_FIFO |
+			STM32_DMA_FLAG_IS_PERIPH_TO_MEMORY |
+			STM32_DMA_FLAG_IS_MEMORY_BYTE |
+			STM32_DMA_FLAG_IS_PERIPH_BYTE
+		}
+	}
+};
+
+
+const stm32_qspi_dma_config_t qspi_dma_config = {
+	.qspi_config = {
+		.attr = {
+			.o_flags = QSPI_FLAG_SET_MASTER |
+			0,
+			.freq = 40000000UL,
+			.pin_assignment = {
+				.data[0] = {3,11}, //PD11
+				.data[1] = {3,12}, //PD12
+				.data[2] = {4,2}, //PE2
+				.data[3] = {3,13}, //PD13
+				.sck = {1,2}, //PB2
+				.cs = {1,6} //PB6
+			},
+			.memory_mapped_read_instruction = 0x6B,
+			.memory_mapped_read_dummy_cycles = 4
 		}
 	},
 	.dma_config = {
@@ -286,8 +340,8 @@ const devfs_device_t qspi_drive_device =
 			);
 
 
-#define DRIVE1_SIZE (512*1024UL)
-#define DRIVE0_SIZE (8*1024*1024UL - DRIVE1_SIZE)
+#define DRIVE1_SIZE SOS_BOARD_DRIVE1_SIZE
+#define DRIVE0_SIZE SOS_BOARD_DRIVE0_SIZE
 const drive_cfi_config_t drive0_cfi_config = {
 	.serial_device = &qspi_drive_device,
 	.info = {
@@ -380,6 +434,18 @@ const drive_cfi_config_t drive1_cfi_config = {
 	QSPI_FLAG_IS_ADDRESS_24_BITS
 };
 drive_cfi_state_t drive1_cfi_state MCU_SYS_MEM;
+
+const drive_ram_config_t drive0_memory_mapped_config = {
+	.size = DRIVE0_SIZE,
+	.memory = (void*)0x90000000,
+	.o_flags = DRIVE_RAM_CONFIG_FLAG_IS_READ_ONLY
+};
+
+const drive_ram_config_t drive1_memory_mapped_config = {
+	.size = DRIVE1_SIZE,
+	.memory = (void*)(0x90000000 + DRIVE0_SIZE),
+	.o_flags = DRIVE_RAM_CONFIG_FLAG_IS_READ_ONLY
+};
 
 
 const drive_ram_config_t drive_ram_config = {
@@ -698,7 +764,11 @@ const devfs_device_t devfs_list[] = {
 	DEVFS_DEVICE("sys", sys, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
 
 	DEVFS_DEVICE("drive0", drive_cfi_qspi, 0, &drive0_cfi_config, &drive0_cfi_state, 0666, SYSFS_ROOT, S_IFBLK),
+	DEVFS_DEVICE("drive0-mapped", drive_ram, 0, &drive0_memory_mapped_config, 0, 0666, SYSFS_ROOT, S_IFBLK),
 	DEVFS_DEVICE("drive1", drive_cfi_qspi, 0, &drive1_cfi_config, &drive1_cfi_state, 0666, SYSFS_ROOT, S_IFBLK),
+	DEVFS_DEVICE("drive1-mapped", drive_ram, 0, &drive1_memory_mapped_config, 0, 0666, SYSFS_ROOT, S_IFBLK),
+
+	DEVFS_DEVICE("qspi", mcu_qspi_dma, 0, &qspi_dma_config_mapped, 0, 0666, SYSFS_ROOT, S_IFCHR),
 
 	#if _IS_BOOT
 	DEVFS_DEVICE("ramdrive", drive_ram, 0, &drive_ram_config, 0, 0666, SOS_USER_ROOT, S_IFBLK),

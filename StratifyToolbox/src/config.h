@@ -48,6 +48,9 @@ limitations under the License.
 #define SOS_BOARD_STDIO_BUFFER_SIZE 512
 #define SOS_BOARD_TMR 4 //TIM5 -- 32-bit timer
 
+#define SOS_BOARD_DRIVE1_SIZE (1024*1024UL)
+#define SOS_BOARD_DRIVE0_SIZE (8*1024*1024UL - SOS_BOARD_DRIVE1_SIZE)
+
 //Total number of tasks (threads) for the entire system
 #define SOS_BOARD_TASK_TOTAL 10
 #define SOS_BOARD_EVENT_HANDLER board_event_handler

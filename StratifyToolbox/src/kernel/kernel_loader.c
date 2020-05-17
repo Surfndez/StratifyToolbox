@@ -74,8 +74,40 @@ const bootloader_board_config_t boot_board_config = {
 	.id = __HARDWARE_ID,
 };
 
+void read_memory_mapped(void * args){
+	const u8 * memory = (const u32*)(0x90000000 + SOS_BOARD_DRIVE0_SIZE);
+	mcu_debug_printf("about to read memory mapped\n");
+
+	for(u32 i=0; i < 1024; i+=16){
+		mcu_debug_printf("0x%08X ", i);
+		for(u32 j=0; j < 16; j++){
+			u8 value = memory[i+j];
+			mcu_debug_printf("%02X ", value);
+		}
+		mcu_debug_printf("\n");
+	}
+
+}
+
 
 int kernel_loader_startup(){
+
+#if 1
+	int fd = open("/dev/qspi", O_RDWR);
+
+	mcu_debug_printf("opened qspi for memory mapping %d\n", fd);
+
+	if( ioctl(fd, I_QSPI_SETATTR, 0) < 0 ){
+		mcu_debug_printf("failed to ioctl QSPI with memory mapping enabled\n");
+	}
+
+	cortexm_svcall(read_memory_mapped, NULL);
+
+	while(1){
+		;
+	}
+
+#else
 	int fd = open("/home/icon.bmp", O_RDONLY);
 	if( fd >= 0 ){
 		bmp_header_t hdr;
@@ -108,9 +140,9 @@ int kernel_loader_startup(){
 				);
 
 	if( is_bootloader_requested == 0 &&
-		 ( (load_kernel_image(0, 1) == 0)
-			//|| (load_kernel_image(KERNEL_IMAGE_SIZE, 1) == 0)
-			) ){
+			( (load_kernel_image(0, 1) == 0)
+				//|| (load_kernel_image(KERNEL_IMAGE_SIZE, 1) == 0)
+				) ){
 		execute_ram_image(0);
 	}
 
@@ -125,6 +157,7 @@ int kernel_loader_startup(){
 		cortexm_svcall(sos_led_svcall_disable, 0);
 		usleep(50*1000);
 	}
+#endif
 	return 0;
 }
 
@@ -183,8 +216,8 @@ void erase_flash_image(int signo){
 	u32 not_blank_count = 0;
 	address = offset;
 	while( (address < (offset + KERNEL_IMAGE_SIZE)) &&
-			 ((result = read(fd, read_buffer, 32)) > 0)
-			 ){
+				 ((result = read(fd, read_buffer, 32)) > 0)
+				 ){
 		for(u32 i=0; i < 32; i++){
 			if( read_buffer[i] != 0xff ){
 				not_blank_count++;
@@ -348,9 +381,9 @@ int load_kernel_image(u32 offset, u32 is_load){
 		}
 
 	} while(
-			  (result > 0) &&
-			  (args.offset < max_image_size)
-			  );
+					(result > 0) &&
+					(args.offset < max_image_size)
+					);
 
 	hash_api->finish(
 				hash_context,
@@ -373,10 +406,10 @@ int load_kernel_image(u32 offset, u32 is_load){
 
 	if( result == sizeof(check_hash_digest) ){
 		if( memcmp(
-				 hash_digest,
-				 check_hash_digest,
-				 KERNEL_HASH_SIZE
-				 ) != 0 ){
+					hash_digest,
+					check_hash_digest,
+					KERNEL_HASH_SIZE
+					) != 0 ){
 			mcu_debug_log_info(
 						MCU_DEBUG_USER0,
 						"hash is bad from %ld bytes",
