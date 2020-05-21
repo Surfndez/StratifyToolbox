@@ -340,14 +340,14 @@ const devfs_device_t qspi_drive_device =
 			);
 
 
-#define DRIVE1_SIZE SOS_BOARD_DRIVE1_SIZE
 #define DRIVE0_SIZE SOS_BOARD_DRIVE0_SIZE
+
 const drive_cfi_config_t drive0_cfi_config = {
 	.serial_device = &qspi_drive_device,
 	.info = {
 		.addressable_size = 1,
 		.write_block_size = 1, //smallest available write size
-		.num_write_blocks = DRIVE0_SIZE,  //7MB + 512KB -- last 512KB is OS copy
+		.num_write_blocks = DRIVE0_SIZE,  //8MB
 		.erase_block_size = 4096, //smallest eraseable block
 		.erase_block_time = 30000UL, //45ms typical
 		.erase_sector_size = 64*1024, //a larger eraseable block
@@ -389,69 +389,20 @@ const drive_cfi_config_t drive0_cfi_config = {
 
 drive_cfi_state_t drive0_cfi_state MCU_SYS_MEM;
 
-const drive_cfi_config_t drive1_cfi_config = {
-	.serial_device = &qspi_drive_device,
-	.info = {
-		.addressable_size = 1,
-		.write_block_size = 1, //smallest available write size
-		.num_write_blocks = DRIVE1_SIZE,  //OS copy
-		.erase_block_size = 4096, //smallest eraseable block
-		.erase_block_time = 30000UL, //45ms typical
-		.erase_device_time = 140000000UL, //140s typical
-		.erase_sector_size = 64*1024, //a larger eraseable block
-		.erase_sector_time = 500000UL, //700ms typical
-		.bitrate = 66000000UL,
-		.partition_start = DRIVE0_SIZE
-	},
-	.opcode = {
-		.write_enable = 0x06,
-		.page_program = 0x02,
-		.block_erase = 0x20,
-		.sector_erase = 0xD8,
-		.device_erase = 0xff, //must use sector erase
-		.fast_read = 0xEB,
-		.power_up = 0xAB,
-		.power_down = 0xB9,
-		.enable_reset = 0x66,
-		.reset = 0x99,
-		.protect = 0x04, //NA --use write disable
-		.unprotect = 0x04, //NA --use write disable
-		.read_busy_status = 0x05, //busy bit is bit 0 of status register 1
-		.busy_status_mask = 0x01,
-		.enter_qpi_mode = 0x38,
-		.enter_4byte_address_mode = 0xff, //NA
-		.write_status = 0xff, //NA -- don't change initial status
-		.initial_status_value = 0x00, //NA
-		.page_program_size = 256,
-		.read_dummy_cycles = 4,
-		.write_dummy_cycles = 0
-	},
-	.cs = { 0xff, 0xff },
-	.qspi_flags =
-	QSPI_FLAG_IS_OPCODE_QUAD |
-	QSPI_FLAG_IS_DATA_QUAD |
-	QSPI_FLAG_IS_ADDRESS_QUAD |
-	QSPI_FLAG_IS_ADDRESS_24_BITS
-};
-drive_cfi_state_t drive1_cfi_state MCU_SYS_MEM;
-
+#if _IS_FLASH
 const drive_ram_config_t drive0_memory_mapped_config = {
 	.size = DRIVE0_SIZE,
 	.memory = (void*)0x90000000,
 	.o_flags = DRIVE_RAM_CONFIG_FLAG_IS_READ_ONLY
 };
+#endif
 
-const drive_ram_config_t drive1_memory_mapped_config = {
-	.size = DRIVE1_SIZE,
-	.memory = (void*)(0x90000000 + DRIVE0_SIZE),
-	.o_flags = DRIVE_RAM_CONFIG_FLAG_IS_READ_ONLY
-};
-
-
+#if _IS_BOOT
 const drive_ram_config_t drive_ram_config = {
 	.memory = (void*)0x24000000,
 	.size = 512*1024UL
 };
+#endif
 
 #define USB_FIFO_BUFFER_SIZE (LINK2_MAX_PACKET_SIZE)
 static char usb_fifo_buffer[USB_FIFO_BUFFER_SIZE] MCU_SYS_MEM;
@@ -763,17 +714,17 @@ const devfs_device_t devfs_list[] = {
 	DEVFS_DEVICE("link-phy-usb", usbfifo, SOS_BOARD_USB_PORT, LINK_CONFIG, &sos_link_transport_usb_fifo_state, 0666, SOS_USER_ROOT, S_IFCHR),
 	DEVFS_DEVICE("sys", sys, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR),
 
+#if _IS_FLASH
+	DEVFS_DEVICE("drive0", drive_ram, 0, &drive0_memory_mapped_config, 0, 0666, SYSFS_ROOT, S_IFBLK),
+#else
 	DEVFS_DEVICE("drive0", drive_cfi_qspi, 0, &drive0_cfi_config, &drive0_cfi_state, 0666, SYSFS_ROOT, S_IFBLK),
-	DEVFS_DEVICE("drive0-mapped", drive_ram, 0, &drive0_memory_mapped_config, 0, 0666, SYSFS_ROOT, S_IFBLK),
-	DEVFS_DEVICE("drive1", drive_cfi_qspi, 0, &drive1_cfi_config, &drive1_cfi_state, 0666, SYSFS_ROOT, S_IFBLK),
-	DEVFS_DEVICE("drive1-mapped", drive_ram, 0, &drive1_memory_mapped_config, 0, 0666, SYSFS_ROOT, S_IFBLK),
-
-	DEVFS_DEVICE("qspi", mcu_qspi_dma, 0, &qspi_dma_config_mapped, 0, 0666, SYSFS_ROOT, S_IFCHR),
+#endif
 
 	#if _IS_BOOT
+	DEVFS_DEVICE("qspi", mcu_qspi_dma, 0, &qspi_dma_config_mapped, 0, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("ramdrive", drive_ram, 0, &drive_ram_config, 0, 0666, SOS_USER_ROOT, S_IFBLK),
 	#else
-	DEVFS_DEVICE("drive2", drive_sdio_dma, 1, &sdio_configuration, &sdio_state, 0666, SOS_USER_ROOT, S_IFBLK),
+	DEVFS_DEVICE("drive1", drive_sdio_dma, 1, &sdio_configuration, &sdio_state, 0666, SOS_USER_ROOT, S_IFBLK),
 	#endif
 
 	#if !_IS_BOOT

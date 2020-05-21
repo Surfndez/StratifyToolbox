@@ -28,6 +28,7 @@ limitations under the License.
 #include <mcu/tmr.h>
 #include <sos/api/crypt_api.h>
 #include <sos/dev/drive.h>
+#include <signal.h>
 
 #include "kernel_loader.h"
 #include "config.h"
@@ -54,13 +55,13 @@ typedef struct MCU_PACK {
 
 #if _IS_BOOT
 
-#define KERNEL_IMAGE_SIZE SOS_BOARD_DRIVE1_SIZE
 #define KERNEL_HASH_SIZE (32)
 
 static void execute_memory_image(int signo, u32 start_location);
 static void execute_ram_image(int signo);
 static void execute_flash_image(int signo);
-static void erase_flash_image(int signo);
+static void erase_flash_image(u32 offet, u32 size);
+static void handle_signal(int signo);
 static void svcall_is_bootloader_requested(void * args);
 static int load_kernel_image(u32 offset, u32 is_load);
 static void write_row_svcall(void * args);
@@ -70,7 +71,7 @@ static void set_flash_drive_memory_map();
 const bootloader_board_config_t boot_board_config = {
 	.sw_req_loc = 0x20010000, //needs to reside in RAM that is preserved through reset and available to both bootloader and OS
 	.sw_req_value = 0x55AA55AA, //this can be any value
-	.program_start_addr = 0x90700000, //Flash image starts here
+	.program_start_addr = SOS_BOARD_FLASH_OS_ADDRESS, //Flash image starts here
 	.hw_req.port = 0xff, .hw_req.pin = 0xff,
 	.o_flags = 0,
 	.link_transport_driver = 0,
@@ -99,7 +100,6 @@ void set_flash_drive_memory_map(){
 		mcu_debug_printf("failed to ioctl QSPI with memory mapping enabled\n");
 	}
 	cortexm_svcall(read_memory_mapped, NULL);
-
 }
 
 int kernel_loader_startup(){
@@ -145,7 +145,10 @@ int kernel_loader_startup(){
 
 
 	mcu_debug_log_info(MCU_DEBUG_USER0, "bootloader running");
-	signal(SIGALRM, erase_flash_image);
+	signal(SIGALRM, handle_signal);
+	signal(SIGBUS, handle_signal);
+	signal(SIGQUIT, handle_signal);
+	signal(SIGINT, handle_signal);
 	signal(SIGCONT, execute_ram_image);
 
 	for(u32 i=0; i < 4; i++){
@@ -161,12 +164,29 @@ static void * stack_ptr;
 static void (*app_reset)();
 #define SYSTICK_CTRL_TICKINT (1<<1)
 
-void erase_flash_image(int signo){
-	int result;
-	mcu_debug_log_info(MCU_DEBUG_USER0, "signal %d", signo);
+static void handle_signal(int signo){
+	switch(signo){
+		case SIGALRM:
+			erase_flash_image(SOS_BOARD_FLASH_OS_OFFSET, SOS_BOARD_FLASH_OS_SIZE);
+			break;
+		case SIGBUS:
+			erase_flash_image(SOS_BOARD_DATA_ASSETS_OFFSET, SOS_BOARD_DATA_ASSETS_SIZE);
+			break;
+		case SIGQUIT:
+			erase_flash_image(SOS_BOARD_APPLICATION_ASSETS_OFFSET, SOS_BOARD_APPLICATION_ASSETS_SIZE);
+			break;
+		case SIGINT:
+			erase_flash_image(SOS_BOARD_RAM_OS_FLASH_OFFSET, SOS_BOARD_RAM_OS_SIZE);
+			break;
+	}
+}
 
-	//execute an erase on /dev/drive1 so that a new image can be installed
-	int fd = open("/dev/drive1", O_RDWR);
+
+void erase_flash_image(u32 offset, u32 size){
+	int result;
+	mcu_debug_log_info(MCU_DEBUG_USER0, "erase 0x%lX %ld", offset, size);
+
+	int fd = open("/dev/drive0", O_RDWR);
 	if( fd < 0 ){
 		mcu_debug_log_error(MCU_DEBUG_USER0, "failed to open drive1");
 		return;
@@ -174,10 +194,9 @@ void erase_flash_image(int signo){
 
 	drive_info_t info;
 	ioctl(fd, I_DRIVE_GETINFO, &info);
-
-	u32 offset = 0;
 	drive_attr_t attributes;
 	u32 address = offset;
+	u32 end = address + size;
 	do {
 
 		if( (address % (128*1024)) == 0 ){
@@ -201,17 +220,16 @@ void erase_flash_image(int signo){
 		address += result;
 		cortexm_svcall(sos_led_svcall_disable, 0);
 
-	} while(address < info.num_write_blocks );
+	} while(address < end );
 
 	while( ioctl(fd, I_DRIVE_ISBUSY) > 0 ){
 		usleep(info.erase_block_time);
 	}
 
-
 	u8 read_buffer[32];
 	u32 not_blank_count = 0;
 	address = offset;
-	while( (address < (offset + KERNEL_IMAGE_SIZE)) &&
+	while( (address < end) &&
 				 ((result = read(fd, read_buffer, 32)) > 0)
 				 ){
 		for(u32 i=0; i < 32; i++){
@@ -292,7 +310,7 @@ void execute_flash_image(int signo){
 }
 
 void execute_ram_image(int signo){
-	execute_memory_image(signo, 0x24000000);
+	execute_memory_image(signo, SOS_BOARD_RAM_OS_ADDRESS);
 }
 
 #endif
@@ -351,7 +369,7 @@ int load_kernel_image(u32 offset, u32 is_load){
 	copy_block_t args;
 
 	const u32 max_image_size =
-			KERNEL_IMAGE_SIZE - KERNEL_HASH_SIZE;
+			2048*1024UL - KERNEL_HASH_SIZE;
 	int page_size;
 	args.offset = 0;
 	args.size = 256;
@@ -451,6 +469,8 @@ void svcall_is_bootloader_requested(void * args){
 }
 
 void boot_event(int event, void * args){
+	//add a way to share the bootloader's secret key with a calling application
+
 	mcu_board_execute_event_handler(event, args);
 }
 

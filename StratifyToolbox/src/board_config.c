@@ -107,9 +107,24 @@ void board_event_handler(int event, void * args){
 			mcu_core_disable_cache();
 			ST7789H2_Init();
 			mcu_core_enable_cache();
+
+			//override the system code MPU region to include the asset filesystem
+//#if _IS_FLASH
+#if 0
+			mpu_enable_region(
+						TASK_SYSTEM_CODE_MPU_REGION,
+						SOS_BOARD_FLASH_OS_ADDRESS,
+						SOS_BOARD_EXTERNAL_FLASH_SIZE,
+						MPU_ACCESS_PR_UR,
+						MPU_MEMORY_FLASH,
+						1
+						);
+#endif
+
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_START_LINK:
+
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Start LED");
 
 #if _IS_BOOT

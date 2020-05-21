@@ -34,6 +34,8 @@ limitations under the License.
 #include <sos/link.h>
 #include <sos/fs/sysfs.h>
 #include <sos/fs/appfs.h>
+#include <sos/fs/assetfs.h>
+#include <sos/fs/drive_assetfs.h>
 #include <sos/fs/devfs.h>
 #include <sos/fs/sffs.h>
 #include <mcu/appfs.h>
@@ -91,7 +93,7 @@ const sos_board_config_t sos_board_config = {
 	.sys_memory_size = SOS_BOARD_SYSTEM_MEMORY_SIZE,
 	.start = sos_default_thread,
 	.start_args = &link_transport,
-	.start_stack_size = 4096,
+	.start_stack_size = 1024*6,
 	#if !_IS_BOOT
 	.socket_api = &wifi_api,
 	#else
@@ -120,26 +122,13 @@ SOS_DECLARE_TASK_TABLE(SOS_BOARD_TASK_TOTAL);
  *
  */
 
-#if 1
-#define INTERNAL_RAM_PAGE_COUNT0 288
-#define INTERNAL_RAM_PAGE_COUNT1 64
-#define TCM_RAM_PAGE_COUNT 64
-#define APPFS_RAM_PAGES (TCM_RAM_PAGE_COUNT + INTERNAL_RAM_PAGE_COUNT0 + INTERNAL_RAM_PAGE_COUNT1)
-
-
-#if _IS_BOOT
-#define DEVFS_OFFSET 0
-#else
-#define DEVFS_OFFSET 1
-#endif
-
 /*
  * Memory
  *
- * ITCM 0x00000000 to 0x0000FFFF 64KB (Not Used)
+ * ITCM 0x00000000 to 0x0000FFFF 64KB (used for mcu core library)
  * DTCM 0x20000000 to 0x2001FFFF 128KB (first half is SYSMEM)
  *
- * AXI SRAM 0x24000000 to 0x2407FFFF 512KB (Code + Data Region for OS) on AXIM
+ * AXI SRAM 0x24000000 to 0x2407FFFF 512KB (Code + Data Region for Maintenance OS) on AXIM
  * SRAM1 0x30000000 to 0x3001FFFF 128KB (application) D1 to D2 AHB to AXIM
  * SRAM2 0x30020000 to 0x3003FFFF 128KB D1 to D2 AHB to AXIM
  * SRAM3 0x30040000 to 0x30047FFF 32KB D1 to D2 AHB to AXIM
@@ -151,6 +140,26 @@ SOS_DECLARE_TASK_TABLE(SOS_BOARD_TASK_TOTAL);
  *
  */
 
+#define INTERNAL_AXI_RAM_PAGE_COUNT (512-64)
+#define INTERNAL_RAM_PAGE_COUNT0 288
+#define INTERNAL_RAM_PAGE_COUNT1 64
+#define TCM_RAM_PAGE_COUNT 64
+
+#if _IS_BOOT
+#define DEVFS_OFFSET 0
+#else
+#if _IS_FLASH
+#define MEMORY_SECTION_COUNT 4
+#define APPFS_RAM_PAGES (INTERNAL_AXI_RAM_PAGE_COUNT + TCM_RAM_PAGE_COUNT + INTERNAL_RAM_PAGE_COUNT0 + INTERNAL_RAM_PAGE_COUNT1)
+#else
+#define MEMORY_SECTION_COUNT 3
+#define APPFS_RAM_PAGES (TCM_RAM_PAGE_COUNT + INTERNAL_RAM_PAGE_COUNT0 + INTERNAL_RAM_PAGE_COUNT1)
+#endif
+
+#define DEVFS_OFFSET 3
+#endif
+
+#if !_IS_BOOT
 u32 ram_usage_table[APPFS_RAM_USAGE_WORDS(APPFS_RAM_PAGES)] MCU_SYS_MEM;
 const devfs_device_t flash0 =
 		DEVFS_DEVICE(
@@ -169,10 +178,14 @@ const appfs_mem_config_t appfs_mem_config = {
 	.usage = ram_usage_table,
 	.system_ram_page = (u32)APPFS_RAM_PAGES, //system RAM is not located in the APPFS memory sections
 	.flash_driver = &flash0,
-	.section_count = 3,
+	.section_count = MEMORY_SECTION_COUNT,
 	.sections = {
+		#if _IS_FLASH
+		{ .o_flags = MEM_FLAG_IS_RAM, .page_count = INTERNAL_AXI_RAM_PAGE_COUNT, .page_size = MCU_RAM_PAGE_SIZE, .address = 0x24000000 + 64*1024UL },
+		#endif
 		{ .o_flags = MEM_FLAG_IS_RAM, .page_count = INTERNAL_RAM_PAGE_COUNT0, .page_size = MCU_RAM_PAGE_SIZE, .address = 0x30000000 },
 		{ .o_flags = MEM_FLAG_IS_RAM, .page_count = INTERNAL_RAM_PAGE_COUNT1, .page_size = MCU_RAM_PAGE_SIZE, .address = 0x38000000 },
+		//maintenance RAM space
 		{ .o_flags = MEM_FLAG_IS_RAM | MEM_FLAG_IS_TIGHTLY_COUPLED, .page_count = TCM_RAM_PAGE_COUNT, .page_size = MCU_RAM_PAGE_SIZE, .address = 0x20000000+64*1024 },
 	}
 };
@@ -188,28 +201,14 @@ const devfs_device_t mem0 =
 			SYSFS_ROOT,
 			S_IFBLK
 			);
-#endif
 
-
-sffs_state_t sffs_state;
-const sffs_config_t sffs_configuration = {
-	.drive = {
-		.devfs = &(sysfs_list[DEVFS_OFFSET]),
-		.name = "drive0",
-		.state = (sysfs_shared_state_t*)&sffs_state
-	}
-};
-
-
-#if !_IS_BOOT
 #include <sos/fs/fatfs.h>
 
 fatfs_state_t fatfs_state;
-sysfs_file_t fatfs_open_file; // Cannot be in MCU_SYS_MEM because it is accessed in unpriv mode
 const fatfs_config_t fatfs_configuration = {
 	.drive = {
 		.devfs = &(sysfs_list[DEVFS_OFFSET]),
-		.name = "drive2",
+		.name = "drive1",
 		.state = &fatfs_state.drive
 	},
 	.partition = {
@@ -220,17 +219,43 @@ const fatfs_config_t fatfs_configuration = {
 	.wait_busy_timeout_count = 5,
 	.vol_id = 0
 };
+
+//ram drive that accesses
+drive_assetfs_state_t data_assetfs_state;
+const drive_assetfs_config_t data_assetfs_configuration = {
+	.drive = {
+		.devfs = &(sysfs_list[DEVFS_OFFSET]),
+		.name = "drive0",
+		.state = &data_assetfs_state.drive
+	},
+	.offset = SOS_BOARD_DATA_ASSETS_OFFSET
+};
+
+drive_assetfs_state_t bin_assetfs_state;
+const drive_assetfs_config_t bin_assetfs_configuration = {
+	.drive = {
+		.devfs = &(sysfs_list[DEVFS_OFFSET]),
+		.name = "drive0",
+		.state = &bin_assetfs_state.drive
+	},
+	.offset = SOS_BOARD_APPLICATION_ASSETS_OFFSET
+};
 #endif
+
+
 
 
 const sysfs_t sysfs_list[] = {
 	#if !_IS_BOOT
 	APPFS_MOUNT("/app", &mem0, 0777, SYSFS_ROOT), //the folder for ram/flash applications
+	#if _IS_FLASH
+	ASSETFS_MOUNT("/assets", &data_assetfs_configuration, 0, SYSFS_ROOT),
+	ASSETFS_MOUNT("/bin", &bin_assetfs_configuration, 0, SYSFS_ROOT),
+	#endif
 	#endif
 	DEVFS_MOUNT("/dev", devfs_list, 0555, SYSFS_ROOT), //the list of devices
-	//SFFS_MOUNT("/home", &sffs_configuration, 0777, SYSFS_ROOT), //stratify flash filesystem
 	#if !_IS_BOOT
-	FATFS_MOUNT("/card", &fatfs_configuration, 0777, SYSFS_ROOT),
+	FATFS_MOUNT("/home", &fatfs_configuration, 0777, SYSFS_ROOT),
 	#endif
 	SYSFS_MOUNT("/", sysfs_list, 0666, SYSFS_ROOT), //the root filesystem (must be last)
 	SYSFS_TERMINATOR
