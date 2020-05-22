@@ -1,4 +1,19 @@
 {
+   "assets": {
+      "dataAssets": {
+         "sources": [
+            "assets/device"
+         ],
+         "destination": "assets/tmp/data"
+      },
+      "applicationAssets": {
+         "sources": [
+            "apps/GpioTool/build_release_v7em_f5dh/GpioTool",
+            "apps/UartTool/build_release_v7em_f5dh/UartTool"
+         ],
+         "destination": "assets/tmp/application"
+      }
+   },
    "creationDate": 1587435007,
    "verbose": "0.51",
    "interactive": "false",
@@ -9,8 +24,16 @@
    "shortcuts": {
       "launchRam": "os.invokebootloader os.build:path=StratifyToolbox,build=debug,touch=src/sos_config.c fs.write:source=host@StratifyToolbox/build_debug/StratifyToolbox.bin,dest=device@/dev/ramdrive,pagesize=2048 task.signal:id=1,signal=CONT ",
       "flashBootloader": "fs.execute:command=openocd' '-f' 'stlink-fixed.cfg' '-f' 'target/stm32h7x.cfg' '-c' '\"program' './StratifyToolbox/build_boot_debug/StratifyToolbox.bin' '0x08000000;' 'reset' 'run;' 'exit;\" ",
+      "eraseRamOsCopy": "os.invokebootloader task.signal:id=1,signal=INT ",
       "eraseFlashOs": "os.invokebootloader task.signal:id=1,signal=ALARM ",
-      "writeFlashOs": "fs.write:source=host@StratifyToolbox/build_flash_debug/StratifyToolbox.bin,dest=device@/dev/drive1,pagesize=256,blank=255 os.reset",
+      "writeFlashOs": "os.install:path=StratifyToolbox,build=flash_debug,dest=host@assets/tmp/StratifyToolbox_build_flash_debug.bin,key,hash fs.write:source=host@assets/tmp/StratifyToolbox_build_flash_debug.bin,dest=device@/dev/drive0,pagesize=256,blank=255,location=0,delay=2",
+      "verifyFlashOs": "fs.verify:source=host@assets/tmp/StratifyToolbox_build_flash_debug.bin,dest=device@/dev/drive0,pagesize=256,location=0",
+      "eraseDataAssets": "os.invokebootloader task.signal:id=1,signal=BUS ",
+      "writeDataAssets": "fs.write:source=host@assets/tmp/data.assetfs,dest=device@/dev/drive0,pagesize=256,blank=255,location=0x200000,delay=2",
+      "verifyDataAssets": "fs.verify:source=host@assets/tmp/data.assetfs,dest=device@/dev/drive0,pagesize=256,location=0x200000",
+      "eraseApplicationAssets": "os.invokebootloader task.signal:id=1,signal=QUIT ",
+      "writeApplicationAssets": "fs.write:source=host@assets/tmp/application.assetfs,dest=device@/dev/drive0,pagesize=256,blank=255,location=0x400000,delay=2",
+      "verifyApplicationAssets": "fs.verify:source=host@assets/tmp/application.assetfs,dest=device@/dev/drive0,pagesize=256,location=0x400000",
       "buildFlashBootloader": "os.build:path=StratifyToolbox,build=boot_debug,touch=src/sos_config.c fs.execute:command=openocd' '-f' 'stlink-fixed.cfg' '-f' 'target/stm32h7x.cfg' '-c' '\"program' './StratifyToolbox/build_boot_debug/StratifyToolbox.bin' '0x08000000;' 'reset' 'run;' 'exit;\" ",
       "buildProcessFlashOs": "os.build:path=StratifyToolbox,build=flash_debug os.process:path=StratifyToolbox,build=flash_debug,padding=1048544,hash "
    }

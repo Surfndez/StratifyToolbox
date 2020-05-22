@@ -132,7 +132,7 @@ void board_event_handler(int event, void * args){
 #else
 			kernel_service_init();
 			sos_led_startup();
-#if _IS_QSPI
+#if _IS_FLASH
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from Ext FLASH");
 #else
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Booting from RAM");

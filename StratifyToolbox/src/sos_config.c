@@ -146,7 +146,7 @@ SOS_DECLARE_TASK_TABLE(SOS_BOARD_TASK_TOTAL);
 #define TCM_RAM_PAGE_COUNT 64
 
 #if _IS_BOOT
-#define DEVFS_OFFSET 0
+#define DEVFS_OFFSET 1
 #else
 #if _IS_FLASH
 #define MEMORY_SECTION_COUNT 4
@@ -220,17 +220,6 @@ const fatfs_config_t fatfs_configuration = {
 	.vol_id = 0
 };
 
-//ram drive that accesses
-drive_assetfs_state_t data_assetfs_state;
-const drive_assetfs_config_t data_assetfs_configuration = {
-	.drive = {
-		.devfs = &(sysfs_list[DEVFS_OFFSET]),
-		.name = "drive0",
-		.state = &data_assetfs_state.drive
-	},
-	.offset = SOS_BOARD_DATA_ASSETS_OFFSET
-};
-
 drive_assetfs_state_t bin_assetfs_state;
 const drive_assetfs_config_t bin_assetfs_configuration = {
 	.drive = {
@@ -242,23 +231,39 @@ const drive_assetfs_config_t bin_assetfs_configuration = {
 };
 #endif
 
+//ram drive that accesses
+drive_assetfs_state_t data_assetfs_state;
+const drive_assetfs_config_t data_assetfs_configuration = {
+	.drive = {
+		.devfs = &(sysfs_list[DEVFS_OFFSET]),
+		.name = "drive0",
+		.state = &data_assetfs_state.drive
+	},
+	.offset = SOS_BOARD_DATA_ASSETS_OFFSET
+};
 
 
-
+#if _IS_BOOT
 const sysfs_t sysfs_list[] = {
-	#if !_IS_BOOT
-	APPFS_MOUNT("/app", &mem0, 0777, SYSFS_ROOT), //the folder for ram/flash applications
-	#if _IS_FLASH
-	ASSETFS_MOUNT("/assets", &data_assetfs_configuration, 0, SYSFS_ROOT),
-	ASSETFS_MOUNT("/bin", &bin_assetfs_configuration, 0, SYSFS_ROOT),
-	#endif
-	#endif
+	DRIVE_ASSETFS_MOUNT("/assets", &data_assetfs_configuration,0555,SYSFS_ROOT),
 	DEVFS_MOUNT("/dev", devfs_list, 0555, SYSFS_ROOT), //the list of devices
-	#if !_IS_BOOT
-	FATFS_MOUNT("/home", &fatfs_configuration, 0777, SYSFS_ROOT),
-	#endif
 	SYSFS_MOUNT("/", sysfs_list, 0666, SYSFS_ROOT), //the root filesystem (must be last)
 	SYSFS_TERMINATOR
 };
+#else
+const sysfs_t sysfs_list[] = {
+	APPFS_MOUNT("/app", &mem0, 0777, SYSFS_ROOT), //the folder for ram/flash applications
+	DRIVE_ASSETFS_MOUNT("/assets", &data_assetfs_configuration, 0444, SYSFS_ROOT),
+	DRIVE_ASSETFS_MOUNT("/bin", &bin_assetfs_configuration, 0555, SYSFS_ROOT),
+	DEVFS_MOUNT("/dev", devfs_list, 0555, SYSFS_ROOT), //the list of devices
+	FATFS_MOUNT("/home", &fatfs_configuration, 0777, SYSFS_ROOT),
+	SYSFS_MOUNT("/", sysfs_list, 0666, SYSFS_ROOT), //the root filesystem (must be last)
+	SYSFS_TERMINATOR
+};
+
+#endif
+
+
+
 
 
