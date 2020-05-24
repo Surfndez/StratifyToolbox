@@ -132,9 +132,31 @@ private:
 	void local_event_handler(const ux::Event & event);
 
 	MenuItem * find_caller_menu_item(const var::String& name){
-			return parent()->find<Menu>(caller())
-			->find<ux::List>(caller() + "Menu")
-			->find<MenuItem>(name);
+		if( parent() == nullptr ){
+			printf("no parent\n");
+			return nullptr;
+		}
+		Menu * menu = parent()->find<Menu>(caller());
+		if( menu == nullptr ){
+			printf("no menu\n");
+			return nullptr;
+		}
+
+		ux::List * list = menu->find<ux::List>(caller() + "Menu");
+		if( list == nullptr ){
+			printf("no list %s\n", (caller() + "Menu").cstring());
+			return nullptr;
+		}
+
+		MenuItem * item = list->find<MenuItem>(name);
+
+		if( item == nullptr ){
+			printf("No menu item %s in %s\n", name.cstring(),
+						 (caller() + "Menu").cstring()
+						 );
+		}
+
+		return item;
 	}
 
 };

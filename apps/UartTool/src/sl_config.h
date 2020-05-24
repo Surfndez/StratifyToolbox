@@ -10,7 +10,7 @@
 #define SL_CONFIG_VERSION_BCD 0x01
 #define SL_CONFIG_DOCUMENT_ID ""
 #define SL_CONFIG_TEAM_ID ""
-#define SL_CONFIG_NAME "GpioTool"
+#define SL_CONFIG_NAME "UartTool"
 #define SL_CONFIG_TYPE "app"
 #define SL_CONFIG_PUBLISHER "Stratify Labs, Inc"
 #define SL_CONFIG_PERMISSIONS "public"

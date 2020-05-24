@@ -67,7 +67,6 @@ void Menu::local_event_handler(
 
 		MenuItem * menu_item = find<MenuItem>(event.component()->name());
 		if( menu_item != nullptr ){
-			printf("item %s\n", menu_item->name().cstring());
 			switch(menu_item->type()){
 				case MenuItem::type_bool:
 					menu_item->set_checked( !menu_item->is_checked() );
@@ -103,15 +102,33 @@ void Menu::local_event_handler(
 						const String menu_name = screen_name + "Menu";
 						List * list = find<List>(menu_name);
 
+						if( list == nullptr ){
+							break;
+						}
+
+
 						for(LayoutComponent& component: list->component_list()){
-							MenuItem * item = component.component()->reinterpret<MenuItem>();
-							item->set_checked(
-										item->key() == menu_item->key()
-										);
-							if( item->key() == menu_item->key() ){
-								find_caller_menu_item(name())->set_present_value(item->key());
+
+							if( component.component()->name().find("Filler") == String::npos ){
+
+								MenuItem * item = component.component()->reinterpret<MenuItem>();
+								if( item == nullptr ){
+
+								} else {
+									item->set_checked(
+												item->key() == menu_item->key()
+												);
+									if( item->key() == menu_item->key() ){
+										MenuItem * caller_item = find_caller_menu_item(name());
+										if( caller_item == nullptr ){
+
+										} else {
+											caller_item->set_present_value(item->key());
+										}
+									}
+									item->redraw();
+								}
 							}
-							item->redraw();
 						}
 					}
 					break;
