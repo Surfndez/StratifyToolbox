@@ -88,7 +88,7 @@ void * kernel_dac_thread_function(void * args){
 
 int init_dac(kernel_shared_dac_channel_t * dac, const char * device_name){
 	memset(dac, 0, sizeof(kernel_shared_dac_channel_t));
-	dac->file.fs = &(sysfs_list[1]); //device filesystem
+	dac->file.fs = &(sysfs_list[SOS_BOARD_DEVFS_OFFSET]); //device filesystem
 	dac->file.flags = O_RDWR;
 	dac->file.loc = 0;
 	dac->file.handle = NULL;
@@ -170,7 +170,7 @@ int kernel_dac_init(){
 		"dac0", "dac1"
 	};
 
-	dac->tmr_file.fs = &(sysfs_list[1]); //device filesystem
+	dac->tmr_file.fs = &(sysfs_list[SOS_BOARD_DEVFS_OFFSET]); //device filesystem
 	dac->tmr_file.flags = O_RDWR;
 	dac->tmr_file.loc = 0;
 	dac->tmr_file.handle = NULL;

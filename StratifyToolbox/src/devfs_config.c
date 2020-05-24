@@ -736,7 +736,6 @@ const devfs_device_t devfs_list[] = {
 	#endif
 
 	#if !_IS_BOOT
-
 	DEVFS_DEVICE("i2c_internal", mcu_i2c, 2, &i2c2_config, 0, 0606, SYSFS_ROOT, S_IFCHR), //internal -- root access
 	//DEVFS_DEVICE("i2c3", mcu_i2c, 3, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PB8 and PB9 and also I2C4
 

@@ -10,11 +10,11 @@
 #include "kernel_shared.h"
 #include "i2c_internal.h"
 
+#define RUN_INTERNAL_IO 1
+#define RUN_KERNEL_SERVICE 1
 #define RUN_APP_SERVICE 0
 #define RUN_DAC_SERVICE 0
 #define RUN_WIFI_SERVICE 0
-#define RUN_KERNEL_SERVICE 0
-#define RUN_INTERNAL_IO 0
 
 static void * kernel_service_thread_function(void * args);
 
@@ -117,8 +117,6 @@ void * kernel_service_thread_function(void * args){
 #if RUN_KERNEL_APP
 		kernel_app_update();
 #endif
-
-		mcu_debug_printf("looping\n");
 		usleep(500000UL);
 
 	}

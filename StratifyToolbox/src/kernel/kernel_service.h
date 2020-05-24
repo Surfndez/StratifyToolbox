@@ -2,6 +2,7 @@
 #define KERNEL_SERVICE_H
 
 #include <pthread.h>
+#include "config.h"
 
 int kernel_service_init();
 int kernel_service_start_thread(

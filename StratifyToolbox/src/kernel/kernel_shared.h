@@ -6,6 +6,7 @@
 #include <ToolboxAPI/toolbox_dac.h>
 #include <sos/fs/sysfs.h>
 #include <pthread.h>
+#include "config.h"
 
 enum kernel_shared_direction_channels {
 	kernel_shared_direction_channel0,

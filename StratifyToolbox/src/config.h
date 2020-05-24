@@ -95,6 +95,13 @@ limitations under the License.
 #define SOS_BOARD_DRIVE0_SIZE (8*1024*1024UL)
 #define SOS_BOARD_RAM_OS_ADDRESS (0x24000000)
 
+#if _IS_BOOT
+#define SOS_BOARD_DEVFS_OFFSET 1
+#else
+#define SOS_BOARD_DEVFS_OFFSET 3
+#endif
+
+
 //Total number of tasks (threads) for the entire system
 #define SOS_BOARD_TASK_TOTAL 10
 #define SOS_BOARD_EVENT_HANDLER board_event_handler

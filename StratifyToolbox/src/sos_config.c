@@ -55,7 +55,7 @@ wifi_api_state_t wifi_api_state;
 
 const wifi_api_config_t wifi_api_config = {
 	.device_config = {
-		.devfs = &(sysfs_list[1]),
+		.devfs = &(sysfs_list[SOS_BOARD_DEVFS_OFFSET]),
 		.name = "wifi_phy",
 		.state = &wifi_api_state.device_state
 	},
@@ -85,7 +85,10 @@ const sos_board_config_t sos_board_config = {
 	.stdin_dev = "/dev/stdio-in" ,
 	.stdout_dev = "/dev/stdio-out",
 	.stderr_dev = "/dev/stdio-out",
-	.o_sys_flags = SYS_FLAG_IS_STDIO_FIFO | SYS_FLAG_IS_TRACE | SYS_FLAG_IS_ACTIVE_ON_IDLE,
+	.o_sys_flags = SYS_FLAG_IS_STDIO_FIFO |
+	SYS_FLAG_IS_TRACE |
+	SYS_FLAG_IS_ACTIVE_ON_IDLE |
+	SYS_FLAG_IS_FIRST_THREAD_AUTHENTICATED,
 	.sys_name = SL_CONFIG_NAME,
 	.sys_version = SL_CONFIG_VERSION_STRING,
 	.sys_id = SL_CONFIG_DOCUMENT_ID,
@@ -146,7 +149,7 @@ SOS_DECLARE_TASK_TABLE(SOS_BOARD_TASK_TOTAL);
 #define TCM_RAM_PAGE_COUNT 0
 
 #if _IS_BOOT
-#define DEVFS_OFFSET 1
+#define SOS_BOARD_DEVFS_OFFSET 1
 #else
 #if _IS_FLASH
 #define MEMORY_SECTION_COUNT 3
@@ -156,7 +159,6 @@ SOS_DECLARE_TASK_TABLE(SOS_BOARD_TASK_TOTAL);
 #define APPFS_RAM_PAGES (TCM_RAM_PAGE_COUNT + INTERNAL_RAM_PAGE_COUNT0 + INTERNAL_RAM_PAGE_COUNT1)
 #endif
 
-#define DEVFS_OFFSET 3
 #endif
 
 #if !_IS_BOOT
@@ -206,7 +208,7 @@ const devfs_device_t mem0 =
 fatfs_state_t fatfs_state;
 const fatfs_config_t fatfs_configuration = {
 	.drive = {
-		.devfs = &(sysfs_list[DEVFS_OFFSET]),
+		.devfs = &(sysfs_list[SOS_BOARD_DEVFS_OFFSET]),
 		.name = "drive1",
 		.state = &fatfs_state.drive
 	},
@@ -222,7 +224,7 @@ const fatfs_config_t fatfs_configuration = {
 drive_assetfs_state_t bin_assetfs_state;
 const drive_assetfs_config_t bin_assetfs_configuration = {
 	.drive = {
-		.devfs = &(sysfs_list[DEVFS_OFFSET]),
+		.devfs = &(sysfs_list[SOS_BOARD_DEVFS_OFFSET]),
 		.name = "drive0",
 		.state = &bin_assetfs_state.drive
 	},
@@ -234,7 +236,7 @@ const drive_assetfs_config_t bin_assetfs_configuration = {
 drive_assetfs_state_t data_assetfs_state;
 const drive_assetfs_config_t data_assetfs_configuration = {
 	.drive = {
-		.devfs = &(sysfs_list[DEVFS_OFFSET]),
+		.devfs = &(sysfs_list[SOS_BOARD_DEVFS_OFFSET]),
 		.name = "drive0",
 		.state = &data_assetfs_state.drive
 	},
@@ -252,11 +254,11 @@ const sysfs_t sysfs_list[] = {
 #else
 const sysfs_t sysfs_list[] = {
 	APPFS_MOUNT("/app", &mem0, 0777, SYSFS_ROOT), //the folder for ram/flash applications
-	DRIVE_ASSETFS_MOUNT("/assets", &data_assetfs_configuration, 0444, SYSFS_ROOT),
+	DRIVE_ASSETFS_MOUNT("/assets", &data_assetfs_configuration, 0555, SYSFS_ROOT),
 	DRIVE_ASSETFS_MOUNT("/bin", &bin_assetfs_configuration, 0555, SYSFS_ROOT),
 	DEVFS_MOUNT("/dev", devfs_list, 0555, SYSFS_ROOT), //the list of devices
 	FATFS_MOUNT("/home", &fatfs_configuration, 0777, SYSFS_ROOT),
-	SYSFS_MOUNT("/", sysfs_list, 0666, SYSFS_ROOT), //the root filesystem (must be last)
+	SYSFS_MOUNT("/", sysfs_list, 0555, SYSFS_ROOT), //the root filesystem (must be last)
 	SYSFS_TERMINATOR
 };
 

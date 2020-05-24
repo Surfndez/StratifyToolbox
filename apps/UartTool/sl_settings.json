@@ -1,7 +1,7 @@
 {
    "description": "GpioTool is a Stratify Toolbox application used to control GPIO pins.",
    "github": "https://github.com/StratifyLabs/GpioTool",
-	 "name": "GpioTool",
+	 "name": "UartTool",
    "permissions": "public",
    "publisher": "Stratify Labs, Inc",
 	 "tags": "Toolbox",

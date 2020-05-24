@@ -16,7 +16,7 @@ int i2c_internal_init(){
 				&mutex_attr
 				);
 
-	kernel_shared_i2c_file()->fs = &(sysfs_list[1]);
+	kernel_shared_i2c_file()->fs = &(sysfs_list[SOS_BOARD_DEVFS_OFFSET]);
 	kernel_shared_i2c_file()->flags = O_RDWR;
 	kernel_shared_i2c_file()->loc = 0;
 	kernel_shared_i2c_file()->handle = NULL;
