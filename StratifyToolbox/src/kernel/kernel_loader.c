@@ -37,7 +37,10 @@ limitations under the License.
 #include "devfs/display_device.h"
 #include "devfs/st7789h2.h"
 
-#define TEST_QSPI_MEMORY_MAP 0
+#define TEST_QSPI_MEMORY_MAP 1
+
+extern u32 _tcim;
+extern u32 _etcim;
 
 typedef struct MCU_PACK {
 	u16 signature;
@@ -75,10 +78,14 @@ static void execute_flash_image(int signo);
 static void erase_flash_image(u32 offet, u32 size);
 static void handle_signal(int signo);
 static void svcall_is_bootloader_requested(void * args);
-static int load_kernel_image(u32 offset, u32 is_load);
+static int is_hash_valid(u32 offset, u32 is_load);
+static int is_flash_os_valid();
+static int is_ram_os_valid();
+static int is_os_valid(u32 startup_offset, u32 offset, u32 address);
 static void write_row_svcall(void * args);
 static void set_cursor_svcall(void * args);
 static void set_flash_drive_memory_map();
+static int copy_from_drive_to_memory(const char * path, u32 offset, u32 size);
 
 const bootloader_board_config_t boot_board_config = {
 	.sw_req_loc = 0x20010000, //needs to reside in RAM that is preserved through reset and available to both bootloader and OS
@@ -149,13 +156,23 @@ int kernel_loader_startup(){
 				&is_bootloader_requested
 				);
 
-	mcu_debug_printf("load kernel image\n");
-	if( is_bootloader_requested == 0 &&
-			( (load_kernel_image(0, 1) == 0)
+	mcu_debug_log_info(MCU_DEBUG_USER0, "load kernel image");
+	if( (is_bootloader_requested == 0) &&
+			( (is_flash_os_valid() == 0)
 				//|| (load_kernel_image(KERNEL_IMAGE_SIZE, 1) == 0)
 				) ){
-		set_flash_drive_memory_map();
-		execute_flash_image(0);
+		mcu_debug_printf("load TCIM memory\n");
+		if( copy_from_drive_to_memory(
+					"/dev/ram1",
+					SOS_BOARD_FLASH_OS_TCIM_OFFSET,
+					SOS_BOARD_FLASH_OS_TCIM_SIZE
+					) < 0 ){
+			mcu_debug_log_error(MCU_DEBUG_USER0, "failed to load TCIM image");
+		} else {
+			mcu_debug_printf("run Flash OS\n");
+			set_flash_drive_memory_map();
+			execute_flash_image(0);
+		}
 	}
 
 
@@ -274,7 +291,11 @@ void execute_memory_image(int signo, u32 start_location){
 	if( signo == SIGCONT ){
 		mcu_debug_log_info(MCU_DEBUG_USER0, "exec requested 0x%08lx", start_location);
 		sleep(1);
+	} else {
+		mcu_debug_log_info(MCU_DEBUG_USER0, "execute at 0x%08lx", start_location);
 	}
+
+	//return 0;
 
 	sos_link_transport_usb_close(&link_transport.handle);
 	cortexm_svcall((cortexm_svcall_t)cortexm_set_privileged_mode, 0);
@@ -287,6 +308,13 @@ void execute_memory_image(int signo, u32 start_location){
 	u32 * start_of_program = (u32*)(start_location);
 	stack_ptr = (void*)start_of_program[0];
 	app_reset = (void (*)())( start_of_program[1] );
+
+	mcu_debug_log_info(
+				MCU_DEBUG_USER0,
+				"start: %p, stack %p",
+				app_reset,
+				stack_ptr
+				);
 
 	devfs_handle_t uart_handle;
 	uart_handle.port = 1;
@@ -321,7 +349,7 @@ void execute_memory_image(int signo, u32 start_location){
 }
 
 void execute_flash_image(int signo){
-	execute_memory_image(signo, boot_board_config.program_start_addr);
+	execute_memory_image(signo, SOS_BOARD_FLASH_OS_TCIM_ADDRESS);
 }
 
 void execute_ram_image(int signo){
@@ -344,21 +372,136 @@ void set_cursor_svcall(void * args){
 
 
 #if _IS_BOOT
-typedef struct {
-	u32 offset;
-	const void * src;
-	u32 size;
-} copy_block_t;
-
-void copy_block(void * args){
-	copy_block_t * p = args;
-	memcpy((void*)(0x24000000 + p->offset), p->src, p->size);
+int is_flash_os_valid(){
+	int result = is_os_valid(
+				SOS_BOARD_FLASH_OS_TCIM_OFFSET,
+				SOS_BOARD_FLASH_OS_OFFSET,
+				SOS_BOARD_FLASH_OS_ADDRESS
+				);
+	if( result < 0 ){
+		mcu_debug_log_info(MCU_DEBUG_USER0, "Flash image is invalid");
+	}
+	return result;
 }
 
-int load_kernel_image(u32 offset, u32 is_load){
+int is_ram_os_valid(){
+	return is_os_valid(
+				SOS_BOARD_RAM_OS_FLASH_OFFSET,
+				SOS_BOARD_RAM_OS_FLASH_OFFSET,
+				SOS_BOARD_RAM_OS_ADDRESS
+				);
+}
+
+int is_os_valid(u32 startup_offset, u32 offset, u32 address){
 	int image_fd;
+	image_fd = open("/dev/drive0", O_RDONLY);
+	if( image_fd < 0 ){
+		mcu_debug_log_warning(MCU_DEBUG_USER0, "/dev/drive0 failed to open");
+		return -1;
+	}
+
+	u32 image_size;
+	u32 tcim_size;
+	{
+		u32 bootloader_api_offset;
+		lseek(image_fd, startup_offset + 36, SEEK_SET);
+		read(image_fd, &bootloader_api_offset, sizeof(u32));
+		if( bootloader_api_offset == (u32)-1 ){
+			mcu_debug_log_info(MCU_DEBUG_USER0, "bootloader api info is blank");
+			return -1;
+		}
+
+		bootloader_board_api_t bootloader_board_api;
+		lseek(image_fd, offset + (bootloader_api_offset - address), SEEK_SET);
+		read(image_fd, &bootloader_board_api, sizeof(bootloader_board_api));
+
+		mcu_debug_log_info(
+					MCU_DEBUG_USER1,
+					"text: 0x%lX etext: 0x%lX tcim: 0x%lX etcim: 0x%lX",
+					bootloader_board_api.text, bootloader_board_api.etext,
+					bootloader_board_api.tcim_text, bootloader_board_api.etcim_text
+					);
+		image_size =
+				(bootloader_board_api.etext - bootloader_board_api.text) +
+				(bootloader_board_api.edata - bootloader_board_api.data);
+
+		image_size +=
+				(image_size % 32) ? (32 - image_size%32 ) : 0;
+
+		if( image_size >= SOS_BOARD_FLASH_OS_SIZE ){
+			mcu_debug_log_info(MCU_DEBUG_USER0, "image size is too big 0x%lX", image_size);
+			return -1;
+		}
+
+		tcim_size =
+				(bootloader_board_api.etcim_text - bootloader_board_api.tcim_text);
+
+		tcim_size +=
+				(image_size % 32) ? (32 - image_size%32 ) : 0;
+
+		if( tcim_size >= SOS_BOARD_FLASH_OS_TCIM_SIZE ){
+			mcu_debug_log_error(MCU_DEBUG_USER0, "TCIM size is invalid %ld", tcim_size);
+			return -1;
+		}
+
+	}
+
+	mcu_debug_log_info(MCU_DEBUG_USER0, "hash OS %d", image_size);
+	if( is_hash_valid(offset, image_size) < 0 ){
+		return -1;
+	}
+
+	if( tcim_size > 0 ){
+		mcu_debug_log_info(MCU_DEBUG_USER0, "hash TCIM OS %d", tcim_size);
+		if( is_hash_valid(SOS_BOARD_FLASH_OS_TCIM_OFFSET, tcim_size) < 0 ){
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+int copy_from_drive_to_memory(const char * path, u32 offset, u32 size){
+	int image_fd;
+	image_fd = open("/dev/drive0", O_RDONLY);
+	if( image_fd < 0 ){
+		return -1;
+	}
+
+	lseek(image_fd, offset, SEEK_SET);
+
+	int ram_fd = open(path, O_RDWR);
+	if( ram_fd < 0 ){
+		return -1;
+	}
+	lseek(ram_fd, 0, SEEK_SET);
+
+	char buffer[256];
+	u32 bytes_written = 0;
+	int result = 0;
+	for(bytes_written = 0; bytes_written < size; bytes_written += result){
+		result = read(image_fd, buffer, sizeof(buffer));
+		if( result > 0 ){
+			write(ram_fd, buffer, result);
+		}
+	}
+
+	return 0;
+}
+
+int is_hash_valid(u32 offset, u32 size){
+	u8 buffer[32];
+	int result = 0;
 	void * hash_context;
 	const crypt_hash_api_t * hash_api = kernel_request_api(CRYPT_SHA256_API_REQUEST);
+
+	int image_fd;
+	image_fd = open("/dev/drive0", O_RDONLY);
+	if( image_fd < 0 ){
+		hash_api->deinit(&hash_context);
+		return -1;
+	}
+
 	if( hash_api == 0 ){
 		mcu_debug_log_error(MCU_DEBUG_USER0, "hash API is missing");
 		return -1;
@@ -369,47 +512,10 @@ int load_kernel_image(u32 offset, u32 is_load){
 		return -1;
 	}
 
-	image_fd = open("/dev/drive0", O_RDONLY);
-	if( image_fd < 0 ){
-		mcu_debug_log_warning(MCU_DEBUG_USER0, "debug image not found");
-		hash_api->deinit(&hash_context);
-		return -1;
-	}
-
-
-	u32 image_size;
-	{
-		u32 bootloader_api_offset;
-		lseek(image_fd, SOS_BOARD_FLASH_OS_OFFSET + 36, SEEK_SET);
-		read(image_fd, &bootloader_api_offset, sizeof(u32));
-		if( bootloader_api_offset == (u32)-1 ){
-			return -1;
-		}
-
-		bootloader_board_api_t bootloader_board_api;
-		lseek(image_fd, SOS_BOARD_FLASH_OS_OFFSET + (bootloader_api_offset - SOS_BOARD_FLASH_OS_ADDRESS), SEEK_SET);
-		read(image_fd, &bootloader_board_api, sizeof(bootloader_board_api));
-
-		image_size =
-				(bootloader_board_api.etext - bootloader_board_api.text) +
-				(bootloader_board_api.edata - bootloader_board_api.data);
-
-		image_size +=
-				(image_size % 32) ? (32 - image_size%32 ) : 0;
-
-		if( image_size >= SOS_BOARD_FLASH_OS_SIZE ){
-			return -1;
-		}
-	}
-
-	u8 buffer[32];
-	int result = 0;
 	hash_api->start(hash_context);
 
-	mcu_debug_printf("sizeof buffer is %ld\n", sizeof(buffer));
-
-	lseek(image_fd, SOS_BOARD_FLASH_OS_OFFSET, SEEK_SET);
-	for(u32 bytes_read = 0; bytes_read < image_size; bytes_read += sizeof(buffer)){
+	lseek(image_fd, offset, SEEK_SET);
+	for(u32 bytes_read = 0; bytes_read < size; bytes_read += sizeof(buffer)){
 		result = read(image_fd, buffer, sizeof(buffer));
 		if( result > 0 ){
 			hash_api->update(
@@ -449,20 +555,19 @@ void exec_bootloader(void * args){
 	u32 * bootloader_request_address = (u32*)0x30020000;
 	*bootloader_request_address = 0xaabbccdd;
 	mcu_core_clean_data_cache();
-
 	cortexm_reset(0);
 }
 
 void svcall_is_bootloader_requested(void * args){
 	int * is_requested = args;
 	u32 * bootloader_request_address = (u32*)0x30020000;
+	*is_requested = 0;
 
 	if( *bootloader_request_address == 0xaabbccdd ){
 		*bootloader_request_address = 0;
 		mcu_core_clean_data_cache();
 		*is_requested = 1;
-	} else {
-		*is_requested = 0;
+		return;
 	}
 }
 
@@ -493,8 +598,13 @@ const bootloader_board_api_t mcu_core_bootloader_api = {
 	.etext = (u32)&_etext,
 	.data = (u32)&_data,
 	.edata = (u32)&_edata,
+#if _IS_FLASH
+	.tcim_text = (u32)&_tcim,
+	.etcim_text = (u32)&_etcim
+#else
 	.tcim_text = 0,
 	.etcim_text = 0
+#endif
 };
 
 

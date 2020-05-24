@@ -78,6 +78,11 @@ void board_event_handler(int event, void * args){
 			} else {
 				mcu_debug_log_fatal(MCU_DEBUG_SYS, "Fatal Error unknown");
 			}
+
+#if !_IS_BOOT
+			mcu_core_invokebootloader(0, NULL);
+#endif
+
 			sos_led_root_error();
 
 			while(1){}
@@ -85,9 +90,7 @@ void board_event_handler(int event, void * args){
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_ROOT_INITIALIZE_CLOCK:
-
 			SystemClock_Config();
-
 
 #if 0
 			//PE1 needs to be driven low for debugging to work
@@ -104,22 +107,29 @@ void board_event_handler(int event, void * args){
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_ROOT_DEBUG_INITIALIZED:
+
+#if _IS_FLASH
+			//make the TCIM region executable
+#if 0
+			mpu_enable_region(
+						7, //secret key is in the bootloader
+						SOS_BOARD_FLASH_OS_TCIM_ADDRESS,
+						SOS_BOARD_FLASH_OS_TCIM_SIZE,
+						MPU_ACCESS_PR_UR,
+						MPU_MEMORY_PERIPHERALS,
+						1 //executable
+						);
+#endif
+#endif
+
 			mcu_core_disable_cache();
 			ST7789H2_Init();
 			mcu_core_enable_cache();
 
-			//override the system code MPU region to include the asset filesystem
-//#if _IS_FLASH
-#if 0
-			mpu_enable_region(
-						TASK_SYSTEM_CODE_MPU_REGION,
-						SOS_BOARD_FLASH_OS_ADDRESS,
-						SOS_BOARD_EXTERNAL_FLASH_SIZE,
-						MPU_ACCESS_PR_UR,
-						MPU_MEMORY_FLASH,
-						1
-						);
+#if _IS_FLASH
+			mcu_debug_printf("TCIM about to switch to priv mode\n");
 #endif
+
 
 			break;
 

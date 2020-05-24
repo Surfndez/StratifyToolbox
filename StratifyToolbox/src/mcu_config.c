@@ -32,7 +32,9 @@ const stm32_config_t stm32_config = {
 	.usb_rx_buffer_size = SOS_BOARD_USB_RX_BUFFER_SIZE
 };
 
+#if _IS_BOOT
 MCU_DECLARE_SECRET_KEY_32(secret_key)
+#endif
 
 #define CONFIG_CACHE MCU_BOARD_CONFIG_FLAG_ENABLE_CACHE
 //#define CONFIG_CACHE 0
@@ -56,14 +58,20 @@ const mcu_board_config_t mcu_board_config = {
 		.event_handler = SOS_BOARD_EVENT_HANDLER,
 		.led = {3, 10},
 		.arch_config = &stm32_config,
+		#if _IS_BOOT
 		.secret_key_address = secret_key,
 		.secret_key_size = 32,
+		#else
+		.secret_key_address = 0,
+		.secret_key_size = 0,
+		#endif
 		.o_mcu_debug =
 		MCU_DEBUG_INFO |
 		MCU_DEBUG_SYS |
 		MCU_DEBUG_USER0 |
 		MCU_DEBUG_USER1 |
 		MCU_DEBUG_DEVICE |
+		MCU_DEBUG_SCHEDULER |
 		//MCU_DEBUG_APPFS |
 		MCU_DEBUG_FILESYSTEM |
 		//MCU_DEBUG_SOCKET |

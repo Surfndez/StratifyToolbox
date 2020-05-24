@@ -398,9 +398,16 @@ const drive_ram_config_t drive0_memory_mapped_config = {
 #endif
 
 #if _IS_BOOT
-const drive_ram_config_t drive_ram_config = {
-	.memory = (void*)0x24000000,
-	.size = 512*1024UL
+const drive_ram_config_t drive_ram0_config = {
+	.memory = (void*)SOS_BOARD_RAM_OS_ADDRESS,
+	.size = SOS_BOARD_RAM_OS_SIZE,
+	.o_flags = 0
+};
+
+const drive_ram_config_t drive_ram1_config = {
+	.memory = (void*)SOS_BOARD_FLASH_OS_TCIM_ADDRESS,
+	.size = SOS_BOARD_FLASH_OS_TCIM_SIZE,
+	.o_flags = 0
 };
 #endif
 
@@ -722,7 +729,8 @@ const devfs_device_t devfs_list[] = {
 
 	#if _IS_BOOT
 	DEVFS_DEVICE("qspi", mcu_qspi_dma, 0, &qspi_dma_config_mapped, 0, 0666, SYSFS_ROOT, S_IFCHR),
-	DEVFS_DEVICE("ramdrive", drive_ram, 0, &drive_ram_config, 0, 0666, SOS_USER_ROOT, S_IFBLK),
+	DEVFS_DEVICE("ram0", drive_ram, 0, &drive_ram0_config, 0, 0666, SOS_USER_ROOT, S_IFBLK),
+	DEVFS_DEVICE("ram1", drive_ram, 0, &drive_ram1_config, 0, 0666, SOS_USER_ROOT, S_IFBLK),
 	#else
 	DEVFS_DEVICE("drive1", drive_sdio_dma, 1, &sdio_configuration, &sdio_state, 0666, SOS_USER_ROOT, S_IFBLK),
 	#endif

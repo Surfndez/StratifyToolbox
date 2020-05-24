@@ -65,3 +65,9 @@ set(SOS_CONFIG flash_release)
 include(${SOS_TOOLCHAIN_CMAKE_PATH}/sos-bsp.cmake)
 set(SOS_CONFIG flash_debug)
 include(${SOS_TOOLCHAIN_CMAKE_PATH}/sos-bsp.cmake)
+
+add_custom_target(
+	tcim_${SOS_NAME}_${SOS_CONFIG} DEPENDS ${BUILD_TARGET} COMMAND ${CMAKE_OBJCOPY} -j .tcim -O binary ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${BUILD_TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${SOS_NAME}.tcim.bin
+	DEPENDS size_${SOS_NAME}_${SOS_CONFIG}
+	)
+

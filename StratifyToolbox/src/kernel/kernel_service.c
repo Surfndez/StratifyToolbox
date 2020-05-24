@@ -14,6 +14,7 @@
 #define RUN_DAC_SERVICE 0
 #define RUN_WIFI_SERVICE 0
 #define RUN_KERNEL_SERVICE 0
+#define RUN_INTERNAL_IO 0
 
 static void * kernel_service_thread_function(void * args);
 
@@ -26,6 +27,7 @@ int kernel_service_init(){
 		return -1;
 	}
 
+#if RUN_INTERNAL_IO
 	if( i2c_internal_init() < 0 ){
 		mcu_debug_log_fatal(
 					MCU_DEBUG_USER0,
@@ -41,6 +43,7 @@ int kernel_service_init(){
 					);
 		return -1;
 	}
+#endif
 
 #if ___debug
 	//makes the UART TX available to the outside pin
