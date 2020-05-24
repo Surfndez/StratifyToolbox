@@ -63,6 +63,15 @@ void board_trace_event(void * event){
 	trace_dev->driver.write(&(trace_dev->handle), &async);
 }
 
+void show_mpu(void * args){
+	for(int i=0; i < 8; i++){
+		MPU->RNR = i;
+		u32 rbar = MPU->RBAR;
+		u32 rasr = MPU->RASR;
+		mcu_debug_printf("MPU:%d ADDR:%p STATUS:0x%lX\n", i, rbar, rasr);
+	}
+}
+
 
 void board_event_handler(int event, void * args){
 	switch(event){
@@ -107,12 +116,14 @@ void board_event_handler(int event, void * args){
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_ROOT_DEBUG_INITIALIZED:
+			break;
 
+		case MCU_BOARD_CONFIG_EVENT_ROOT_CONFIGURE_MPU:
 #if _IS_FLASH
+#if 1
 			//make the TCIM region executable
-#if 0
 			mpu_enable_region(
-						7, //secret key is in the bootloader
+						TASK_SYSTEM_SECRET_KEY_REGION, //secret key is in the bootloader
 						SOS_BOARD_FLASH_OS_TCIM_ADDRESS,
 						SOS_BOARD_FLASH_OS_TCIM_SIZE,
 						MPU_ACCESS_PR_UR,
@@ -121,22 +132,14 @@ void board_event_handler(int event, void * args){
 						);
 #endif
 #endif
-
-			mcu_core_disable_cache();
 			ST7789H2_Init();
-			mcu_core_enable_cache();
 
-#if _IS_FLASH
-			mcu_debug_printf("TCIM about to switch to priv mode\n");
-#endif
-
-
+			show_mpu(NULL);
 			break;
 
 		case MCU_BOARD_CONFIG_EVENT_START_LINK:
 
 			mcu_debug_log_info(MCU_DEBUG_USER0, "Start LED");
-
 #if _IS_BOOT
 			kernel_loader_startup();
 #else

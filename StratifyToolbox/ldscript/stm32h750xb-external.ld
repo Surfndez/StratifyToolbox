@@ -5,7 +5,7 @@ MEMORY {
 	 flash : ORIGIN = 0x90000000, LENGTH = 2048K - 64K
 	 ram : ORIGIN = 0x24000000, LENGTH = 64K
 	 tcim : ORIGIN = 0x00000000, LENGTH = 64K
-	 sysmem : ORIGIN = 0x20000000, LENGTH = 128K
+	 sysmem : ORIGIN = 0x20010000, LENGTH = 64K
 	 ram1 : ORIGIN = 0x30000000, LENGTH = 288K
 	 ram2 : ORIGIN = 0x38000000, LENGTH = 64K
 }
@@ -60,6 +60,11 @@ SECTIONS {
 		*(.text.m2m_*)
 		*(.text.*_device_*)
 		*(.text.LCD_IO*)
+		_priv_code = .;
+        *(.priv_code)
+        _priv_exec_code = .;
+        *(.priv_exec_code)
+        _epriv_code = .;
   	} >tcim
 	. = ALIGN(32);
   	_etcim = .;
@@ -87,11 +92,7 @@ SECTIONS {
          *(.glue_7t)
 
        	 *(.text.*)
-         _priv_code = .;
-         *(.priv_code)
-         _priv_exec_code = .;
-         *(.priv_exec_code)
-         _epriv_code = .;
+
 	} >flash
   
 	.ARM.extab : 

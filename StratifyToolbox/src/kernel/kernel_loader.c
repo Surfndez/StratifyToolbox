@@ -37,7 +37,7 @@ limitations under the License.
 #include "devfs/display_device.h"
 #include "devfs/st7789h2.h"
 
-#define TEST_QSPI_MEMORY_MAP 1
+#define TEST_QSPI_MEMORY_MAP 0
 
 extern u32 _tcim;
 extern u32 _etcim;
@@ -338,6 +338,7 @@ void execute_memory_image(int signo, u32 start_location){
 	__set_CONTROL(control);
 
 	mcu_core_clean_data_cache();
+	mcu_core_disable_cache();
 	/*
 	 * This will start executing the OS that is currently in RAM.
 	 *
@@ -349,7 +350,7 @@ void execute_memory_image(int signo, u32 start_location){
 }
 
 void execute_flash_image(int signo){
-	execute_memory_image(signo, SOS_BOARD_FLASH_OS_TCIM_ADDRESS);
+	execute_memory_image(signo, SOS_BOARD_EFFECTIVE_FLASH_OS_ADDRESS);
 }
 
 void execute_ram_image(int signo){
@@ -374,7 +375,7 @@ void set_cursor_svcall(void * args){
 #if _IS_BOOT
 int is_flash_os_valid(){
 	int result = is_os_valid(
-				SOS_BOARD_FLASH_OS_TCIM_OFFSET,
+				SOS_BOARD_EFFECTIVE_FLASH_OS_OFFSET,
 				SOS_BOARD_FLASH_OS_OFFSET,
 				SOS_BOARD_FLASH_OS_ADDRESS
 				);
@@ -433,6 +434,7 @@ int is_os_valid(u32 startup_offset, u32 offset, u32 address){
 			return -1;
 		}
 
+#if USE_TCIM
 		tcim_size =
 				(bootloader_board_api.etcim_text - bootloader_board_api.tcim_text);
 
@@ -443,6 +445,7 @@ int is_os_valid(u32 startup_offset, u32 offset, u32 address){
 			mcu_debug_log_error(MCU_DEBUG_USER0, "TCIM size is invalid %ld", tcim_size);
 			return -1;
 		}
+#endif
 
 	}
 
