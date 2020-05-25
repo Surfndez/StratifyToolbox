@@ -35,9 +35,13 @@ const void * kernel_request_api(u32 request){
 			return &jansson_api;
 		case SGFX_API_REQUEST:
 			return &sg_api;
-#if _IS_QSPI
+#if _IS_FLASH
 		case MBEDTLS_API_REQUEST:
 			return &mbedtls_api;
+		case CRYPT_AES_API_REQUEST:
+			return &device_aes_api;
+		case CRYPT_RANDOM_API_REQUEST:
+			return &device_random_api;
 #endif
 #endif
 			//switch this overt to the hardware crypt unit

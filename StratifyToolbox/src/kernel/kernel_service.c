@@ -13,7 +13,7 @@
 #define RUN_INTERNAL_IO 1
 #define RUN_KERNEL_SERVICE 1
 #define RUN_APP_SERVICE 0
-#define RUN_DAC_SERVICE 0
+#define RUN_DAC_SERVICE 1
 #define RUN_WIFI_SERVICE 0
 
 static void * kernel_service_thread_function(void * args);

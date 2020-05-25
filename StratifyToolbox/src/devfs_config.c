@@ -39,10 +39,12 @@ limitations under the License.
 #include <sos/fs/sffs.h>
 #include <mcu/appfs.h>
 #include <mcu/hash.h>
+#include <mcu/rng.h>
 #include <sos/sos.h>
 #include <device/drive_cfi.h>
 #include <device/drive_ram.h>
 #include <device/drive_sdio.h>
+#include <ToolboxAPI/toolbox_dac.h>
 
 #include "devfs/display_device.h"
 #include "devfs/wifi_phy_device.h"
@@ -464,7 +466,7 @@ const stm32_adc_dma_config_t adc0_dma_config = {
 	}
 };
 
-#define ADC_SAMPLES_PER_PACKET 256
+#define ADC_SAMPLES_PER_PACKET TOOLBOX_DAC_SAMPLES_PER_PACKET
 #define ADC_PACKET_SIZE (ADC_SAMPLES_PER_PACKET*sizeof(u16))
 const devfs_device_t adc0_dma =
 		DEVFS_DEVICE(
@@ -578,7 +580,7 @@ const stm32_dac_dma_config_t dac0_dma_config = {
 	}
 };
 
-#define DAC_SAMPLES_PER_PACKET 1024
+#define DAC_SAMPLES_PER_PACKET 4000
 #define DAC_PACKET_SIZE (DAC_SAMPLES_PER_PACKET*sizeof(u32))
 const devfs_device_t dac0_dma =
 		DEVFS_DEVICE(
@@ -678,7 +680,7 @@ tmr_config_t tmr14_config = {
 	}
 };
 
-drive_sdio_state_t sdio_state;
+drive_sdio_state_t sdio_state MCU_SYS_MEM;
 const drive_sdio_config_t sdio_configuration = {
 	.sdio = {
 		.attr = {
@@ -688,7 +690,7 @@ const drive_sdio_config_t sdio_configuration = {
 			SDIO_FLAG_IS_CLOCK_POWER_SAVE_ENABLED |
 			SDIO_FLAG_IS_HARDWARE_FLOW_CONTROL_ENABLED |
 			0,
-			.freq = 12000000UL,
+			.freq = 24000000UL,
 			.pin_assignment = {
 				.clock = {2, 1}, //PC1
 				.command = {0, 0}, //PA0
@@ -749,8 +751,8 @@ const devfs_device_t devfs_list[] = {
 	DEVFS_DEVICE("dac1", stream_ffifo, 0, &dac1_stream_ffifo_config, &dac1_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
 
 	//crypto
-	//DEVFS_DEVICE("crypt", mcu_crypt, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
-	//DEVFS_DEVICE("random", mcu_rng, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
+	DEVFS_DEVICE("crypt0", mcu_crypt, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
+	DEVFS_DEVICE("random0", mcu_rng, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 	DEVFS_DEVICE("hash0", mcu_hash, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 
 	DEVFS_DEVICE("i2c0", i2c_device, 0, &i2c0_config, 0, 0666, SYSFS_USER, S_IFCHR), //PB8 and PB9 - I2C1

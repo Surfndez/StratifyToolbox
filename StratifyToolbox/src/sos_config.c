@@ -143,7 +143,7 @@ SOS_DECLARE_TASK_TABLE(SOS_BOARD_TASK_TOTAL);
  *
  */
 
-#define INTERNAL_AXI_RAM_PAGE_COUNT (512-64)
+#define INTERNAL_AXI_RAM_PAGE_COUNT (512-SOS_BOARD_SYSTEM_MEMORY_SIZE/1024)
 #define INTERNAL_RAM_PAGE_COUNT0 288
 #define INTERNAL_RAM_PAGE_COUNT1 64
 #define TCM_RAM_PAGE_COUNT 0
@@ -183,7 +183,7 @@ const appfs_mem_config_t appfs_mem_config = {
 	.section_count = MEMORY_SECTION_COUNT,
 	.sections = {
 		#if _IS_FLASH
-		{ .o_flags = MEM_FLAG_IS_RAM, .page_count = INTERNAL_AXI_RAM_PAGE_COUNT, .page_size = MCU_RAM_PAGE_SIZE, .address = 0x24000000 + 64*1024UL },
+		{ .o_flags = MEM_FLAG_IS_RAM, .page_count = INTERNAL_AXI_RAM_PAGE_COUNT, .page_size = MCU_RAM_PAGE_SIZE, .address = 0x24000000 + SOS_BOARD_SYSTEM_MEMORY_SIZE },
 		#endif
 		{ .o_flags = MEM_FLAG_IS_RAM, .page_count = INTERNAL_RAM_PAGE_COUNT0, .page_size = MCU_RAM_PAGE_SIZE, .address = 0x30000000 },
 		{ .o_flags = MEM_FLAG_IS_RAM, .page_count = INTERNAL_RAM_PAGE_COUNT1, .page_size = MCU_RAM_PAGE_SIZE, .address = 0x38000000 },

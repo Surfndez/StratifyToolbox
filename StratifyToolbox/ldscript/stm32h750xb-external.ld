@@ -3,7 +3,7 @@ flash_page_count = 1;
 
 MEMORY {
 	 flash : ORIGIN = 0x90000000, LENGTH = 2048K - 64K
-	 ram : ORIGIN = 0x24000000, LENGTH = 64K
+	 ram : ORIGIN = 0x24000000, LENGTH = 128K
 	 tcim : ORIGIN = 0x00000000, LENGTH = 64K
 	 sysmem : ORIGIN = 0x20010000, LENGTH = 64K
 	 ram1 : ORIGIN = 0x30000000, LENGTH = 288K
@@ -30,6 +30,7 @@ SECTIONS {
     	*\libsos_mcu_stm32h750xx*.a:*(.isr_vector)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*_isr)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*_IRQHandler*)
+    	*\libsos_mcu_stm32h750xx*.a:*(.text.*mcu_core_*)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*mcu_pio_*)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*HAL_GPIO_*)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*mcu_usb_*)
@@ -38,28 +39,25 @@ SECTIONS {
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*HAL_QSPI_*)
 		*\libsos_mcu_stm32h750xx*.a:*(.text.*mcu_tmr_*)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*HAL_TIM_*)
+		*\libsos_mcu_stm32h750xx*.a:*(.text.*mcu_dac_*)
+    	*\libsos_mcu_stm32h750xx*.a:*(.text.*HAL_DAC_*)
+		*\libsos_mcu_stm32h750xx*.a:*(.text.*mcu_adc_*)
+    	*\libsos_mcu_stm32h750xx*.a:*(.text.*HAL_ADC_*)
 		*\libsos_mcu_stm32h750xx*.a:*(.text.*mcu_sdio_*)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*HAL_SD_*)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*stm32_dma*)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*read)
     	*\libsos_mcu_stm32h750xx*.a:*(.text.*write)
+    	*\libsos_sys*.a:*(.text.mcu_*)
     	*\libsos_sys*.a:*(.text.cortexm_*)
     	*\libsos_sys*.a:*(.text.task_*)
     	*\libsos_sys*.a:*(.text.devfs_*)
     	*\libsos_sys*.a:*(.text.scheduler_*)
-    	*\libsos_sys*.a:*(.text.pthread_*)
     	*\libsos_sys*.a:*(.text.sysfs_*)
     	*\libsos_sys*.a:*(.text.usbd_*)
-    	*\libsos_sys*.a:*(.text.open)
-    	*\libsos_sys*.a:*(.text.close)
-    	*\libsos_sys*.a:*(.text.read)
-    	*\libsos_sys*.a:*(.text.write)
-    	*\libsos_sys*.a:*(.text.ioctl)
-    	*\libsos_sys*.a:*(.text.link_*)
-		*(.text.nm_*)
-		*(.text.m2m_*)
 		*(.text.*_device_*)
 		*(.text.LCD_IO*)
+		*(.text.ST7789H2_*)
 		_priv_code = .;
         *(.priv_code)
         _priv_exec_code = .;
