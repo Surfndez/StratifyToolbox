@@ -63,7 +63,8 @@ UartMenu::UartMenu(
 	add_component(
 				Keyboard::create("BaudrateInput", event_loop())
 				.set_caller(name)
-				.set_target( find<MenuItem>("BaudrateValue")->present_value_pointer() )
+				.set_callback( MenuItem::update_callback )
+				.set_context( find<MenuItem>("BaudrateValue") )
 				.set_enabled(false)
 				);
 
