@@ -8,66 +8,69 @@
 #include <ToolboxAPI/toolbox.hpp>
 #include <ToolboxAPI/components.hpp>
 
+#include "UartMenu.hpp"
 #include "Menu.hpp"
 
 
 Configuration::Configuration(Application * app)
-	: ApplicationLayout("Configuration", app){
+	: ApplicationLayout<Configuration>("Configuration", app){
 
-	const StringList parity_options = {
-		"none", "odd", "even"
-	};
-	PRINTER_TRACE(printer(), "construct");
 
 	add_component(
 				Menu::create("Settings", event_loop())
 				.add_item(
-					MenuItem::create("Serial Settings")
-					.set_type(MenuItem::type_menu)
-					)
+							MenuItem::create("Local")
+							.set_type(MenuItem::type_menu)
+							)
 				.add_item(
-					MenuItem::create("Wifi")
-					.set_type(MenuItem::type_bool)
-					.set_checked()
-					)
+							MenuItem::create("USB")
+							.set_type(MenuItem::type_menu)
+							)
 				.add_item(
-					MenuItem::create("Parity")
-					.set_present_value("none")
-					.set_type(MenuItem::type_string_list)
-					)
+							MenuItem::create("Wifi")
+							.set_type(MenuItem::type_menu)
+							)
 				.add_filler()
 				);
 
-	PRINTER_TRACE(printer(), "data");
-	printer().object("after settings", DataInfo());
+
 	add_component(
-				Menu::create("Serial Settings", event_loop())
-				.add_item(
-					MenuItem::create("USB")
-					.set_type(MenuItem::type_bool)
-					.set_checked()
-					)
-				.add_filler()
-				.set_caller("Settings")
+				UartMenu::create("Local", app)
 				.set_enabled(false)
 				);
 
-	printer().object("after serial settings", DataInfo());
-
 	add_component(
-				Menu::create_options_list(
-					"Parity", event_loop(), "none", parity_options
-					)
-				.add_filler()
-				.set_caller("Settings")
+				UartMenu::create("USB", app)
 				.set_enabled(false)
 				);
-	printer().object("after parity", DataInfo());
+
+	add_component(
+				UartMenu::create("Wifi", app)
+				.set_enabled(false)
+				);
+
 }
 
 void Configuration::local_event_handler(
 		const ux::Event & event
 		){
+
+	//check for button push to exit back to LocalTerminal
+	Button * button = ButtonEvent::component(event);
+	if( button ){
+
+		if( event.id() == ButtonEvent::id_released ){
+			printer().info("Handle Settings Menu button press: "	+ button->name() + " for " + name());
+
+			if( button->name() == "SettingsTopNavigationLeftButton" ){
+				parent()->transition("LocalTerminal");
+			}
+
+		} else if( event.id() == ButtonEvent::id_held ){
+
+		}
+
+	}
 
 }
 

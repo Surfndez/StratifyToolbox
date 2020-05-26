@@ -15,6 +15,7 @@ Menu::Menu(
 
 	constexpr drawing_size_t top_navigation_height = 175;
 
+	printf("set menu name to %s\n", name.cstring());
 	const String list_name = name + "Menu";
 	add_component(
 				TopNavigation::create(
@@ -50,8 +51,7 @@ void Menu::local_event_handler(
 		if( button_event.id() == ButtonEvent::id_released ){
 			Button * button = button_event.component(event);
 			if( button->name() == String(get_top_navigation_name()) + "LeftButton" ){
-
-
+				printf("back button to %s\n", caller().cstring());
 				parent()->transition(caller());
 			}
 		}
@@ -73,7 +73,7 @@ void Menu::local_event_handler(
 					menu_item->redraw();
 					break;
 				case MenuItem::type_menu:
-					printf("menu transition to %s\n", menu_item->target_name().cstring());
+					printf("menu transition to '%s'\n", menu_item->target_name().cstring());
 					parent()->transition(menu_item->key());
 					break;
 				case MenuItem::type_string_list:

@@ -5,10 +5,10 @@
 #include <sapi/ux.hpp>
 #include <ToolboxAPI/toolbox.hpp>
 
-class Application;
+#include "Menu.hpp"
 
 
-class Configuration : public ApplicationLayout<Configuration> {
+class Configuration :  public ApplicationLayout<Configuration> {
 public:
 	 Configuration(Application * app);
 

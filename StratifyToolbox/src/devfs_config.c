@@ -427,7 +427,7 @@ const usbfifo_config_t link2_transport_usb_fifo_cfg = {
 };
 #define LINK_CONFIG &link2_transport_usb_fifo_cfg
 
-#if !_IS_BOOT
+#if _IS_FLASH
 
 const stm32_adc_dma_config_t adc0_dma_config = {
 	.adc_config = {
@@ -680,6 +680,9 @@ tmr_config_t tmr14_config = {
 	}
 };
 
+#endif
+
+#if !_IS_BOOT
 drive_sdio_state_t sdio_state MCU_SYS_MEM;
 const drive_sdio_config_t sdio_configuration = {
 	.sdio = {
@@ -745,14 +748,17 @@ const devfs_device_t devfs_list[] = {
 
 	//User devices:
 	DEVFS_DEVICE("display0", display_device, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
+	#if _IS_FLASH
 	DEVFS_DEVICE("adc0", stream_ffifo, 0, &adc0_stream_ffifo_config, &adc0_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("adc1", stream_ffifo, 1, &adc1_stream_ffifo_config, &adc1_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("dac0", stream_ffifo, 0, &dac0_stream_ffifo_config, &dac0_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
 	DEVFS_DEVICE("dac1", stream_ffifo, 0, &dac1_stream_ffifo_config, &dac1_stream_ffifo_state, 0666, SYSFS_ROOT, S_IFCHR),
+	DEVFS_DEVICE("tmr14", mcu_tmr, 14, &tmr14_config, 0, 0666, SYSFS_ROOT, S_IFCHR), //TIM15
+	#endif
 
 	//crypto
 	DEVFS_DEVICE("crypt0", mcu_crypt, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
-	DEVFS_DEVICE("random0", mcu_rng, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
+	DEVFS_DEVICE("random", mcu_rng, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 	DEVFS_DEVICE("hash0", mcu_hash, 0, 0, 0, 0666, SYSFS_USER, S_IFCHR),
 
 	DEVFS_DEVICE("i2c0", i2c_device, 0, &i2c0_config, 0, 0666, SYSFS_USER, S_IFCHR), //PB8 and PB9 - I2C1
@@ -766,7 +772,6 @@ const devfs_device_t devfs_list[] = {
 	DEVFS_DEVICE("uart3", uart_device, 3, 0, 0, 0666, SYSFS_USER, S_IFCHR), //PB8, PB9 UART4
 	DEVFS_DEVICE("uart5", uart_device, 5, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //PC6, PC7 USART6
 
-	DEVFS_DEVICE("tmr14", mcu_tmr, 14, &tmr14_config, 0, 0666, SYSFS_ROOT, S_IFCHR), //TIM15
 	#endif
 
 	DEVFS_DEVICE("pio2", mcu_pio, 0, 0, 0, 0666, SYSFS_ROOT, S_IFCHR), //GPIOA

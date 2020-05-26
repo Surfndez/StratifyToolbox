@@ -20,6 +20,7 @@ public:
 
 	MenuItem(const var::String& name) : ux::ListItemAccess<MenuItem>(name){
 		set_key(name);
+		set_target_name(name);
 	}
 
 	MenuItem& set_type(enum types value){
@@ -111,8 +112,10 @@ public:
 						MenuItem::create(name + "@" + item)
 						.set_type(MenuItem::type_radio)
 						.set_key(item)
+						.set_checked( item == active )
 						);
 		}
+		result.add_filler();
 		return result;
 	}
 
@@ -159,6 +162,15 @@ private:
 		return item;
 	}
 
+};
+
+template <class T> class MenuAccess : public Menu {
+public:
+	MenuAccess(const var::String& name, ux::EventLoop * loop) : Menu(name, loop){}
+	API_ACCESS_DERIVED_COMPOUND(Menu,T,var::String,caller)
+	API_ACCESS_DERIVED_COMPOUND(Menu,T,var::String,menu_item)
+
+	COMPONENT_ACCESS_CREATE()
 };
 
 #endif // MENU_HPP
