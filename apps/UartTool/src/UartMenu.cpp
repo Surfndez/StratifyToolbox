@@ -28,7 +28,9 @@ UartMenu::UartMenu(
 					.set_type(MenuItem::type_string_list)
 					)
 				.add_item(
-					MenuItem::create("Baudrate")
+					MenuItem::create("BaudrateValue")
+					.set_key("Baudrate")
+					.set_target_name("BaudrateInput")
 					.set_present_value("115200")
 					.set_type(MenuItem::type_string)
 					)
@@ -57,6 +59,13 @@ UartMenu::UartMenu(
 	const StringList stop_bit_options = {
 		"1", "1.5", "2"
 	};
+
+	add_component(
+				Keyboard::create("BaudrateInput", event_loop())
+				.set_caller(name)
+				.set_target( find<MenuItem>("BaudrateValue")->present_value_pointer() )
+				.set_enabled(false)
+				);
 
 	add_component(
 				Menu::create_options_list(

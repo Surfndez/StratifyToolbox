@@ -21,6 +21,7 @@ public:
 	MenuItem(const var::String& name) : ux::ListItemAccess<MenuItem>(name){
 		set_key(name);
 		set_target_name(name);
+		printf("%s -> %p\n", name.cstring(), present_value_pointer());
 	}
 
 	MenuItem& set_type(enum types value){
@@ -39,6 +40,10 @@ public:
 		m_present_value = value;
 		update_value();
 		return *this;
+	}
+
+	var::String * present_value_pointer(){
+		return &m_present_value;
 	}
 
 	bool is_checked() const {

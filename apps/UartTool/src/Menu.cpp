@@ -60,6 +60,7 @@ void Menu::local_event_handler(
 	if( event.type() == SystemEvent::event_type() ){
 		if( event.id() == SystemEvent::id_enter ){
 			//update values with child values
+
 		}
 	}
 
@@ -72,27 +73,16 @@ void Menu::local_event_handler(
 					menu_item->set_checked( !menu_item->is_checked() );
 					menu_item->redraw();
 					break;
+				case MenuItem::type_string:
 				case MenuItem::type_menu:
 					printf("menu transition to '%s'\n", menu_item->target_name().cstring());
-					parent()->transition(menu_item->key());
+					parent()->transition(menu_item->target_name());
 					break;
 				case MenuItem::type_string_list:
 				{
 					//set string list menu parameters
 					const String screen_name = menu_item->name().split("@").at(0);
 					parent()->transition(screen_name);
-				}
-					break;
-				case MenuItem::type_string:
-				{
-					String menu_name = menu_item->name() + "Menu";
-					printf("transition to edit string %s\n", menu_name.cstring());
-					Component * next_menu = parent()->find<Component>(menu_name);
-					if( next_menu == nullptr ){
-						printf("menu %s not found\n", menu_name.cstring());
-					} else {
-						printf("new menu is %p (%d)\n", next_menu, next_menu->is_layout());
-					}
 				}
 					break;
 				case MenuItem::type_radio:
