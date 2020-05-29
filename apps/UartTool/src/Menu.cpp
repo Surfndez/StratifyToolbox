@@ -10,10 +10,11 @@
 
 Menu::Menu(
 		const var::String& name,
-		ux::EventLoop* event_loop
+		ux::EventLoop* event_loop,
+		const MenuOptions& options
 		) : LayoutAccess<Menu>(name,event_loop){
 
-	constexpr drawing_size_t top_navigation_height = 175;
+	constexpr drawing_size_t top_navigation_height = TopNavigation::height();
 
 	const String list_name = name + "Menu";
 	add_component(
@@ -29,10 +30,14 @@ Menu::Menu(
 
 	add_component(
 				List::create(list_name, event_loop)
-				.set_item_height(250)
+				.set_item_height(options.list_item_height())
 				.set_vertical_scroll_enabled()
-				.set_drawing_point(DrawingPoint(0,TopNavigation::height()))
-				.set_drawing_area(DrawingArea(1000,1000-TopNavigation::height()))
+				.set_drawing_point(DrawingPoint(0,top_navigation_height))
+				.set_drawing_area(
+					DrawingArea(
+						1000,
+						options.list_height())
+					)
 				);
 
 	m_list = find<ux::List>(list_name);

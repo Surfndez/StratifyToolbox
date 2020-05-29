@@ -32,16 +32,10 @@ public:
 		 return "DirectionValue";
 	 }
 
+	 void local_event_handler(const Event & event);
+
 private:
 	 enum Io::io_pins m_io_pin;
-
-	 static void event_handler(
-			 Component * object,
-			 const Event & event){
-		 object->reinterpret<Configuration>()->local_event_handler(event);
-	 }
-
-	 void local_event_handler(const Event & event);
 
 	 void update_display_values();
 	 void toggle_direction();

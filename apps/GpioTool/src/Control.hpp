@@ -24,17 +24,10 @@ public:
 		 return "PinMarkerBar";
 	 }
 
-private:
-
-	 var::Array<s8, Io::last_io_pin> m_pin_states;
-	 static void event_handler(
-			 ux::Layout * object,
-			 const ux::Event & event
-			 ){
-		 Control * control_object = object->reinterpret<Control>();
-		 control_object->local_event_handler(event);
-	 }
 	 void local_event_handler(const ux::Event & event);
+
+private:
+	 var::Array<s8, Io::last_io_pin> m_pin_states;
 	 bool handle_io_button_press(const ux::Button * button);
 	 void update_pin_markers();
 };

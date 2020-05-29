@@ -2,10 +2,23 @@
 #define UARTSELECTION_HPP
 
 
-class UartSelection
-{
+#include <ToolboxAPI/components.hpp>
+
+class Application;
+
+class UartSelection : public ApplicationLayout<UartSelection>{
 public:
-	UartSelection();
+	UartSelection(Application * app);
+
+	static const char * top_navigation_name(){
+		return "UartSelectionTopNavigation";
+	}
+
+	void local_event_handler(const ux::Event & event);
+
+private:
+	API_ACCESS_COMPOUND(UartSelection,var::String,caller);
+
 };
 
 #endif // UARTSELECTION_HPP

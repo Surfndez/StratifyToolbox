@@ -346,13 +346,6 @@ int get_io_pin_description(
 	pin_description->peripheral_function_list[1] =
 			external_pin_table[pin_number].secondary_peripheral_function;
 
-	mcu_debug_printf(
-				"Pin:%d does %d and %d\n",
-				pin_number,
-				pin_description->peripheral_function_list[0],
-			pin_description->peripheral_function_list[1]
-			);
-
 	return 0;
 }
 

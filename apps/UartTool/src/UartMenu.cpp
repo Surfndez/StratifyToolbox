@@ -9,6 +9,7 @@
 #include <ToolboxAPI/components.hpp>
 
 #include "Menu.hpp"
+#include "UartSelection.hpp"
 
 
 UartMenu::UartMenu(
@@ -17,9 +18,10 @@ UartMenu::UartMenu(
 	: ApplicationLayout(name, app){
 
 	add_component(
-				Menu::create(name, event_loop())
+				Menu::create(name, event_loop(), MenuOptions())
 				.add_item(
-					MenuItem::create("Uart")
+					MenuItem::create("UartSelection")
+					.set_key("Uart")
 					.set_type(MenuItem::type_menu)
 					)
 				.add_item(
@@ -61,8 +63,15 @@ UartMenu::UartMenu(
 	};
 
 	add_component(
-				Keyboard::create("BaudrateInput", event_loop())
+				UartSelection::create((Application*)application())
 				.set_caller(name)
+				.set_enabled(false)
+				);
+
+	add_component(
+				NumberKeypad::create("BaudrateInput", event_loop())
+				.set_caller(name)
+				.set_text("115200")
 				.set_callback( MenuItem::update_callback )
 				.set_context( find<MenuItem>("BaudrateValue") )
 				.set_enabled(false)
@@ -70,7 +79,11 @@ UartMenu::UartMenu(
 
 	add_component(
 				Menu::create_options_list(
-					"Line Settings", event_loop(), "auto", line_mode_options
+					"Line Settings",
+					event_loop(),
+					MenuListOptions()
+					.set_active("auto")
+					.set_list(line_mode_options)
 					)
 				.set_caller(name)
 				.set_enabled(false)
@@ -78,7 +91,10 @@ UartMenu::UartMenu(
 
 	add_component(
 				Menu::create_options_list(
-					"Parity", event_loop(), "none", parity_options
+					"Parity", event_loop(),
+					MenuListOptions()
+					.set_active("none")
+					.set_list(parity_options)
 					)
 				.set_caller(name)
 				.set_enabled(false)
@@ -87,7 +103,11 @@ UartMenu::UartMenu(
 
 	add_component(
 				Menu::create_options_list(
-					"Stop Bits", event_loop(), "1", stop_bit_options
+					"Stop Bits",
+					event_loop(),
+					MenuListOptions()
+					.set_active("1")
+					.set_list(stop_bit_options)
 					)
 				.set_caller(name)
 				.set_enabled(false)

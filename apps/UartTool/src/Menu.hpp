@@ -4,6 +4,7 @@
 #include <sapi/var/Vector.hpp>
 #include <sapi/ux.hpp>
 #include <ToolboxAPI/toolbox.hpp>
+#include <ToolboxAPI/components/TopNavigation.hpp>
 
 class Application;
 
@@ -74,11 +75,27 @@ private:
 };
 
 
+class MenuOptions {
+	API_ACCESS_FUNDAMENTAL(MenuOptions,drawing_size_t,list_height,1000-toolbox::TopNavigation::height());
+	API_ACCESS_FUNDAMENTAL(MenuOptions,drawing_size_t,list_item_height,250);
+public:
+};
+
+class MenuListOptions : public MenuOptions {
+	API_ACCESS_COMPOUND(MenuListOptions,var::String,active);
+	API_ACCESS_COMPOUND(MenuListOptions,var::StringList,list);
+public:
+
+	API_ACCESS_DERIVED_FUNDAMETAL(MenuOptions,MenuListOptions,drawing_size_t,list_height);
+	API_ACCESS_DERIVED_FUNDAMETAL(MenuOptions,MenuListOptions,drawing_size_t,list_item_height);
+};
+
 class Menu : public ux::LayoutAccess<Menu> {
 public:
 	Menu(
 			const var::String& name,
-			ux::EventLoop* event_loop
+			ux::EventLoop* event_loop,
+			const MenuOptions& options
 			);
 
 	var::String get_top_navigation_name() const {
@@ -105,17 +122,16 @@ public:
 	static Menu& create_options_list(
 			const var::String& name,
 			ux::EventLoop * event_loop,
-			const var::String& active,
-			const var::StringList& list
+			const MenuListOptions& options
 			){
 		Menu& result =
-				Menu::create(name, event_loop);
-		for(const var::String& item: list){
+				Menu::create(name, event_loop, options);
+		for(const var::String& item: options.list()){
 			result.add_item(
 						MenuItem::create(name + "@" + item)
 						.set_type(MenuItem::type_radio)
 						.set_key(item)
-						.set_checked( item == active )
+						.set_checked( item == options.active() )
 						);
 		}
 		result.add_filler();

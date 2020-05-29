@@ -7,7 +7,6 @@
 
 class Application;
 
-
 class LocalTerminal : public ApplicationLayout<LocalTerminal> {
 public:
 	 LocalTerminal(Application * app);

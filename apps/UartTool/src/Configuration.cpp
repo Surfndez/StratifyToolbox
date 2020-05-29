@@ -17,7 +17,7 @@ Configuration::Configuration(Application * app)
 
 
 	add_component(
-				Menu::create("Settings", event_loop())
+				Menu::create("Settings", event_loop(), MenuOptions())
 				.add_item(
 							MenuItem::create("Local")
 							.set_type(MenuItem::type_menu)
